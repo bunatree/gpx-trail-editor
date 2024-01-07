@@ -1,7 +1,8 @@
 $bgTablePrimaryRow: #cfe2ff; // Borrowed from Bootstrap5. (table-primary)
+$fontFamily: 'M PLUS 1p', sans-serif;
 
 body {
-  font-family: 'M PLUS 1p', sans-serif;
+  font-family: $fontFamily;
   margin: 0;
   padding: 0;
 }
@@ -41,4 +42,8 @@ body {
 
 #map-options {
   margin: 10px;
+}
+
+.leaflet-container {
+  font-family: $fontFamily;
 }

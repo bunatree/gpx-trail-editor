@@ -84,7 +84,7 @@ const GpxTrailEditor = {
       const datetimeTextBox = document.createElement('input');
       datetimeTextBox.type = 'datetime-local';
       datetimeTextBox.classList.add('form-control');
-      const formattedDateTime = GpxTrailEditor.convertGPXDateTimeToHTMLFormat(gpxDateTime)
+      const formattedDateTime = GpxTrailEditor.convertGPXDateTimeToHTMLFormat(gpxDateTime);
       datetimeTextBox.value = formattedDateTime;
       timeCell.appendChild(datetimeTextBox);
 
@@ -167,19 +167,24 @@ const GpxTrailEditor = {
     const trackPoints = xmlDoc.querySelectorAll('trkpt');
     // An array to store latitude and longitude
     const latLngs = [];
+    // An array to store date and time
+    const dateTimes = [];
 
     for (let i = 0; i < trackPoints.length; i++) {
         const point = trackPoints[i];
+
         const latitude = parseFloat(point.getAttribute('lat'));
         const longitude = parseFloat(point.getAttribute('lon'));
-
         latLngs.push([latitude, longitude]);
+
+        const gpxDateTime = point.querySelector('time').textContent;
+        dateTimes.push(gpxDateTime);
     }
 
     if (latLngs.length > 0) {
 
       GpxTrailEditor.drawPolylines(latLngs);
-      GpxTrailEditor.drawMarkers(latLngs);
+      GpxTrailEditor.drawMarkers(latLngs,dateTimes);
 
       GpxTrailEditor.addCustomControl();
 
@@ -226,7 +231,7 @@ const GpxTrailEditor = {
 
   },
 
-  drawMarkers: function(latLngs) {
+  drawMarkers: function(latLngs,dateTimes) {
 
     const normalMarkerOptions = {
       icon: L.divIcon({
@@ -288,6 +293,16 @@ const GpxTrailEditor = {
       // Add the marker to the markers array
       GpxTrailEditor.markersArray.push(marker);
 
+      // Add popup balloon to the marker
+      const formattedDateTime = GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTimes[i]);
+      const popupContent = `<ul class="m-0 p-0 list-unstyled">
+      <li>マーカー番号: ${i + 1}</li>
+      <li>日時: ${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTimes[i])}</li>
+      <li>緯度: ${latLngs[i][0]}</li>
+      <li>経度: ${latLngs[i][1]}</li>
+      </ul>`;
+      marker.bindPopup(popupContent);
+
     }
   },
 
@@ -312,7 +327,6 @@ const GpxTrailEditor = {
 
   // Update the latitude and longitude values in the row associated with the dragged marker.
   onMarkerDragEnd: function (i,newLatLng) {
-    console.log('onMarkerDragEnd')
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     if (i < tableRows.length) {
       tableRows[i].classList.remove('dragged-marker');
