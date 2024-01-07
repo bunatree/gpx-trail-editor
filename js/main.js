@@ -280,8 +280,9 @@ const GpxTrailEditor = {
       }).on('dragend', function(event) {
         console.log('drag end index=' + i); // ##### Remove this later
         GpxTrailEditor.onMarkerDragEnd(i, event.target.getLatLng());
-      }).on('dragstart', function() {
+      }).on('dragstart', function(event) {
         console.log('drag start index=' + i); // ##### Remove this later
+        GpxTrailEditor.onMarkerDragStart(i, event.target.getLatLng());
       });
 
       // Add the marker to the markers array
@@ -291,7 +292,6 @@ const GpxTrailEditor = {
   },
 
   onMarkerClick: function(i) {
-    // Find the corresponding row in the table
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     if (i < tableRows.length) {
       // Remove the "clicked-marker" class from all rows.
@@ -303,8 +303,28 @@ const GpxTrailEditor = {
     }
   },
 
+  onMarkerDragStart: function(i,curLatLng) {
+    const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    if (i < tableRows.length) {
+      tableRows[i].classList.add('dragged-marker');
+    }
+  },
+
   // Update the latitude and longitude values in the row associated with the dragged marker.
-  onMarkerDragEnd: function (i, newLatLng) {
+  onMarkerDragEnd: function (i,newLatLng) {
+    console.log('onMarkerDragEnd')
+    const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    if (i < tableRows.length) {
+      tableRows[i].classList.remove('dragged-marker');
+    }
+
+    GpxTrailEditor.updateTableRowLatLng(i,newLatLng);
+    
+
+    // #### Update the elevation later.
+  },
+
+  updateTableRowLatLng: function(i,newLatLng) {
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     if (i < tableRows.length) {
       const latInput = tableRows[i].querySelector('td.latitude input');
@@ -312,8 +332,6 @@ const GpxTrailEditor = {
       latInput.value = newLatLng.lat;
       lngInput.value = newLatLng.lng;
     }
-
-    // #### Update the elevation later.
   },
 
   clearMapLayers: function(map) {

@@ -1,4 +1,4 @@
-$bgTablePrimaryRow: #cfe2ff; // Borrowed from Bootstrap5.
+$bgTablePrimaryRow: #cfe2ff; // Borrowed from Bootstrap5. (table-primary)
 
 body {
   font-family: 'M PLUS 1p', sans-serif;
@@ -6,13 +6,6 @@ body {
   padding: 0;
 }
 
-#map {
-  height: 400px;
-}
-
-#map-options {
-  margin: 10px;
-}
 
 #data-table {
   // Hidden by default
@@ -20,22 +13,32 @@ body {
   tr.clicked-marker {
     background-color: $bgTablePrimaryRow;
   }
+  tr.dragged-marker {
+    background-color: $bgTablePrimaryRow;
+  }
 }
 
-.normal-div-icon {
-  border: 2px solid #fff;
-  background-color: rgba(255, 0, 128, 1);
-  border-radius: 50%;
+#map {
+  height: 400px;
+  .normal-div-icon {
+    border: 2px solid #fff;
+    background-color: rgba(255, 0, 128, 1);
+    border-radius: 50%;
+  }
+  
+  .first-div-icon {
+    border: 2px solid #fff;
+    background-color: blue;
+    border-radius: 50%;
+  }
+  
+  .last-div-icon {
+    border: 2px solid #fff;
+    background-color: green;
+    border-radius: 50%;
+  }
 }
 
-.first-div-icon {
-  border: 2px solid #fff;
-  background-color: blue;
-  border-radius: 50%;
-}
-
-.last-div-icon {
-  border: 2px solid #fff;
-  background-color: green;
-  border-radius: 50%;
+#map-options {
+  margin: 10px;
 }
