@@ -277,10 +277,11 @@ const GpxTrailEditor = {
       // Add a click event listener to this marker
       marker.on('click', function() {
         GpxTrailEditor.onMarkerClick(i);
-      }).on('dragend', function() {
-        console.log('drag end index=' + i);
+      }).on('dragend', function(event) {
+        console.log('drag end index=' + i); // ##### Remove this later
+        GpxTrailEditor.onMarkerDragEnd(i, event.target.getLatLng());
       }).on('dragstart', function() {
-        console.log('drag start index=' + i);
+        console.log('drag start index=' + i); // ##### Remove this later
       });
 
       // Add the marker to the markers array
@@ -300,6 +301,19 @@ const GpxTrailEditor = {
       // Add the "clicked-marker" classs to the corresponding row.
       tableRows[i].classList.add('clicked-marker');
     }
+  },
+
+  // Update the latitude and longitude values in the row associated with the dragged marker.
+  onMarkerDragEnd: function (i, newLatLng) {
+    const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    if (i < tableRows.length) {
+      const latInput = tableRows[i].querySelector('td.latitude input');
+      const lngInput = tableRows[i].querySelector('td.longitude input');
+      latInput.value = newLatLng.lat;
+      lngInput.value = newLatLng.lng;
+    }
+
+    // #### Update the elevation later.
   },
 
   clearMapLayers: function(map) {
