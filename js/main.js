@@ -27,22 +27,42 @@ const GpxTrailEditor = {
     const reader = new FileReader();
 
     reader.onload = function (e) {
-      const gpxData = e.target.result;
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(gpxData, 'text/xml');
+      try {
+        const gpxData = e.target.result;
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(gpxData, 'text/xml');
 
-      // Show the data table.
-      GpxTrailEditor.showDataTable();
+        if (!GpxTrailEditor.isValidGPX(xmlDoc)) {
+          // Handle invalid GPX file
+          console.error('Invalid GPX file');
+          // You can show a user-friendly error message here
+          return;
+        }
 
-      // Put the data into the table.
-      GpxTrailEditor.parseTableGPX(xmlDoc);
+        // Show the data table.
+        GpxTrailEditor.showDataTable();
 
-      // Draw the map.
-      GpxTrailEditor.parseMapGPX(xmlDoc);
+        // Put the data into the table.
+        GpxTrailEditor.parseTableGPX(xmlDoc);
 
+        // Draw the map.
+        GpxTrailEditor.parseMapGPX(xmlDoc);
+
+      } catch (error) {
+        // Handle parsing error
+        console.error('Error parsing GPX:', error);
+        
+      }
     };
 
     reader.readAsText(file);
+  },
+
+  // Check if the GPX file is valid
+  isValidGPX: function(xmlDoc) {
+    // Check if the root element is <gpx>
+    const rootElement = xmlDoc.documentElement;
+    return rootElement && rootElement.nodeName.toLowerCase() === 'gpx';
   },
 
   showDataTable: function() {
