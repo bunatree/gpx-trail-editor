@@ -249,6 +249,9 @@ const GpxTrailEditor = {
     // Draw polylines with the style options above.
     const polyline = L.polyline(latLngs, polylineOptions).addTo(GpxTrailEditor.map);
 
+    // Add polyline to the layerGroup
+    GpxTrailEditor.layerGroup.addLayer(polyline);
+
   },
 
   drawMarkers: function(latLngs,dateTimes) {
@@ -303,10 +306,8 @@ const GpxTrailEditor = {
       marker.on('click', function() {
         GpxTrailEditor.onMarkerClick(i);
       }).on('dragend', function(event) {
-        console.log('drag end index=' + i); // ##### Remove this later
         GpxTrailEditor.onMarkerDragEnd(i, event.target.getLatLng());
       }).on('dragstart', function(event) {
-        console.log('drag start index=' + i); // ##### Remove this later
         GpxTrailEditor.onMarkerDragStart(i, event.target.getLatLng());
       });
 
@@ -323,7 +324,14 @@ const GpxTrailEditor = {
       </ul>`;
       marker.bindPopup(popupContent);
 
+      // Add marker to the layerGroup
+      GpxTrailEditor.layerGroup.addLayer(marker);
+
     }
+
+    
+
+    
   },
 
   onMarkerClick: function(i) {
@@ -354,6 +362,7 @@ const GpxTrailEditor = {
 
     GpxTrailEditor.updateTableRowLatLng(i,newLatLng);
     
+    GpxTrailEditor.updatePolylines();
 
     // #### Update the elevation later.
   },
@@ -368,12 +377,26 @@ const GpxTrailEditor = {
     }
   },
 
-  clearMapLayers: function(map) {
-    if (!GpxTrailEditor.layerGroup) {
-      GpxTrailEditor.layerGroup = L.layerGroup().addTo(GpxTrailEditor.map);
-    } else {
-      GpxTrailEditor.layerGroup.clearLayers();
-    }
+  updatePolylines: function() {
+
+    // Temporarily save a layer of markers
+    const markerLayers = GpxTrailEditor.layerGroup.getLayers().filter(layer => layer instanceof L.Marker);
+  
+    // Clear all the layers
+    GpxTrailEditor.layerGroup.clearLayers();
+
+    const latLngs = GpxTrailEditor.markersArray.map(marker => marker.getLatLng());
+    const polylineOptions = {
+      color: GpxTrailEditor.polylineColor,
+      weight: GpxTrailEditor.polylineWeight,
+    };
+
+    // Add the new polyline to the layerGroup
+    const polyline = L.polyline(latLngs, polylineOptions).addTo(GpxTrailEditor.layerGroup);
+
+    // Add the saved marker layer to layerGroup again.
+    markerLayers.forEach(layer => GpxTrailEditor.layerGroup.addLayer(layer));
+  
   },
 
   addCustomControl: function() {
@@ -486,7 +509,7 @@ const GpxTrailEditor = {
       targetMarker.options.elevation = elevation;
 
       // Update polylines.
-      GpxTrailEditor.updatePolyline();
+      GpxTrailEditor.updatePolylines();
 
       // マーカーがクリックされたときの処理を更新
       targetMarker.off('click'); // イベントリスナーを一旦削除
@@ -496,20 +519,7 @@ const GpxTrailEditor = {
         // または他の処理を追加
       });
     }
-  },
-
-  updatePolyline: function() {
-    
-    // Clear the current polylines.
-    GpxTrailEditor.layerGroup.clearLayers();
-
-    const latLngs = GpxTrailEditor.markersArray.map(marker => marker.getLatLng());
-    const polylineOptions = {
-        color: GpxTrailEditor.polylineColor,
-        weight: GpxTrailEditor.polylineWeight,
-    };
-    const polyline = L.polyline(latLngs, polylineOptions).addTo(GpxTrailEditor.layerGroup);
-  },
+  }
 
 };
 
