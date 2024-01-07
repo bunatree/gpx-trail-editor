@@ -247,12 +247,35 @@ const GpxTrailEditor = {
       fill: true,
       fillOpacity: GpxTrailEditor.markerFillOpacity,
       fillColor: GpxTrailEditor.markerColor,
+      draggable: true,
+    };
+
+    const firstMarkerOptions = {
+      ...normalMarkerOptions,
+      fillColor: 'green',
+      radius: GpxTrailEditor.markerRadius + 2
+    };
+    
+    const lastMarkerOptions = {
+      ...normalMarkerOptions,
+      fillColor: 'blue',
+      radius: GpxTrailEditor.markerRadius + 2
     };
 
     // Draw markers at each point.
     for (let i = 0; i < latLngs.length; i++) {
 
-      marker = L.circleMarker(latLngs[i], normalMarkerOptions).addTo(GpxTrailEditor.map);
+      const markerOptions = (function() {
+        if (i === 0 ) {
+          return firstMarkerOptions;
+        } else if (i === latLngs.length -1) {
+          return lastMarkerOptions;
+        } else {
+          return normalMarkerOptions;
+        }
+      })();
+
+      const marker = L.circleMarker(latLngs[i], markerOptions).addTo(GpxTrailEditor.map);
 
       // Add a click event listener to this marker
       marker.on('click', function() {
@@ -299,6 +322,7 @@ const GpxTrailEditor = {
 
       buttonElm.addEventListener('click', function () {
         console.log('You clicked the button!'); // #####
+        GpxTrailEditor.toggleMarkerDraggability();
       });
 
       return divElm;
@@ -307,6 +331,20 @@ const GpxTrailEditor = {
 
     // Add the custom control to the map.
     customControl.addTo(GpxTrailEditor.map);
+  },
+
+  toggleMarkerDraggability: function() {
+    console.dir(GpxTrailEditor.markersArray)
+    // Toggle marker draggability
+    GpxTrailEditor.markersArray.forEach(function (marker) {
+      console.log({marker})
+      marker.dragging.disable();
+      // marker.dragging.enable();//#####
+    });
+    // Update the button's data-draggable attribute
+    const buttonElm = document.getElementById('btn-toggle-draggable');
+    console.log({buttonElm});
+    buttonElm.setAttribute('data-draggable', 'true');
   },
   
   exportToGPX: function() {
@@ -350,7 +388,6 @@ const GpxTrailEditor = {
   },
 
   hideDropZone: function() {
-    console.log("hideDropZone")
     document.getElementById('drop-zone-form').style.display = 'none';
   },
 
