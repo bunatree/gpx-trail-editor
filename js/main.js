@@ -3,10 +3,11 @@ const GpxTrailEditor = {
   map: null,
   layerGroup: null,
   markersArray: [],
-  markerColor: 'rgba(0, 0, 255, 1)',
-  markerRadius: 4,
+  markerColor: 'rgba(255, 0, 128, 1)',
+  markerRadius: 6,
   markerFillOpacity: 1,
-  polylineColor: 'rgba(255, 0, 128, 0.5)',
+  polylineColor: 'rgba(192, 0, 128, 1)',
+  polylineWeight: 5,
 
   onUploadGPX: function(files) {
     const file = files[0];
@@ -18,7 +19,8 @@ const GpxTrailEditor = {
     }
   },
 
-  // GPXファイルの解析と地図・テーブルへの反映の処理を実装
+  // Analyzes an uploaded GPX file, put the data into the table,
+  // and draws markers and polylines on the map.
   parseAndDisplayGPX: function(file) {
     const reader = new FileReader();
 
@@ -27,10 +29,10 @@ const GpxTrailEditor = {
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(gpxData, 'text/xml');
 
-      // テーブルにGPXデータを表示
-      GpxTrailEditor.displayTableGPX(xmlDoc);
+      // Put the data into the table.
+      GpxTrailEditor.parseTableGPX(xmlDoc);
 
-      // 地図にGPXデータを描く
+      // Draw the map.
       GpxTrailEditor.parseMapGPX(xmlDoc);
 
     };
@@ -53,75 +55,89 @@ const GpxTrailEditor = {
     GpxTrailEditor.map.setView([point.latitude, point.longitude], GpxTrailEditor.map.getZoom());
   },
 
-  displayTableGPX: function(xmlDoc) {
+  parseTableGPX: function(xmlDoc) {
     const tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
     tableBody.innerHTML = '';
 
     const trackPoints = xmlDoc.querySelectorAll('trkpt');
 
     for (let i = 0; i < trackPoints.length; i++) {
-        const point = trackPoints[i];
-        const gpxDateTime = point.querySelector('time').textContent;
-        const latitude = point.getAttribute('lat');
-        const longitude = point.getAttribute('lon');
+      const point = trackPoints[i];
+      const gpxDateTime = point.querySelector('time').textContent;
+      const latitude = point.getAttribute('lat');
+      const longitude = point.getAttribute('lon');
+      const elevation = (point.querySelector('ele')) ? point.querySelector('ele').textContent : '';
 
-        // Create a row.
-        const row = tableBody.insertRow(i);
+      // Create a row.
+      const row = tableBody.insertRow(i);
 
-        // Checkbox
-        const checkboxCell = row.insertCell(0);
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.classList.add('form-check-input');
-        checkboxCell.appendChild(checkbox);
-        checkboxCell.classList.add('chkbox');
+      // Checkbox
+      const checkboxCell = row.insertCell(0);
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.classList.add('form-check-input');
+      checkboxCell.appendChild(checkbox);
+      checkboxCell.classList.add('chkbox','align-middle');
 
-        // Date/Time
-        const timeCell = row.insertCell(1);
-        // const gpxDateTime = "2023-12-30T03:54:15Z";
-        const datetimeTextBox = document.createElement('input');
-        datetimeTextBox.type = 'datetime-local';
-        datetimeTextBox.classList.add('form-control');
-        const formattedDateTime = GpxTrailEditor.convertGPXDateTimeToHTMLFormat(gpxDateTime)
-        datetimeTextBox.value = formattedDateTime;
-        timeCell.appendChild(datetimeTextBox);
+      // Index (Starts from 1)
+      const idxCell = row.insertCell(1);
+      idxCell.innerText = i + 1;
+      idxCell.classList.add('idx','align-middle','text-end');
 
-        timeCell.classList.add('datetime');
+      // Date/Time
+      const timeCell = row.insertCell(2);
+      const datetimeTextBox = document.createElement('input');
+      datetimeTextBox.type = 'datetime-local';
+      datetimeTextBox.classList.add('form-control');
+      const formattedDateTime = GpxTrailEditor.convertGPXDateTimeToHTMLFormat(gpxDateTime)
+      datetimeTextBox.value = formattedDateTime;
+      timeCell.appendChild(datetimeTextBox);
 
-        // Latitude
-        const latitudeCell = row.insertCell(2);
-        const latitudeTextBox = document.createElement('input');
-        latitudeTextBox.type = 'text';
-        latitudeTextBox.classList.add('form-control');
-        latitudeTextBox.value = latitude;
-        latitudeCell.appendChild(latitudeTextBox);
-        latitudeCell.classList.add('latitude');
+      timeCell.classList.add('datetime');
 
-        // Longitude
-        const longitudeCell = row.insertCell(3);
-        const longitudeTextBox = document.createElement('input');
-        longitudeTextBox.type = 'text';
-        longitudeTextBox.classList.add('form-control');
-        longitudeTextBox.value = longitude;
-        longitudeCell.appendChild(longitudeTextBox);
-        longitudeCell.classList.add('longitude');
+      // Latitude
+      const latitudeCell = row.insertCell(3);
+      const latitudeTextBox = document.createElement('input');
+      latitudeTextBox.type = 'text';
+      latitudeTextBox.classList.add('form-control');
+      latitudeTextBox.value = latitude;
+      latitudeCell.appendChild(latitudeTextBox);
+      latitudeCell.classList.add('latitude');
 
-        // Apply button
-        const applyButtonCell = row.insertCell(4);
-        // const applyButton = document.createElement('button');
-        // applyButton.classList.add('btn');
-        // applyButton.textContent = '適用';
-        const applyButton = document.createElement('a');
-        const applyIcon = document.createElement('i');
-        applyButton.appendChild(applyIcon);
-        applyIcon.classList.add('bi','bi-arrow-clockwise');
-        applyButton.setAttribute('href', 'javascript:void(0);');
-        applyButton.onclick = function () {
-            // 適用ボタンがクリックされたときの処理を実装
-            // ...
-        };
-        applyButtonCell.appendChild(applyButton);
-        applyButtonCell.classList.add('apply');
+      // Longitude
+      const longitudeCell = row.insertCell(4);
+      const longitudeTextBox = document.createElement('input');
+      longitudeTextBox.type = 'text';
+      longitudeTextBox.classList.add('form-control');
+      longitudeTextBox.value = longitude;
+      longitudeCell.appendChild(longitudeTextBox);
+      longitudeCell.classList.add('longitude');
+
+      // Elevation
+      const elevationCell = row.insertCell(5);
+      const elevationTextBox = document.createElement('input');
+      elevationTextBox.type = 'text';
+      elevationTextBox.classList.add('form-control');
+      elevationTextBox.value = elevation;
+      elevationCell.appendChild(elevationTextBox);
+      elevationCell.classList.add('elevation');
+
+      // Apply button
+      const applyButtonCell = row.insertCell(6);
+      const applyButton = document.createElement('a');
+      const applyIcon = document.createElement('i');
+      applyButton.appendChild(applyIcon);
+      applyIcon.classList.add('bi','bi-arrow-clockwise');
+      applyButton.setAttribute('href', 'javascript:void(0);');
+      applyButton.addEventListener('click', function () {
+        GpxTrailEditor.onApplyButtonClick(applyButton);
+      });
+      // applyButton.onclick = function () {
+      //   // 適用ボタンがクリックされたときの処理を実装
+      //   // ...
+      // };
+      applyButtonCell.appendChild(applyButton);
+      applyButtonCell.classList.add('apply','align-middle');
     }
   },
 
@@ -167,44 +183,10 @@ const GpxTrailEditor = {
 
     if (latLngs.length > 0) {
 
-      // Options for polylines
-      const polylineOptions = {
-        color: GpxTrailEditor.polylineColor,
-        weight: 5,
-      };
+      GpxTrailEditor.drawPolylines(latLngs);
+      GpxTrailEditor.drawMarkers(latLngs);
 
-      // Draw polylines with the style options above.
-      const polyline = L.polyline(latLngs, polylineOptions).addTo(GpxTrailEditor.map);
-
-      // Options for the markers
-      const markerOptions = {
-        radius: GpxTrailEditor.markerRadius,
-        color: GpxTrailEditor.markerColor,
-        fillOpacity: GpxTrailEditor.markerFillOpacity,
-      };
-
-      // Draw markers at each point.
-      for (let i = 0; i < latLngs.length; i++) {
-
-        // Draw a marker on the map.
-        const marker = L.circleMarker(latLngs[i], markerOptions).addTo(GpxTrailEditor.map);
-
-        // Add a click event listener to this marker
-        marker.on('click', function() {
-          // Find the corresponding row in the table
-          const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-          if (i < tableRows.length) {
-            // Remove the "table-primary" and "clicked-marker" classes from all rows.
-            for (const row of tableRows) {
-                row.classList.remove('table-primary','clicked-marker');
-            }
-            // Add the "table-primary" and "clicked-marker" classses to the corresponding row.
-            // The "table-primary" class is defained by Bootstrap, which colors the row blue.
-            tableRows[i].classList.add('table-primary','clicked-marker');
-          }
-        });
-
-      }
+      GpxTrailEditor.addCustomControl();
 
       // The variable "bounds" is a rectangular area calculated
       // from the coordinate points through which the polyline passes.
@@ -223,12 +205,100 @@ const GpxTrailEditor = {
   
   },
 
+  drawPolylines: function(latLngs,drawBorder = true) {
+
+    if (drawBorder) {
+
+      // Create a duplicate polyline with a larger weight for the border.
+      const borderPolylineOptions = {
+        // Set the border color to white
+        color: 'white',
+        // Adjust the weight for the border
+        weight: GpxTrailEditor.polylineWeight + 4,
+      };
+
+      const borderPolyline = L.polyline(latLngs, borderPolylineOptions).addTo(GpxTrailEditor.map);
+    }
+
+    // Options for polylines
+    const polylineOptions = {
+      color: GpxTrailEditor.polylineColor,
+      weight: GpxTrailEditor.polylineWeight,
+    };
+
+    // Draw polylines with the style options above.
+    const polyline = L.polyline(latLngs, polylineOptions).addTo(GpxTrailEditor.map);
+
+  },
+
+  drawMarkers: function(latLngs) {
+    // Options for the normal markers
+    const normalMarkerOptions = {
+      radius: GpxTrailEditor.markerRadius,
+      color: 'white',
+      fill: true,
+      fillOpacity: GpxTrailEditor.markerFillOpacity,
+      fillColor: GpxTrailEditor.markerColor,
+    };
+
+    // Draw markers at each point.
+    for (let i = 0; i < latLngs.length; i++) {
+
+      marker = L.circleMarker(latLngs[i], normalMarkerOptions).addTo(GpxTrailEditor.map);
+
+      // Add a click event listener to this marker
+      marker.on('click', function() {
+        // Find the corresponding row in the table
+        const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+        if (i < tableRows.length) {
+          // Remove the "clicked-marker" class from all rows.
+          for (const row of tableRows) {
+              row.classList.remove('clicked-marker');
+          }
+          // Add the "clicked-marker" classs to the corresponding row.
+          tableRows[i].classList.add('clicked-marker');
+        }
+      });
+
+      // Add the marker to the markers array
+      GpxTrailEditor.markersArray.push(marker);
+
+    }
+  },
+
   clearMapLayers: function(map) {
     if (!GpxTrailEditor.layerGroup) {
       GpxTrailEditor.layerGroup = L.layerGroup().addTo(GpxTrailEditor.map);
     } else {
-        GpxTrailEditor.layerGroup.clearLayers();
+      GpxTrailEditor.layerGroup.clearLayers();
     }
+  },
+
+  addCustomControl: function() {
+    // The tool box custom control
+    const customControl = L.control({ position: 'topleft' });
+
+    // Define the method to add the control.
+    customControl.onAdd = function (map) {
+      // Maybe I'll add more class names,  bg-light p-2 rounded border...
+      const divElm = L.DomUtil.create('div', 'custom-control'); // The parent element.
+
+      // Create a button.
+      const buttonElm = L.DomUtil.create('button', 'btn btn-light border border-2', divElm);
+      buttonElm.id = 'btn-toggle-draggable';
+      buttonElm.title = '有効にすると、ドラッグで各ポイントを移動できるようになります。';
+      buttonElm.innerHTML = 'ポイント移動しない';
+
+      buttonElm.addEventListener('click', function () {
+        console.log('You clicked the button!'); // #####
+      });
+
+      return divElm;
+
+    };
+
+    // Add the custom control to the map.
+    customControl.addTo(GpxTrailEditor.map);
   },
   
   exportToGPX: function() {
@@ -241,7 +311,7 @@ const GpxTrailEditor = {
     if (!this.map) {
       this.map = L.map('map').setView([35.6895, 139.6917], 10);
       L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
-        attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">地理院タイル</a>',
+        attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>',
         maxZoom: 18,
       }).addTo(this.map);
 
@@ -257,7 +327,7 @@ const GpxTrailEditor = {
         // If the clicked element is not a marker or within a marker, deselect all markers
         if (!isMarker) {
           document.querySelectorAll('#data-table tbody tr').forEach(trElm => {
-            trElm.classList.remove('table-primary','clicked-marker');
+            trElm.classList.remove('clicked-marker');
           });
         }
       });
@@ -273,7 +343,54 @@ const GpxTrailEditor = {
 
   hideDropZone: function() {
     document.getElementById('drop-zone-form').style.display = 'none';
-  }
+  },
+
+  onApplyButtonClick: function(btnElm) {
+
+    // Get the table row where the inner Apply icon was clicked.
+    const row = btnElm.closest('tr');
+
+    // Get the values from the text boxes.
+    const latitude = row.querySelector('.latitude input').value;
+    const longitude = row.querySelector('.longitude input').value;
+    const elevation = row.querySelector('.elevation input').value;
+
+    // Get the marker's index.
+    const markerIdx = Number(row.querySelector('.idx').textContent) - 1;
+
+    // Specify the target marker and update its coordinate. 
+    const markersArray = GpxTrailEditor.markersArray;
+    const targetMarker = markersArray[markerIdx];
+    if (targetMarker) {
+      targetMarker.setLatLng([latitude, longitude]);
+      // Update the elevation if the marker has one.
+      targetMarker.options.elevation = elevation;
+
+      // Update polylines.
+      GpxTrailEditor.updatePolyline();
+
+      // マーカーがクリックされたときの処理を更新
+      targetMarker.off('click'); // イベントリスナーを一旦削除
+      targetMarker.on('click', function () {
+        // マーカーがクリックされたときの処理をここに記述
+        // 例: テーブルの対応する行に 'clicked-marker' クラスを追加
+        // または他の処理を追加
+      });
+    }
+  },
+
+  updatePolyline: function() {
+    
+    // Clear the current polylines.
+    GpxTrailEditor.layerGroup.clearLayers();
+
+    const latLngs = GpxTrailEditor.markersArray.map(marker => marker.getLatLng());
+    const polylineOptions = {
+        color: GpxTrailEditor.polylineColor,
+        weight: GpxTrailEditor.polylineWeight,
+    };
+    const polyline = L.polyline(latLngs, polylineOptions).addTo(GpxTrailEditor.layerGroup);
+  },
 
 };
 
@@ -320,6 +437,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Initialize the map.
   GpxTrailEditor.initMap();
+
+  // 適用アイコンがクリックされたときの処理
+  const applyButtons = document.querySelectorAll('.apply a');
+  applyButtons.forEach(btnElm => {
+    btnElm.addEventListener('click', function () {
+      GpxTrailEditor.onApplyButtonClick(btnElm);
+    });
+  });
 
   // チェックボックスの状態に応じて地図上の点をドラッグ＆ドロップできるようにする処理
   document.getElementById('enable-drag').addEventListener('change', function () {
