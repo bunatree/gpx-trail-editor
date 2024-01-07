@@ -3,9 +3,11 @@ const GpxTrailEditor = {
   map: null,
   layerGroup: null,
   markersArray: [],
-  markerColor: 'rgba(255, 0, 128, 1)',
-  markerRadius: 6,
-  markerFillOpacity: 1,
+
+  firstMarkerRadius: 8,
+  lastMarkerRadius: 8,
+  normalMarkerRadius: 6,
+
   polylineColor: 'rgba(192, 0, 128, 1)',
   polylineWeight: 5,
 
@@ -41,21 +43,6 @@ const GpxTrailEditor = {
     };
 
     reader.readAsText(file);
-  },
-
-  getFirstPoint: function(xmlDoc) {
-    const trackPoints = xmlDoc.querySelectorAll('trkpt');
-    if (trackPoints.length > 0) {
-      const firstPoint = trackPoints[0];
-      const latitude = parseFloat(firstPoint.getAttribute('lat'));
-      const longitude = parseFloat(firstPoint.getAttribute('lon'));
-      return { latitude, longitude };
-    }
-    return null;
-  },
-
-  setMapCenter: function(point) {
-    GpxTrailEditor.map.setView([point.latitude, point.longitude], GpxTrailEditor.map.getZoom());
   },
 
   showDataTable: function() {
@@ -240,26 +227,35 @@ const GpxTrailEditor = {
   },
 
   drawMarkers: function(latLngs) {
-    // Options for the normal markers
+
     const normalMarkerOptions = {
-      radius: GpxTrailEditor.markerRadius,
-      color: 'white',
-      fill: true,
-      fillOpacity: GpxTrailEditor.markerFillOpacity,
-      fillColor: GpxTrailEditor.markerColor,
-      draggable: true,
+      icon: L.divIcon({
+        className: 'normal-div-icon',
+        html: '',
+        iconSize: [GpxTrailEditor.normalMarkerRadius*2,GpxTrailEditor.normalMarkerRadius*2],
+        iconAnchor: [GpxTrailEditor.normalMarkerRadius,GpxTrailEditor.normalMarkerRadius],
+      }),
+      draggable: false, // Do not allow to drag the markers by default.
     };
 
     const firstMarkerOptions = {
       ...normalMarkerOptions,
-      fillColor: 'green',
-      radius: GpxTrailEditor.markerRadius + 2
+      icon: L.divIcon({
+        className: 'first-div-icon',
+        html: '',
+        iconSize: [GpxTrailEditor.firstMarkerRadius*2,GpxTrailEditor.firstMarkerRadius*2],
+        iconAnchor: [GpxTrailEditor.firstMarkerRadius,GpxTrailEditor.firstMarkerRadius],
+      }),
     };
     
     const lastMarkerOptions = {
       ...normalMarkerOptions,
-      fillColor: 'blue',
-      radius: GpxTrailEditor.markerRadius + 2
+      icon: L.divIcon({
+        className: 'last-div-icon',
+        html: '',
+        iconSize: [GpxTrailEditor.lastMarkerRadius*2,GpxTrailEditor.lastMarkerRadius*2],
+        iconAnchor: [GpxTrailEditor.lastMarkerRadius,GpxTrailEditor.lastMarkerRadius],
+      }),
     };
 
     // Draw markers at each point.
@@ -275,25 +271,34 @@ const GpxTrailEditor = {
         }
       })();
 
-      const marker = L.circleMarker(latLngs[i], markerOptions).addTo(GpxTrailEditor.map);
+      // const marker = L.circleMarker(latLngs[i], markerOptions).addTo(GpxTrailEditor.map);
+      const marker = L.marker(latLngs[i], markerOptions).addTo(GpxTrailEditor.map);
 
       // Add a click event listener to this marker
       marker.on('click', function() {
-        // Find the corresponding row in the table
-        const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-        if (i < tableRows.length) {
-          // Remove the "clicked-marker" class from all rows.
-          for (const row of tableRows) {
-              row.classList.remove('clicked-marker');
-          }
-          // Add the "clicked-marker" classs to the corresponding row.
-          tableRows[i].classList.add('clicked-marker');
-        }
+        GpxTrailEditor.onMarkerClick(i);
+      }).on('dragend', function() {
+        console.log('drag end index=' + i);
+      }).on('dragstart', function() {
+        console.log('drag start index=' + i);
       });
 
       // Add the marker to the markers array
       GpxTrailEditor.markersArray.push(marker);
 
+    }
+  },
+
+  onMarkerClick: function(i) {
+    // Find the corresponding row in the table
+    const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    if (i < tableRows.length) {
+      // Remove the "clicked-marker" class from all rows.
+      for (const row of tableRows) {
+        row.classList.remove('clicked-marker');
+      }
+      // Add the "clicked-marker" classs to the corresponding row.
+      tableRows[i].classList.add('clicked-marker');
     }
   },
 
@@ -319,10 +324,10 @@ const GpxTrailEditor = {
       buttonElm.id = 'btn-toggle-draggable';
       buttonElm.title = '有効にすると、ドラッグで各ポイントを移動できるようになります。';
       buttonElm.innerHTML = 'ポイント移動しない';
+      buttonElm.dataset.draggable = 'false';
 
       buttonElm.addEventListener('click', function () {
-        console.log('You clicked the button!'); // #####
-        GpxTrailEditor.toggleMarkerDraggability();
+        GpxTrailEditor.toggleMarkerDraggability(buttonElm);
       });
 
       return divElm;
@@ -333,18 +338,20 @@ const GpxTrailEditor = {
     customControl.addTo(GpxTrailEditor.map);
   },
 
-  toggleMarkerDraggability: function() {
-    console.dir(GpxTrailEditor.markersArray)
-    // Toggle marker draggability
-    GpxTrailEditor.markersArray.forEach(function (marker) {
-      console.log({marker})
-      marker.dragging.disable();
-      // marker.dragging.enable();//#####
-    });
-    // Update the button's data-draggable attribute
-    const buttonElm = document.getElementById('btn-toggle-draggable');
-    console.log({buttonElm});
-    buttonElm.setAttribute('data-draggable', 'true');
+  toggleMarkerDraggability: function(buttonElm) {
+    if (buttonElm.dataset.draggable === 'false' || !buttonElm.dataset.draggable) {
+      GpxTrailEditor.markersArray.forEach(function (marker) {
+        marker.dragging.enable();
+      });
+      buttonElm.dataset.draggable = 'true';
+      buttonElm.innerHTML = 'ポイント移動する';
+    } else {
+      GpxTrailEditor.markersArray.forEach(function (marker) {
+        marker.dragging.disable();
+      });
+      buttonElm.dataset.draggable = 'false';
+      buttonElm.innerHTML = 'ポイント移動しない';
+    }
   },
   
   exportToGPX: function() {
