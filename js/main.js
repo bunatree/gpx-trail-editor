@@ -29,6 +29,9 @@ const GpxTrailEditor = {
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(gpxData, 'text/xml');
 
+      // Show the data table.
+      GpxTrailEditor.showDataTable();
+
       // Put the data into the table.
       GpxTrailEditor.parseTableGPX(xmlDoc);
 
@@ -53,6 +56,11 @@ const GpxTrailEditor = {
 
   setMapCenter: function(point) {
     GpxTrailEditor.map.setView([point.latitude, point.longitude], GpxTrailEditor.map.getZoom());
+  },
+
+  showDataTable: function() {
+    const tableElm = document.getElementById('data-table');
+    tableElm.style.display = 'table';
   },
 
   parseTableGPX: function(xmlDoc) {
@@ -407,12 +415,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   dropZoneElm.addEventListener('dragover', e => {
     e.preventDefault();
-    dropZoneElm.classList.add('drag-over');
+    dropZoneElm.classList.add('drag-over','bg-info');
   });
 
   ['dragleave','dragend'].forEach(type => {
     dropZoneElm.addEventListener(type, e => {
-      dropZoneElm.classList.remove('drag-over');
+      dropZoneElm.classList.remove('drag-over','bg-info');
     });
   });
 

@@ -1,1 +1,1 @@
-body{font-family:Arial, sans-serif;margin:0;padding:0}#map{height:400px}#map-options{margin:10px}#data-table tr.clicked-marker{background-color:#cfe2ff}
+body{font-family:Arial, sans-serif;margin:0;padding:0}#map{height:400px}#map-options{margin:10px}#data-table{display:none}#data-table tr.clicked-marker{background-color:#cfe2ff}
