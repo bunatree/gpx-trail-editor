@@ -350,6 +350,7 @@ const GpxTrailEditor = {
   },
 
   hideDropZone: function() {
+    console.log("hideDropZone")
     document.getElementById('drop-zone-form').style.display = 'none';
   },
 
@@ -455,11 +456,5 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // チェックボックスの状態に応じて地図上の点をドラッグ＆ドロップできるようにする処理
-  document.getElementById('enable-drag').addEventListener('change', function () {
-    const enableDrag = this.checked;
-    // ドラッグ＆ドロップの処理を追加
-    // ...
-  });
 });
 
