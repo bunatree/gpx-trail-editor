@@ -431,9 +431,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }    
   });
 
-  document.getElementById('btn-export-gpx').addEventListener('click', function () {
-    GpxTrailEditor.exportToGPX();
-  });
+  // Export button ... I'll come back here later.
+  // document.getElementById('btn-export-gpx').addEventListener('click', function () {
+  //   GpxTrailEditor.exportToGPX();
+  // });
 
   // Initialize the map.
   GpxTrailEditor.initMap();
