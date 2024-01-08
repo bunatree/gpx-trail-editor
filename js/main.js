@@ -12,6 +12,9 @@ const GpxTrailEditor = {
   polylineWeight: 5,
 
   onUploadGPX: function(files) {
+
+    console.log('#### onUploadGPX');
+
     const file = files[0];
     if (file) {
       // ファイルの解析と地図・テーブルへの反映の処理を呼び出す
@@ -24,6 +27,9 @@ const GpxTrailEditor = {
   // Analyzes an uploaded GPX file, put the data into the table,
   // and draws markers and polylines on the map.
   parseAndDisplayGPX: function(file) {
+
+    console.log('#### parseAndDisplayGPX');
+
     const reader = new FileReader();
 
     reader.onload = function (e) {
@@ -171,6 +177,8 @@ const GpxTrailEditor = {
 
   // Draw markers and polylines on the map.
   parseMapGPX: function(xmlDoc) {
+
+    console.log('#### parseMapGPX');
 
     // If the layer group "GpxTrailEditor.layerGroup" does not yet exist,
     // create a new L.layerGroup() object and add it to GpxTrailEditor.map,
@@ -400,6 +408,9 @@ const GpxTrailEditor = {
   },
 
   addCustomControl: function() {
+
+    console.log("##### addCustomControl");
+
     // The tool box custom control
     const customControl = L.control({ position: 'topleft' });
 
@@ -525,6 +536,8 @@ const GpxTrailEditor = {
 
 document.addEventListener('DOMContentLoaded', function () {
 
+  console.log('#### DOMContentLoaded');
+
   // Input element to select a gpx file
   const fileInputElm = document.getElementById('upload-gpx-fileinput');
   // Div element as the drop-zone container
@@ -548,8 +561,10 @@ document.addEventListener('DOMContentLoaded', function () {
   dropZoneElm.addEventListener('drop', e => {
     e.preventDefault();
     if (e.dataTransfer.files.length > 0) {
-      // Only one file selection is supported.
-      fileInputElm.files = e.dataTransfer.files;
+      // Safari fires the change event when the dropped file(s) is
+      // applied to the file input. It leads to a bug that the custom
+      // control shows up duplicatedly.
+      // fileInputElm.files = e.dataTransfer.files;
       GpxTrailEditor.onUploadGPX(e.dataTransfer.files);
     }
   });
@@ -557,13 +572,8 @@ document.addEventListener('DOMContentLoaded', function () {
   fileInputElm.addEventListener('change', e => {
     if (e.target.files.length > 0) {
       GpxTrailEditor.onUploadGPX(e.target.files);
-    }    
+    }
   });
-
-  // Export button ... I'll come back here later.
-  // document.getElementById('btn-export-gpx').addEventListener('click', function () {
-  //   GpxTrailEditor.exportToGPX();
-  // });
 
   // Initialize the map.
   GpxTrailEditor.initMap();
