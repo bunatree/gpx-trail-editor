@@ -1,3 +1,4 @@
+$mapHeight: 480px;
 $bgTablePrimaryRow: #cfe2ff; // Borrowed from Bootstrap5. (table-primary)
 $fontFamily: 'M PLUS 1p', sans-serif;
 
@@ -20,7 +21,9 @@ body {
 }
 
 #map {
-  height: 400px;
+
+  height: $mapHeight;
+
   .leaflet-marker-icon {
 
     // For the letters "S" and "G"
