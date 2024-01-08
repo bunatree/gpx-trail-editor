@@ -270,7 +270,7 @@ const GpxTrailEditor = {
       ...normalMarkerOptions,
       icon: L.divIcon({
         className: 'first-div-icon',
-        html: '',
+        html: '<span class="label">S</span>',
         iconSize: [GpxTrailEditor.firstMarkerRadius*2,GpxTrailEditor.firstMarkerRadius*2],
         iconAnchor: [GpxTrailEditor.firstMarkerRadius,GpxTrailEditor.firstMarkerRadius],
       }),
@@ -280,7 +280,7 @@ const GpxTrailEditor = {
       ...normalMarkerOptions,
       icon: L.divIcon({
         className: 'last-div-icon',
-        html: '',
+        html: '<span class="label">G</span>',
         iconSize: [GpxTrailEditor.lastMarkerRadius*2,GpxTrailEditor.lastMarkerRadius*2],
         iconAnchor: [GpxTrailEditor.lastMarkerRadius,GpxTrailEditor.lastMarkerRadius],
       }),

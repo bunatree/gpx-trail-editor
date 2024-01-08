@@ -21,22 +21,39 @@ body {
 
 #map {
   height: 400px;
-  .normal-div-icon {
-    border: 2px solid #fff;
-    background-color: rgba(255, 0, 128, 1);
-    border-radius: 50%;
-  }
-  
-  .first-div-icon {
-    border: 2px solid #fff;
-    background-color: blue;
-    border-radius: 50%;
-  }
-  
-  .last-div-icon {
-    border: 2px solid #fff;
-    background-color: green;
-    border-radius: 50%;
+  .leaflet-marker-icon {
+
+    // For the letters "S" and "G"
+    .label {
+      color: #fff;
+      font-size: 12px; // Size of the marker - 2px (white border) * 2
+      font-weight: bold;
+    }
+
+    &.first-div-icon {
+      border: 2px solid #fff;
+      background-color: blue;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    &.last-div-icon {
+      border: 2px solid #fff;
+      background-color: green;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    &.normal-div-icon {
+      border: 2px solid #fff;
+      background-color: rgba(255, 0, 128, 1);
+      border-radius: 50%;
+    }
+
   }
 }
 
