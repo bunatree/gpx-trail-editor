@@ -530,6 +530,47 @@ const GpxTrailEditor = {
         // または他の処理を追加
       });
     }
+  },
+
+  setupDropZone: function() {
+
+    // Input element to select a gpx file
+    const fileInputElm = document.getElementById('upload-gpx-fileinput');
+    // Div element as the drop-zone container
+    const dropZoneElm = fileInputElm.closest('.drop-zone');
+
+    dropZoneElm.addEventListener('click', e => {
+      fileInputElm.click();
+    });
+
+    dropZoneElm.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropZoneElm.classList.add('drag-over','bg-info');
+    });
+
+    ['dragleave','dragend'].forEach(type => {
+      dropZoneElm.addEventListener(type, e => {
+        dropZoneElm.classList.remove('drag-over','bg-info');
+      });
+    });
+
+    dropZoneElm.addEventListener('drop', e => {
+      e.preventDefault();
+      if (e.dataTransfer.files.length > 0) {
+        // Safari fires the change event when the dropped file(s) is
+        // applied to the file input. It leads to a bug that the custom
+        // control shows up duplicatedly.
+        // fileInputElm.files = e.dataTransfer.files;
+        GpxTrailEditor.onUploadGPX(e.dataTransfer.files);
+      }
+    });
+
+    fileInputElm.addEventListener('change', e => {
+      if (e.target.files.length > 0) {
+        GpxTrailEditor.onUploadGPX(e.target.files);
+      }
+    });
+
   }
 
 };
@@ -538,42 +579,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   console.log('#### DOMContentLoaded');
 
-  // Input element to select a gpx file
-  const fileInputElm = document.getElementById('upload-gpx-fileinput');
-  // Div element as the drop-zone container
-  const dropZoneElm = fileInputElm.closest('.drop-zone');
-
-  dropZoneElm.addEventListener('click', e => {
-    fileInputElm.click();
-  });
-
-  dropZoneElm.addEventListener('dragover', e => {
-    e.preventDefault();
-    dropZoneElm.classList.add('drag-over','bg-info');
-  });
-
-  ['dragleave','dragend'].forEach(type => {
-    dropZoneElm.addEventListener(type, e => {
-      dropZoneElm.classList.remove('drag-over','bg-info');
-    });
-  });
-
-  dropZoneElm.addEventListener('drop', e => {
-    e.preventDefault();
-    if (e.dataTransfer.files.length > 0) {
-      // Safari fires the change event when the dropped file(s) is
-      // applied to the file input. It leads to a bug that the custom
-      // control shows up duplicatedly.
-      // fileInputElm.files = e.dataTransfer.files;
-      GpxTrailEditor.onUploadGPX(e.dataTransfer.files);
-    }
-  });
-
-  fileInputElm.addEventListener('change', e => {
-    if (e.target.files.length > 0) {
-      GpxTrailEditor.onUploadGPX(e.target.files);
-    }
-  });
+  // Set up the gpx-file drop zone.
+  GpxTrailEditor.setupDropZone();
 
   // Initialize the map.
   GpxTrailEditor.initMap();
