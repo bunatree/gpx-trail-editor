@@ -77,7 +77,18 @@ const GpxTrailEditor = {
   },
 
   parseTableGPX: function(xmlDoc) {
+
+    // The "Check All" checkbox
+    const chkboxAllCell = document.querySelector('#data-table thead .chkbox');
+    const chkAllElm = document.createElement('input');
+    chkAllElm.id = 'chk-all';
+    chkAllElm.type = 'checkbox';
+    chkAllElm.classList.add('form-check-input');
+    chkboxAllCell.appendChild(chkAllElm);
+    chkboxAllCell.classList.add('align-middle');
+
     const tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
+
     tableBody.innerHTML = '';
 
     const trackPoints = xmlDoc.querySelectorAll('trkpt');
@@ -579,19 +590,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   console.log('#### DOMContentLoaded');
 
-  // Set up the gpx-file drop zone.
-  GpxTrailEditor.setupDropZone();
-
   // Initialize the map.
   GpxTrailEditor.initMap();
 
-  // 適用アイコンがクリックされたときの処理
-  const applyButtons = document.querySelectorAll('.apply a');
-  applyButtons.forEach(btnElm => {
-    btnElm.addEventListener('click', function () {
-      GpxTrailEditor.onApplyButtonClick(btnElm);
-    });
-  });
+  // Set up the gpx-file drop zone.
+  GpxTrailEditor.setupDropZone();
 
 });
 
