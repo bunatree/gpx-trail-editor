@@ -379,20 +379,62 @@ const GpxTrailEditor = {
       tableRows[i].classList.remove('dragged-marker');
     }
 
-    GpxTrailEditor.updateTableRowLatLng(i,newLatLng);
-    
+    GpxTrailEditor.updateTableRow(i,newLatLng);
     GpxTrailEditor.updatePolylines();
 
-    // #### Update the elevation later.
   },
 
-  updateTableRowLatLng: function(i,newLatLng) {
+  updateTableRow: async function(i,newLatLng) {
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     if (i < tableRows.length) {
-      const latInput = tableRows[i].querySelector('td.latitude input');
-      const lngInput = tableRows[i].querySelector('td.longitude input');
-      latInput.value = newLatLng.lat;
-      lngInput.value = newLatLng.lng;
+
+      const lon = newLatLng.lng;
+      const lat = newLatLng.lat;
+
+      const latInputElm = tableRows[i].querySelector('td.latitude input');
+      const lonInputElm = tableRows[i].querySelector('td.longitude input');
+      latInputElm.value = newLatLng.lat;
+      lonInputElm.value = newLatLng.lng;
+
+      // Save the current existing evelation.
+      const eveInputElm = tableRows[i].querySelector('td.elevation input');
+      const existingEve = eveInputElm.value;
+
+      // Get the evelation of the marker's new location.
+      const newEve = await GpxTrailEditor.getElevationData(lon, lat);
+      if (newEve !== null) {
+        console.log(`New evelation: ${newEve} meters`);
+        eveInputElm.value = newEve;
+      }
+
+    }
+  },
+
+  getElevationData: async function(lon, lat) {
+
+    const apiUrl = `https://cyberjapandata2.gsi.go.jp/general/dem/scripts/getelevation.php?lon=${lon}&lat=${lat}&outtype=JSON`;
+    const errorStr = '-----';
+
+    try {
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+
+      // Check if the evelation value is valid.
+      if (data.elevation !== errorStr && data.hsrc !== errorStr) {
+        const elevation = parseFloat(data.elevation);
+        const dataSource = data.hsrc;
+
+        console.log(`Evelation: ${elevation} meters`);
+        console.log(`Data source: ${dataSource}`);        
+        return elevation;
+
+      } else {
+        console.error('Could not get an evelation value.');
+        return null;
+      }
+    } catch (error) {
+      console.error('Unexpected error: ', error);
+      return null;
     }
   },
 
