@@ -527,7 +527,7 @@ const GpxTrailEditor = {
       const buttonElm = L.DomUtil.create('button', 'btn btn-light border border-2', divElm);
       buttonElm.id = 'btn-toggle-draggable';
       buttonElm.title = '有効にすると、ドラッグで各ポイントを移動できるようになります。';
-      buttonElm.innerHTML = 'ポイント移動しない';
+      buttonElm.innerHTML = 'ポイント移動 : 無効';
       buttonElm.dataset.draggable = 'false';
 
       buttonElm.addEventListener('click', function () {
@@ -548,13 +548,17 @@ const GpxTrailEditor = {
         marker.dragging.enable();
       });
       buttonElm.dataset.draggable = 'true';
-      buttonElm.innerHTML = 'ポイント移動する';
+      buttonElm.innerHTML = 'ポイント移動 : 有効';
+      buttonElm.classList.remove('btn-light');
+      buttonElm.classList.add('btn-success');
     } else {
       GpxTrailEditor.markersArray.forEach(function (marker) {
         marker.dragging.disable();
       });
       buttonElm.dataset.draggable = 'false';
-      buttonElm.innerHTML = 'ポイント移動しない';
+      buttonElm.innerHTML = 'ポイント移動 : 無効';
+      buttonElm.classList.remove('btn-success');
+      buttonElm.classList.add('btn-light');
     }
   },
   
