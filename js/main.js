@@ -11,10 +11,50 @@ const GpxTrailEditor = {
   polylineColor: 'rgba(192, 0, 128, 1)',
   polylineWeight: 5,
 
-  startOver: function() {
+  confirmStartOver: function() {
     const isOkay = confirm("読み込み済みのデータを破棄して最初からやり直します。よろしいですか？");
     if (isOkay) {
       location.reload();
+    }
+  },
+
+  showBtnStartOver: function() {
+    const btnElm = document.getElementById('btn-start-over');
+    btnElm.classList.remove('d-none');
+  },
+
+  showBtnExportGPX: function() {
+    const btnElm = document.getElementById('btn-export-gpx');
+    btnElm.classList.remove('d-none');
+  },
+
+  initMap: function() {
+    if (!this.map) {
+      this.map = L.map('map').setView([35.6895, 139.6917], 10);
+      L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
+        attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>',
+        maxZoom: 18,
+      }).addTo(this.map);
+
+      // Add click event listener to the map container
+      // to cancel a selection on a marker.
+      const mapContainer = this.map.getContainer();
+      mapContainer.addEventListener('click', function(event) {
+        const clickedElement = event.target;
+
+        // Check if the clicked element is a marker or within a marker
+        const isMarker = clickedElement.classList.contains('leaflet-interactive');
+
+        // If the clicked element is not a marker or within a marker, deselect all markers
+        if (!isMarker) {
+          document.querySelectorAll('#data-table tbody tr').forEach(trElm => {
+            trElm.classList.remove('clicked-marker');
+          });
+        }
+      });
+
+      // Initialize the layer group.
+      this.layerGroup = L.layerGroup().addTo(this.map);
     }
   },
 
@@ -28,6 +68,10 @@ const GpxTrailEditor = {
       GpxTrailEditor.parseAndDisplayGPX(file);
       // GPXアップロード用フォームを非表示にする
       GpxTrailEditor.hideDropZone();
+      // Show "Start Over" button in the navbar.
+      GpxTrailEditor.showBtnStartOver();
+      // Show "Export GPX" button in the navbar.
+      GpxTrailEditor.showBtnExportGPX();
     }
   },
 
@@ -520,36 +564,6 @@ const GpxTrailEditor = {
 
   },
 
-  initMap: function() {
-    if (!this.map) {
-      this.map = L.map('map').setView([35.6895, 139.6917], 10);
-      L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
-        attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>',
-        maxZoom: 18,
-      }).addTo(this.map);
-
-      // Add click event listener to the map container
-      // to cancel a selection on a marker.
-      const mapContainer = this.map.getContainer();
-      mapContainer.addEventListener('click', function(event) {
-        const clickedElement = event.target;
-
-        // Check if the clicked element is a marker or within a marker
-        const isMarker = clickedElement.classList.contains('leaflet-interactive');
-
-        // If the clicked element is not a marker or within a marker, deselect all markers
-        if (!isMarker) {
-          document.querySelectorAll('#data-table tbody tr').forEach(trElm => {
-            trElm.classList.remove('clicked-marker');
-          });
-        }
-      });
-
-      // Initialize the layer group.
-      this.layerGroup = L.layerGroup().addTo(this.map);
-    }
-  },
-
   showDropZone: function() {
     document.getElementById('drop-zone-form').style.display = 'block';
   },
@@ -640,7 +654,7 @@ document.addEventListener('DOMContentLoaded', function () {
   console.log('#### DOMContentLoaded');
 
   // Start Over Button
-  document.getElementById('btn-start-over').addEventListener('click', GpxTrailEditor.startOver);
+  document.getElementById('btn-start-over').addEventListener('click', GpxTrailEditor.confirmStartOver);
 
   // Initialize the map.
   GpxTrailEditor.initMap();
