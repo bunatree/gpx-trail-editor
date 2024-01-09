@@ -10,14 +10,25 @@ body {
 
 
 #data-table {
+
   // Hidden by default
+
   display: none;
+
   tr.clicked-marker {
     background-color: $bgTablePrimaryRow;
   }
   tr.dragged-marker {
     background-color: $bgTablePrimaryRow;
   }
+
+  .elevation {
+    max-width: 4rem;
+  }
+  .apply {
+    max-width: 1rem;
+  }
+
 }
 
 #map {

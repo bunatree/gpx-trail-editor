@@ -447,15 +447,14 @@ const GpxTrailEditor = {
       latInputElm.value = newLatLng.lat;
       lonInputElm.value = newLatLng.lng;
 
-      // Save the current existing evelation.
-      const eveInputElm = tableRows[i].querySelector('td.elevation input');
-      const existingEve = eveInputElm.value;
+      // Save the current existing elevation.
+      const eleInputElm = tableRows[i].querySelector('td.elevation input');
 
-      // Get the evelation of the marker's new location.
-      const newEve = await GpxTrailEditor.getElevationData(lon, lat);
-      if (newEve !== null) {
-        console.log(`New evelation: ${newEve} meters`);
-        eveInputElm.value = newEve;
+      // Get the elevation of the marker's new location.
+      const newEle = await GpxTrailEditor.getElevationData(lon, lat);
+      if (newEle !== null) {
+        console.log(`New elevation: ${newEle} meters`);
+        eleInputElm.value = newEle;
       }
 
     }
@@ -470,17 +469,17 @@ const GpxTrailEditor = {
       const response = await fetch(apiUrl);
       const data = await response.json();
 
-      // Check if the evelation value is valid.
+      // Check if the elevation value is valid.
       if (data.elevation !== errorStr && data.hsrc !== errorStr) {
         const elevation = parseFloat(data.elevation);
         const dataSource = data.hsrc;
 
-        console.log(`Evelation: ${elevation} meters`);
+        console.log(`Elevation: ${elevation} meters`);
         console.log(`Data source: ${dataSource}`);        
         return elevation;
 
       } else {
-        console.error('Could not get an evelation value.');
+        console.error('Could not get an elevation value.');
         return null;
       }
     } catch (error) {
