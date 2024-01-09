@@ -11,6 +11,13 @@ const GpxTrailEditor = {
   polylineColor: 'rgba(192, 0, 128, 1)',
   polylineWeight: 5,
 
+  startOver: function() {
+    const isOkay = confirm("読み込み済みのデータを破棄して最初からやり直します。よろしいですか？");
+    if (isOkay) {
+      location.reload();
+    }
+  },
+
   onUploadGPX: function(files) {
 
     console.log('#### onUploadGPX');
@@ -631,6 +638,9 @@ const GpxTrailEditor = {
 document.addEventListener('DOMContentLoaded', function () {
 
   console.log('#### DOMContentLoaded');
+
+  // Start Over Button
+  document.getElementById('btn-start-over').addEventListener('click', GpxTrailEditor.startOver);
 
   // Initialize the map.
   GpxTrailEditor.initMap();
