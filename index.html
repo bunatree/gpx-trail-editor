@@ -20,45 +20,57 @@
 </head>
 <body>
 
-  <div class="container-fluid">
-  <h1>GPX Trail Editor</h1>
+  <header>
+    <nav class="navbar fixed-top bg-dark border-bottom border-body" data-bs-theme="dark">
+      <div class="container-fluid">
+        <div class="navbar-brand" href="#">GPX Trail Editor</div>
+        <div class="justify-content-end" id="nav-buttons">
+          <a class="btn btn-sm btn-light" href="javascript:void(0);">Export GPX</a>
+          <a class="btn btn-sm btn-danger" href="javascript:void(0);">Start Over</a>
+        </div>
+      </div>
+    </nav>
+  </header>
 
-  <h2 class="d-none">Map</h2>
+  <main>
 
-  <div id="map" class="border shadow-sm mt-4 mb-4"></div>
+    <div class="container-fluid">
+      <h1>GPX Trail Editor</h1>
 
-  <h2 class="d-none">Upload GPX</h2>
+      <h2 class="d-none">Map</h2>
 
-  <div id="drop-zone-form" class="drop-zone border shadow-sm p-4 mt-4 mb-4">
-    <div class="form-inner d-flex flex-column justify-content-center">
-      <i class="bi bi-cloud-upload text-center fs-3"></i>
-      <span class="drop-zone-prompt text-center">ここにGPXファイルをドロップまたはクリックして選択</span>
-      <input type="file" id="upload-gpx-fileinput" class="d-none" accept=".gpx" area-hidden="true">
+      <h2 class="d-none">Upload GPX</h2>
+
+      <div id="drop-zone-form" class="drop-zone border shadow-sm p-4 mt-4 mb-4">
+        <div class="form-inner d-flex flex-column justify-content-center">
+          <i class="bi bi-cloud-upload text-center fs-3"></i>
+          <span class="drop-zone-prompt text-center">ここにGPXファイルをドロップまたはクリックして選択</span>
+          <input type="file" id="upload-gpx-fileinput" class="d-none" accept=".gpx" area-hidden="true">
+        </div>
+      </div>
+
+      <div id="map" class="border shadow-sm mt-4 mb-4"></div>
+
+      <table id="data-table" class="table-sm table-hover w-100">
+        <thead>
+          <tr>
+            <th class="chkbox"></th>
+            <th class="idx"></th>
+            <th class="datetime">日時</th>
+            <th class="latitude">緯度</th>
+            <th class="longitude">経度</th>
+            <th class="elevation">標高</th>
+            <th class="apply">適用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- The table rows will be inserted by JS. -->
+        </tbody>
+      </table>
+
     </div>
-  </div>
 
-  <!-- <div id="fm-export-gpx" class="input-group mb-3">
-    <button id="btn-export-gpx">エクスポート</button>
-  </div> -->
-
-  <table id="data-table" class="table-sm table-hover w-100">
-    <thead>
-      <tr>
-        <th class="chkbox"></th>
-        <th class="idx"></th>
-        <th class="datetime">日時</th>
-        <th class="latitude">緯度</th>
-        <th class="longitude">経度</th>
-        <th class="elevation">標高</th>
-        <th class="apply">適用</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- The table rows will be inserted by JS. -->
-    </tbody>
-  </table>
-
-</div>
+  </main>
 
   <!-- <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script> -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
