@@ -248,6 +248,15 @@ const GpxTrailEditor = {
     const divElm = document.getElementById('total-dist');
     divElm.innerHTML = 'Total Distance: ' + roundedDistance + 'm';
 
+    // Total Up/Down Evelations
+    const totalElevation = GpxTrailEditor.calcTotalElevation(xmlDoc); // Array
+    const totalUp = Number(totalElevation[0].toFixed(2));
+    const divUpElm = document.getElementById('total-eleu');
+    divUpElm.innerHTML = 'Total Up Elevation: ' + totalUp + 'm';
+    const totalDown = Number(totalElevation[1].toFixed(2));
+    const divDownElm = document.getElementById('total-eled');
+    divDownElm.innerHTML = 'Total Down Elevation: ' + totalDown + 'm';
+
   },
 
   calcTotalDistance: function(xmlDoc) {
@@ -281,6 +290,32 @@ const GpxTrailEditor = {
     // 総距離を返す
     return totalDistance;
 
+  },
+
+  calcTotalElevation(xmlDoc) {
+
+    const trackPoints = xmlDoc.querySelectorAll('trkpt');
+
+    let upElevation = 0;
+    let downElevation = 0;
+
+    for (let i = 0; i < trackPoints.length - 1; i++) {
+        const currentElevation = parseFloat(trackPoints[i].querySelector('ele').textContent);
+        const nextElevation = parseFloat(trackPoints[i + 1].querySelector('ele').textContent);
+
+        const elevationDifference = nextElevation - currentElevation;
+
+        if (elevationDifference > 0) {
+            // 標高が上がっている場合
+            upElevation += elevationDifference;
+        } else if (elevationDifference < 0) {
+            // 標高が下がっている場合
+            downElevation += Math.abs(elevationDifference);
+        }
+        // 標高が変わっていない場合は何もしない
+    }
+
+    return [upElevation, downElevation];
   },
 
   // Draw markers and polylines on the map.
