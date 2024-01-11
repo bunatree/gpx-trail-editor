@@ -8,6 +8,14 @@ body {
   padding: 0;
 }
 
+#data-summary {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  h3.label {
+    font-size: 1.2rem;
+  }
+}
 
 #data-table {
 
