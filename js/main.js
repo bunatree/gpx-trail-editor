@@ -241,13 +241,16 @@ const GpxTrailEditor = {
   },
 
   parseSummaryGPX: function(xmlDoc) {
-    const totalDistance = GpxTrailEditor.calcSummaryGPX(xmlDoc);
+
+    // Total Distance
+    const totalDistance = GpxTrailEditor.calcTotalDistance(xmlDoc);
     const roundedDistance = Number(totalDistance.toFixed(2));
     const divElm = document.getElementById('total-dist');
     divElm.innerHTML = 'Total Distance: ' + roundedDistance + 'm';
+
   },
 
-  calcSummaryGPX: function(xmlDoc) {
+  calcTotalDistance: function(xmlDoc) {
     
     const trackPoints = xmlDoc.querySelectorAll('trkpt');
 
@@ -277,6 +280,7 @@ const GpxTrailEditor = {
 
     // 総距離を返す
     return totalDistance;
+
   },
 
   // Draw markers and polylines on the map.
