@@ -6,7 +6,7 @@
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
   <!-- Google Web Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -52,28 +52,41 @@
   
       <h2 class="d-none">GPX Details</h2>
       <div id="data-summary" class="d-none m-4">
-        <div id="total-time">
-          <h3 class="label fw-light text-center text-secondary">GPS Time</h3>
+        <div id="total-gpx-time">
+          <h3 class="label fw-light text-center text-secondary">
+            <i class="bi bi-stopwatch"></i>
+            <span>GPS Time</span>
+          </h3>
           <div class="desc text-center">
             <span class="value h3"></span>
           </div>
         </div>
+
         <div id="total-dist">
-          <h3 class="label fw-light text-center text-secondary">Distance</h3>
+          <h3 class="label fw-light text-center text-secondary">
+            <i class="bi bi-person-walking"></i>
+            <span>Distance</span>
+            </h3>
           <div class="desc text-center">
             <span class="value h3"></span>
             <span class="unit">m</span>
           </div>
         </div>
         <div id="total-eleu">
-          <h3 class="label fw-light text-center text-secondary">Up</h3>
+          <h3 class="label fw-light text-center text-secondary">
+            <i class="bi bi-arrow-up-right"></i>
+            <span>Up</span>
+          </h3>
           <div class="desc text-center">
             <span class="value h3"></span>
             <span class="unit">m</span>
           </div>
         </div>
         <div id="total-eled">
-          <h3 class="label fw-light text-center text-secondary">Down</h3>
+          <h3 class="label fw-light text-center text-secondary">
+            <i class="bi bi-arrow-down-right"></i>
+            <span>Down</span>
+          </h3>
           <div class="desc text-center">
             <span class="value h3"></span>
             <span class="unit">m</span>

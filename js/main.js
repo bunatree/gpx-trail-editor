@@ -245,9 +245,9 @@ const GpxTrailEditor = {
     // Container Element
     const container = document.getElementById('data-summary');
 
-    // Total Time
+    // Total GPX Time
     const totalTime = GpxTrailEditor.calcTotalTime(xmlDoc); // Array
-    const spanTimeElm = document.querySelector('#total-time .value');
+    const spanTimeElm = document.querySelector('#total-gpx-time .value');
     spanTimeElm.innerHTML = totalTime[0] + ':' + totalTime[1] + ':' + totalTime[2];
 
     // Total Distance
@@ -270,6 +270,14 @@ const GpxTrailEditor = {
 
   },
 
+  millisecToHMS: function (milliseconds) {
+    const hours = Math.floor(milliseconds / (1000 * 60 * 60));
+    const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
+
+    return [hours, minutes, seconds];
+  },
+
   calcTotalTime: function(xmlDoc) {
     const trackPoints = xmlDoc.querySelectorAll('trkpt');
 
@@ -283,16 +291,10 @@ const GpxTrailEditor = {
     const lastTime = new Date(trackPoints[trackPoints.length - 1].querySelector('time').textContent);
 
     // 時間の差を計算
-    let timeDiff = Math.abs(lastTime - firstTime);
+    const timeDiff = Math.abs(lastTime - firstTime);
 
     // 時間、分、秒に変換
-    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-    timeDiff %= (1000 * 60 * 60);
-    const mins = Math.floor(timeDiff / (1000 * 60));
-    timeDiff %= (1000 * 60);
-    const secs = Math.floor(timeDiff / 1000);
-
-    return [hours, mins, secs];
+    return GpxTrailEditor.millisecToHMS(timeDiff);
   },
 
   calcTotalDistance: function(xmlDoc) {
@@ -314,7 +316,7 @@ const GpxTrailEditor = {
 
       // 最初のトラックポイントでない場合、前回のトラックポイントとの距離を計算して加算
       if (prevLat !== null && prevLon !== null) {
-          const distance = GpxTrailEditor.hubenyDistance(prevLat, prevLon, currentLat, currentLon);
+          const distance = GpxTrailEditor.calcHubenyDistance(prevLat, prevLon, currentLat, currentLon);
           totalDistance += distance;
       }
 
@@ -767,7 +769,7 @@ const GpxTrailEditor = {
 
   },
 
-  hubenyDistance: function(lat1, lon1, lat2, lon2){ 
+  calcHubenyDistance: function(lat1, lon1, lat2, lon2){ 
     const a = 6378137; // WGS84楕円体の長半径
     const b = 6356752.314245; // WGS84楕円体の短半径
     const e2 = 0.006694379990141317; // WGS84楕円体の離心率の二乗
