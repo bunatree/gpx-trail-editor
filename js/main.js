@@ -245,6 +245,11 @@ const GpxTrailEditor = {
     // Container Element
     const container = document.getElementById('data-summary');
 
+    // Total Time
+    const totalTime = GpxTrailEditor.calcTotalTime(xmlDoc); // Array
+    const spanTimeElm = document.querySelector('#total-time .value');
+    spanTimeElm.innerHTML = totalTime[0] + ':' + totalTime[1] + ':' + totalTime[2];
+
     // Total Distance
     const totalDistance = GpxTrailEditor.calcTotalDistance(xmlDoc);
     const roundedDistance = Number(totalDistance.toFixed(2));
@@ -263,6 +268,31 @@ const GpxTrailEditor = {
     // Make the container show up.
     container.classList.remove('d-none');
 
+  },
+
+  calcTotalTime: function(xmlDoc) {
+    const trackPoints = xmlDoc.querySelectorAll('trkpt');
+
+    if (trackPoints.length === 0) {
+        // トラックポイントが存在しない場合はゼロの時間を返す
+        return [0, 0, 0];
+    }
+
+    // 最初と最後のトラックポイントの時間を取得
+    const firstTime = new Date(trackPoints[0].querySelector('time').textContent);
+    const lastTime = new Date(trackPoints[trackPoints.length - 1].querySelector('time').textContent);
+
+    // 時間の差を計算
+    let timeDiff = Math.abs(lastTime - firstTime);
+
+    // 時間、分、秒に変換
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    timeDiff %= (1000 * 60 * 60);
+    const mins = Math.floor(timeDiff / (1000 * 60));
+    timeDiff %= (1000 * 60);
+    const secs = Math.floor(timeDiff / 1000);
+
+    return [hours, mins, secs];
   },
 
   calcTotalDistance: function(xmlDoc) {
