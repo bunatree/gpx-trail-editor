@@ -242,20 +242,26 @@ const GpxTrailEditor = {
 
   parseSummaryGPX: function(xmlDoc) {
 
+    // Container Element
+    const container = document.getElementById('data-summary');
+
     // Total Distance
     const totalDistance = GpxTrailEditor.calcTotalDistance(xmlDoc);
     const roundedDistance = Number(totalDistance.toFixed(2));
-    const divElm = document.getElementById('total-dist');
-    divElm.innerHTML = 'Total Distance: ' + roundedDistance + 'm';
+    const spanDistElm = document.querySelector('#total-dist .value');
+    spanDistElm.innerHTML = roundedDistance;
 
     // Total Up/Down Evelations
     const totalElevation = GpxTrailEditor.calcTotalElevation(xmlDoc); // Array
     const totalUp = Number(totalElevation[0].toFixed(2));
-    const divUpElm = document.getElementById('total-eleu');
-    divUpElm.innerHTML = 'Total Up Elevation: ' + totalUp + 'm';
+    const spanUpElm = document.querySelector('#total-eleu .value');
+    spanUpElm.innerHTML = totalUp;
     const totalDown = Number(totalElevation[1].toFixed(2));
-    const divDownElm = document.getElementById('total-eled');
-    divDownElm.innerHTML = 'Total Down Elevation: ' + totalDown + 'm';
+    const spanDownElm = document.querySelector('#total-eled .value');
+    spanDownElm.innerHTML = totalDown;
+
+    // Make the container show up.
+    container.classList.remove('d-none');
 
   },
 

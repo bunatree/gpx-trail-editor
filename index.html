@@ -51,10 +51,26 @@
       <div id="map" class="border shadow-sm mt-4 mb-4"></div>
   
       <h2 class="d-none">GPX Details</h2>
-      <div id="data-summary">
-        <div id="total-dist"></div>
-        <div id="total-eleu"></div>
-        <div id="total-eled"></div>
+      <div id="data-summary" class="d-none">
+        <div id="total-time">
+          <h3 class="label">GPS Time</h3>
+          <span class="value"></span>
+        </div>
+        <div id="total-dist">
+          <h3 class="label">Distance</h3>
+          <span class="value"></span>
+          <span class="unit">m</span>
+        </div>
+        <div id="total-eleu">
+          <h3 class="label">Up</h3>
+          <span class="value"></span>
+          <span class="unit">m</span>
+        </div>
+        <div id="total-eled">
+          <h3 class="label">Down</h3>
+          <span class="value"></span>
+          <span class="unit">m</span>
+        </div>
       </div>
 
       <table id="data-table" class="table-sm table-hover w-100">
