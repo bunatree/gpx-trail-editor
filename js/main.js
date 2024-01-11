@@ -102,6 +102,9 @@ const GpxTrailEditor = {
         // Put the data into the table.
         GpxTrailEditor.parseTableGPX(xmlDoc);
 
+        // Calculate the total distance and evelation.
+        GpxTrailEditor.parseSummaryGPX(xmlDoc);
+
         // Draw the map.
         GpxTrailEditor.parseMapGPX(xmlDoc);
 
@@ -235,6 +238,45 @@ const GpxTrailEditor = {
 
     return formattedDateTime;
 
+  },
+
+  parseSummaryGPX: function(xmlDoc) {
+    const totalDistance = GpxTrailEditor.calcSummaryGPX(xmlDoc);
+    const roundedDistance = Number(totalDistance.toFixed(2));
+    const divElm = document.getElementById('total-dist');
+    divElm.innerHTML = 'Total Distance: ' + roundedDistance + 'm';
+  },
+
+  calcSummaryGPX: function(xmlDoc) {
+    
+    const trackPoints = xmlDoc.querySelectorAll('trkpt');
+
+    // トラックポイント間の距離の合計を保存する変数
+    let totalDistance = 0;
+
+    // 最初のトラックポイントの緯度と経度
+    let prevLat = null;
+    let prevLon = null;
+
+    // 各トラックポイントをループ処理
+    trackPoints.forEach(point => {
+      // トラックポイントの緯度と経度を取得
+      const currentLat = parseFloat(point.getAttribute("lat"));
+      const currentLon = parseFloat(point.getAttribute("lon"));
+
+      // 最初のトラックポイントでない場合、前回のトラックポイントとの距離を計算して加算
+      if (prevLat !== null && prevLon !== null) {
+          const distance = GpxTrailEditor.hubenyDistance(prevLat, prevLon, currentLat, currentLon);
+          totalDistance += distance;
+      }
+
+      // 現在のトラックポイントの緯度と経度を次の計算のために保存
+      prevLat = currentLat;
+      prevLon = currentLon;
+    });
+
+    // 総距離を返す
+    return totalDistance;
   },
 
   // Draw markers and polylines on the map.
