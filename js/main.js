@@ -648,6 +648,20 @@ const GpxTrailEditor = {
       }
     });
 
+  },
+
+  hubenyDistance: function(lat1, lon1, lat2, lon2){ 
+    const a = 6378137; // WGS84楕円体の長半径
+    const b = 6356752.314245; // WGS84楕円体の短半径
+    const e2 = 0.006694379990141317; // WGS84楕円体の離心率の二乗
+
+    const P = (lat1 + lat2) / 2 * Math.PI / 180; // 2つの緯度の平均
+    const dP = (lat1 - lat2) * Math.PI / 180; // 2つの緯度の差
+    const dR = (lon1 - lon2) * Math.PI / 180; // 2つの経度の差
+    const M = a * (1 - e2) / Math.pow((1 - e2 * Math.sin(P) * Math.sin(P)), 1.5); // 子午線曲率半径 (地球上の点における緯度方向の曲率半径)
+    const N = a / Math.sqrt(1 - e2 * Math.sin(P) * Math.sin(P)); // 卯酉線曲率半径 (地球上の点における経度方向の曲率半径)
+    const D = Math.sqrt((M * dP) * (M * dP) + (N * Math.cos(P) * dR) * (N * Math.cos(P) * dR)); // 求める距離
+    return D;
   }
 
 };
