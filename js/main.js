@@ -805,6 +805,9 @@ const GpxTrailEditor = {
         case 'clear-all-datetime':
           GpxTrailEditor.clearAllDateTime();
           break;
+        case 'clear-checked-datetime':
+          GpxTrailEditor.clearCheckedDateTime();
+          break;
         case 'clear-unchecked-datetime':
           GpxTrailEditor.clearUncheckedDateTime();
           break;
@@ -820,6 +823,15 @@ const GpxTrailEditor = {
   clearAllDateTime: function() {
     const rowElms = document.querySelectorAll('#data-table tbody tr');
     rowElms.forEach(trElm => {
+      const inputElm = trElm.querySelector('td.datetime input');
+      inputElm.value = '';
+    });
+  },
+
+  clearCheckedDateTime: function() {
+    const checkedInputElm = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:checked');
+    checkedInputElm.forEach(chkElm => {
+      const trElm = chkElm.closest('tr');
       const inputElm = trElm.querySelector('td.datetime input');
       inputElm.value = '';
     });
