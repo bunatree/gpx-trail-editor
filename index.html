@@ -102,17 +102,17 @@
             </div>
             <div class="col-auto">
               <select id="fm-op-selector" class="col-sm-10 form-select" aria-label="What do you want to do?">
-                <option selected>----</option>
-                <option value="1">Clear all dates and times</option>
-                <option value="2">Clear unckecked dates and times</option>
-                <option value="3">Shift dates and times</option>
+                <option value="" selected>----</option>
+                <option value="clear-all-datetime">Clear all dates and times</option>
+                <option value="clear-unchecked-datetime">Clear unckecked dates and times</option>
+                <option value="shift-datetime">Shift dates and times</option>
               </select>
             </div>
             <div class="col-auto">
               <input type="number" id="fm-ts-input" class="form-control" placeholder="In seconds" value="0" />
             </div>
             <div class="col-auto">
-              <button id="fm-go-button" class="btn btn-primary" disabled>Go</button>
+              <a id="fm-go-button" class="btn btn-light border disabled text-black-50">Go</a>
             </div>
           </div>
           <!-- <div class="row mb-2">

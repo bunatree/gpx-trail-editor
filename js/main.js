@@ -12,6 +12,7 @@ const GpxTrailEditor = {
   polylineWeight: 5,
 
   confirmStartOver: function() {
+    console.log('#### confirmStartOver');
     const isOkay = confirm("読み込み済みのデータを破棄して最初からやり直します。よろしいですか？");
     if (isOkay) {
       location.reload();
@@ -781,6 +782,56 @@ const GpxTrailEditor = {
     const N = a / Math.sqrt(1 - e2 * Math.sin(P) * Math.sin(P)); // 卯酉線曲率半径 (地球上の点における経度方向の曲率半径)
     const D = Math.sqrt((M * dP) * (M * dP) + (N * Math.cos(P) * dR) * (N * Math.cos(P) * dR)); // 求める距離
     return D;
+  },
+
+  setupOpForm: function() {
+
+    const goBtnElm = document.getElementById('fm-go-button');
+    const opElm = document.getElementById('fm-op-selector');
+    const tsElm = document.getElementById('fm-ts-input');
+
+    opElm.addEventListener('change', (e) => {
+      if (e.target.value) {
+        goBtnElm.classList.remove('btn-light','disabled','border','text-black-50');
+        goBtnElm.classList.add('btn-primary');
+      } else {
+        goBtnElm.classList.remove('btn-primary');
+        goBtnElm.classList.add('btn-light','disabled','border','text-black-50');
+      }
+    });
+
+    goBtnElm.addEventListener('click',(e) => {
+      switch (opElm.value) {
+        case 'clear-all-datetime':
+          GpxTrailEditor.clearAllDateTime();
+          break;
+        case 'clear-unchecked-datetime':
+          GpxTrailEditor.clearUncheckedDateTime();
+          break;
+        case 'shift-datetime':
+          GpxTrailEditor.shiftDateTime();
+          break;
+        default:
+          console.log('Oops. Unknown value: ' + e.target.value);
+      }
+    });
+  },
+
+  clearAllDateTime: function() {
+    const rowElms = document.querySelectorAll('#data-table tbody tr');
+    rowElms.forEach(trElm => {
+      const inputElm = trElm.querySelector('td.datetime input');
+      inputElm.value = '';
+    });
+  },
+
+  clearUncheckedDateTime: function() {
+    const checkedInputElm = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:not(:checked)');
+    checkedInputElm.forEach(chkElm => {
+      const trElm = chkElm.closest('tr');
+      const inputElm = trElm.querySelector('td.datetime input');
+      inputElm.value = '';
+    });
   }
 
 };
@@ -797,6 +848,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Set up the gpx-file drop zone.
   GpxTrailEditor.setupDropZone();
+
+  // Set up the operation form.
+  GpxTrailEditor.setupOpForm();
 
 });
 
