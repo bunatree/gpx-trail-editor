@@ -25,6 +25,7 @@
       <div class="container-fluid">
         <div class="navbar-brand" href="#">GPX Trail Editor</div>
         <div class="justify-content-end" id="nav-buttons">
+          <button id="btn-create-new" class="btn btn-sm btn-light">Create New</button>
           <button id="btn-export-gpx" class="btn btn-sm btn-light d-none">Export GPX</button>
           <button id="btn-start-over" class="btn btn-sm btn-danger d-none">Start Over</button>
         </div>
@@ -45,11 +46,13 @@
           <span class="drop-zone-prompt text-center">ここにGPXファイルをドロップまたはクリックして選択</span>
           <input type="file" id="upload-gpx-fileinput" class="d-none" accept=".gpx" area-hidden="true">
         </div>
+        <h2 class="d-none">Map</h2>
+        <div id="prev-map" class="border shadow-sm mt-4 mb-4"></div>
       </div>
 
       <h2 class="d-none">Map</h2>
       <div id="map" class="border shadow-sm mt-4 mb-4"></div>
-  
+
       <h2 class="d-none">GPX Details</h2>
       <div id="data-summary" class="d-none m-4">
         <div id="total-gpx-time">

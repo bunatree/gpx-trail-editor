@@ -39,6 +39,14 @@ body {
 
 }
 
+#prev-map {
+  background-image: url('images/yushin.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 400px;
+  width: 100%;
+}
+
 #map {
 
   height: $mapHeight;
