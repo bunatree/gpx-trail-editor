@@ -232,10 +232,9 @@ const GpxTrailEditor = {
       // Apply button
       const applyButtonCell = row.insertCell(7);
       const applyButton = document.createElement('a');
-      const applyIcon = document.createElement('i');
-      applyButton.appendChild(applyIcon);
-      applyIcon.classList.add('bi','bi-arrow-clockwise');
+      applyButton.classList.add('bi','bi-check-circle-fill');
       applyButton.setAttribute('href', 'javascript:void(0);');
+      applyButton.setAttribute('title','地図に反映');
       applyButton.addEventListener('click', function () {
         GpxTrailEditor.onApplyButtonClick(applyButton);
       });
@@ -734,6 +733,13 @@ const GpxTrailEditor = {
     const latitude = trElm.querySelector('.latitude input').value;
     const longitude = trElm.querySelector('.longitude input').value;
     const elevation = trElm.querySelector('.elevation input').value;
+    
+    // If the latitude or longitude is empty (invalid),
+    // cancel this function and return.
+    if (!latitude || !longitude) {
+      alert('Oops! The latitude or longitude is invalid.');
+      return;
+    }
 
     // Get the marker's index.
     const markerIdx = Number(trElm.querySelector('.idx').textContent) - 1;
