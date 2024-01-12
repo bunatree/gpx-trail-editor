@@ -177,6 +177,7 @@ const GpxTrailEditor = {
       const datetimeTextBox = document.createElement('input');
       datetimeTextBox.type = 'datetime-local';
       datetimeTextBox.classList.add('form-control');
+      datetimeTextBox.setAttribute('step','1');
       const formattedDateTime = GpxTrailEditor.convertGPXDateTimeToHTMLFormat(gpxDateTime);
       datetimeTextBox.value = formattedDateTime;
       timeCell.appendChild(datetimeTextBox);
@@ -863,7 +864,35 @@ const GpxTrailEditor = {
   },
 
   shiftDateTime: function() {
-    
+
+    const tsInput = document.getElementById('fm-ts-input');
+    const rowElms = document.querySelectorAll('#data-table tbody tr');
+
+    rowElms.forEach(trElm => {
+      const dtInputElm = trElm.querySelector('td.datetime input');
+      const dtValue = dtInputElm.value; // UTC (not JST)
+      const shiftSeconds = parseInt(tsInput.value, 10) || 0;
+  
+      // Exec only when dtValue has a valid value.
+      if (dtValue) {
+        // Convert the datetime string to a Date object in local time.
+        const curDate = new Date(dtValue + 'Z'); // 'Z' indicates UTC
+  
+        // Output current datetime and shiftSeconds for debugging.
+        console.log('Current Date:', curDate.toISOString());
+        console.log('Shift Seconds:', shiftSeconds);
+  
+        // Shift the datetime.
+        curDate.setSeconds(curDate.getSeconds() + shiftSeconds);
+  
+        // Output the new datetime for debugging.
+        console.log('New Date:', curDate.toISOString());
+  
+        // Convert the shifted datetime back to the local time and put it into the input element.
+        const newDate = curDate.toISOString().slice(0, 19);
+        dtInputElm.value = newDate;
+      }
+    });
   }
 
 };
