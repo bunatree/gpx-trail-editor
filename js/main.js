@@ -798,14 +798,21 @@ const GpxTrailEditor = {
     const goBtnElm = document.getElementById('fm-go-button');
     const opElm = document.getElementById('fm-op-selector');
     const tsElm = document.getElementById('fm-ts-input');
+    const colTsElm = document.querySelector('#fm-data-table div.col-ts');
 
     opElm.addEventListener('change', (e) => {
       if (e.target.value) {
         goBtnElm.classList.remove('btn-light','disabled','border','text-black-50');
         goBtnElm.classList.add('btn-primary');
+        if (e.target.value === 'shift-datetime') {
+          colTsElm.classList.remove('d-none');
+        } else {
+          colTsElm.classList.add('d-none');
+        }
       } else {
         goBtnElm.classList.remove('btn-primary');
         goBtnElm.classList.add('btn-light','disabled','border','text-black-50');
+        colTsElm.classList.add('d-none');
       }
     });
 
@@ -853,6 +860,10 @@ const GpxTrailEditor = {
       const inputElm = trElm.querySelector('td.datetime input');
       inputElm.value = '';
     });
+  },
+
+  shiftDateTime: function() {
+    
   }
 
 };

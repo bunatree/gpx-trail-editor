@@ -97,10 +97,10 @@
       <div id="fm-data-table">
         <form>
           <div class="row mb-2">
-            <div class="col-sm-2">
+            <div class="col-auto col-label">
               <label for="fm-op-selector" class="col-form-label">Operaton</label>
             </div>
-            <div class="col-auto">
+            <div class="col-auto col-op">
               <select id="fm-op-selector" class="col-sm-10 form-select" aria-label="What do you want to do?">
                 <option value="" selected>----</option>
                 <option value="clear-all-datetime">Clear all dates and times</option>
@@ -109,10 +109,10 @@
                 <option value="shift-datetime">Shift dates and times</option>
               </select>
             </div>
-            <div class="col-auto">
+            <div class="col-auto col-ts d-none">
               <input type="number" id="fm-ts-input" class="form-control" placeholder="In seconds" value="0" />
             </div>
-            <div class="col-auto">
+            <div class="col-auto col-button">
               <a id="fm-go-button" class="btn btn-light border disabled text-black-50">Go</a>
             </div>
           </div>
