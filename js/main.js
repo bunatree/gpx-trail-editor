@@ -163,18 +163,18 @@ const GpxTrailEditor = {
       // Create a row.
       const row = tableBody.insertRow(i);
 
-      // Checkbox
-      const checkboxCell = row.insertCell(0);
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.classList.add('form-check-input');
-      checkboxCell.appendChild(checkbox);
-      checkboxCell.classList.add('chkbox','align-middle');
-
       // Index (Starts from 1)
-      const idxCell = row.insertCell(1);
+      const idxCell = row.insertCell(0);
       idxCell.innerText = i + 1;
       idxCell.classList.add('idx','align-middle','text-end');
+
+      // Checkbox
+      const checkboxCell = row.insertCell(1);
+      const checkboxElm = document.createElement('input');
+      checkboxElm.type = 'checkbox';
+      checkboxElm.classList.add('form-check-input','text-center');
+      checkboxCell.appendChild(checkboxElm);
+      checkboxCell.classList.add('chkbox','align-middle');
 
       // Date/Time
       const timeCell = row.insertCell(2);
@@ -185,11 +185,22 @@ const GpxTrailEditor = {
       const formattedDateTime = GpxTrailEditor.convertGPXDateTimeToHTMLFormat(gpxDateTime);
       datetimeTextBox.value = formattedDateTime;
       timeCell.appendChild(datetimeTextBox);
-
       timeCell.classList.add('datetime');
 
+      // Eraser
+      const eraserCell = row.insertCell(3);
+      const eraserElm = document.createElement('a');
+      eraserElm.setAttribute('href','javascript:void(0);');
+      eraserElm.setAttribute('title','Clear the date and time.');
+      eraserElm.classList.add('bi','bi-eraser-fill');
+      eraserCell.appendChild(eraserElm);
+      eraserCell.classList.add('eraser');
+      eraserElm.addEventListener('click', function () {
+        GpxTrailEditor.onEraserButtonClick(eraserElm);
+      });
+
       // Latitude
-      const latitudeCell = row.insertCell(3);
+      const latitudeCell = row.insertCell(4);
       const latitudeTextBox = document.createElement('input');
       latitudeTextBox.type = 'text';
       latitudeTextBox.classList.add('form-control');
@@ -198,7 +209,7 @@ const GpxTrailEditor = {
       latitudeCell.classList.add('latitude');
 
       // Longitude
-      const longitudeCell = row.insertCell(4);
+      const longitudeCell = row.insertCell(5);
       const longitudeTextBox = document.createElement('input');
       longitudeTextBox.type = 'text';
       longitudeTextBox.classList.add('form-control');
@@ -207,7 +218,7 @@ const GpxTrailEditor = {
       longitudeCell.classList.add('longitude');
 
       // Elevation
-      const elevationCell = row.insertCell(5);
+      const elevationCell = row.insertCell(6);
       const elevationTextBox = document.createElement('input');
       elevationTextBox.type = 'text';
       elevationTextBox.classList.add('form-control');
@@ -216,7 +227,7 @@ const GpxTrailEditor = {
       elevationCell.classList.add('elevation');
 
       // Apply button
-      const applyButtonCell = row.insertCell(6);
+      const applyButtonCell = row.insertCell(7);
       const applyButton = document.createElement('a');
       const applyIcon = document.createElement('i');
       applyButton.appendChild(applyIcon);
@@ -225,10 +236,6 @@ const GpxTrailEditor = {
       applyButton.addEventListener('click', function () {
         GpxTrailEditor.onApplyButtonClick(applyButton);
       });
-      // applyButton.onclick = function () {
-      //   // 適用ボタンがクリックされたときの処理を実装
-      //   // ...
-      // };
       applyButtonCell.appendChild(applyButton);
       applyButtonCell.classList.add('apply','align-middle');
     }
@@ -709,18 +716,24 @@ const GpxTrailEditor = {
     document.getElementById('drop-zone-form').classList.add('d-none');
   },
 
+  onEraserButtonClick: function(btnElm) {
+    const trElm = btnElm.closest('tr');
+    const dtInputElm = trElm.querySelector('.datetime input');
+    dtInputElm.value = '';
+  },
+
   onApplyButtonClick: function(btnElm) {
 
     // Get the table row where the inner Apply icon was clicked.
-    const row = btnElm.closest('tr');
+    const trElm = btnElm.closest('tr');
 
     // Get the values from the text boxes.
-    const latitude = row.querySelector('.latitude input').value;
-    const longitude = row.querySelector('.longitude input').value;
-    const elevation = row.querySelector('.elevation input').value;
+    const latitude = trElm.querySelector('.latitude input').value;
+    const longitude = trElm.querySelector('.longitude input').value;
+    const elevation = trElm.querySelector('.elevation input').value;
 
     // Get the marker's index.
-    const markerIdx = Number(row.querySelector('.idx').textContent) - 1;
+    const markerIdx = Number(trElm.querySelector('.idx').textContent) - 1;
 
     // Specify the target marker and update its coordinate. 
     const markersArray = GpxTrailEditor.markersArray;
