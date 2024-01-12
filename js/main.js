@@ -68,13 +68,15 @@ const GpxTrailEditor = {
       // ファイルの解析と地図・テーブルへの反映の処理を呼び出す
       GpxTrailEditor.parseAndDisplayGPX(file);
       // GPXアップロード用フォームを非表示にする
-      GpxTrailEditor.hideDropZone();
+      GpxTrailEditor.hideDropZoneForm();
       // Show "Start Over" button in the navbar.
       GpxTrailEditor.showBtnStartOver();
       // Show "Export GPX" button in the navbar.
       GpxTrailEditor.showBtnExportGPX();
     }
   },
+
+  
 
   // Analyzes an uploaded GPX file, put the data into the table,
   // and draws markers and polylines on the map.
@@ -697,12 +699,8 @@ const GpxTrailEditor = {
 
   },
 
-  showDropZone: function() {
-    document.getElementById('drop-zone-form').style.display = 'block';
-  },
-
-  hideDropZone: function() {
-    document.getElementById('drop-zone-form').style.display = 'none';
+  hideDropZoneForm: function() {
+    document.getElementById('drop-zone-form').classList.add('d-none');
   },
 
   onApplyButtonClick: function(btnElm) {
@@ -744,7 +742,8 @@ const GpxTrailEditor = {
     // Input element to select a gpx file
     const fileInputElm = document.getElementById('upload-gpx-fileinput');
     // Div element as the drop-zone container
-    const dropZoneElm = fileInputElm.closest('.drop-zone');
+    const dropZoneElm = document.getElementById('drop-zone');
+    const dropZoneFormElm = document.getElementById('drop-zone-form');
 
     dropZoneElm.addEventListener('click', e => {
       fileInputElm.click();
@@ -752,12 +751,14 @@ const GpxTrailEditor = {
 
     dropZoneElm.addEventListener('dragover', e => {
       e.preventDefault();
-      dropZoneElm.classList.add('drag-over','bg-info');
+      dropZoneElm.classList.add('drag-over');
+      dropZoneFormElm.classList.add('bg-info');
     });
 
     ['dragleave','dragend'].forEach(type => {
       dropZoneElm.addEventListener(type, e => {
-        dropZoneElm.classList.remove('drag-over','bg-info');
+        dropZoneElm.classList.remove('drag-over');
+        dropZoneFormElm.classList.remove('bg-info');
       });
     });
 

@@ -39,10 +39,11 @@ body {
 
 }
 
-#prev-map {
-  background-image: url('images/yushin.jpg');
+#example-map {
+  background-image: url('../../images/yushin.jpg');
   background-repeat: no-repeat;
   background-size: cover;
+  background-position: center;
   height: 400px;
   width: 100%;
 }
