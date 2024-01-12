@@ -69,6 +69,8 @@ const GpxTrailEditor = {
       GpxTrailEditor.parseAndDisplayGPX(file);
       // GPXアップロード用フォームを非表示にする
       GpxTrailEditor.hideDropZoneForm();
+      // Show the operation form.
+      GpxTrailEditor.showOperationForm();
       // Show "Start Over" button in the navbar.
       GpxTrailEditor.showBtnStartOver();
       // Show "Export GPX" button in the navbar.
@@ -699,6 +701,10 @@ const GpxTrailEditor = {
 
   },
 
+  showOperationForm: function() {
+    document.getElementById('operation-form').classList.remove('d-none');
+  },
+
   hideDropZoneForm: function() {
     document.getElementById('drop-zone-form').classList.add('d-none');
   },
@@ -800,7 +806,7 @@ const GpxTrailEditor = {
     const goBtnElm = document.getElementById('fm-go-button');
     const opElm = document.getElementById('fm-op-selector');
     const tsElm = document.getElementById('fm-ts-input');
-    const colTsElm = document.querySelector('#fm-data-table div.col-ts');
+    const colTsElm = document.querySelector('#operation-form div.col-ts');
 
     opElm.addEventListener('change', (e) => {
       if (e.target.value) {
