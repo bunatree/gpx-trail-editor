@@ -141,6 +141,7 @@ const GpxTrailEditor = {
     chkAllElm.classList.add('form-check-input');
     chkboxAllCell.appendChild(chkAllElm);
     chkboxAllCell.classList.add('align-middle');
+    chkAllElm.addEventListener('change',GpxTrailEditor.onChkAllChange);
 
     const tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
 
@@ -226,6 +227,14 @@ const GpxTrailEditor = {
       applyButtonCell.appendChild(applyButton);
       applyButtonCell.classList.add('apply','align-middle');
     }
+  },
+
+  onChkAllChange: function(e) {
+    const chkElms = document.querySelectorAll('#data-table tbody tr input[type=checkbox]');
+    const isChecked = e.target.checked;
+    chkElms.forEach(chkElm => {
+      chkElm.checked = isChecked;
+    });
   },
 
   convertGPXDateTimeToHTMLFormat: function(gpxDateTime) {
