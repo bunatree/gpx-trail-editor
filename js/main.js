@@ -163,18 +163,18 @@ const GpxTrailEditor = {
       // Create a row.
       const row = tableBody.insertRow(i);
 
-      // Index (Starts from 1)
-      const idxCell = row.insertCell(0);
-      idxCell.innerText = i + 1;
-      idxCell.classList.add('idx','align-middle','text-end');
-
       // Checkbox
-      const checkboxCell = row.insertCell(1);
+      const checkboxCell = row.insertCell(0);
       const checkboxElm = document.createElement('input');
       checkboxElm.type = 'checkbox';
       checkboxElm.classList.add('form-check-input','text-center');
       checkboxCell.appendChild(checkboxElm);
       checkboxCell.classList.add('chkbox','align-middle');
+
+      // Index (Starts from 1)
+      const idxCell = row.insertCell(1);
+      idxCell.innerText = i + 1;
+      idxCell.classList.add('idx','align-middle','text-end');
 
       // Date/Time
       const timeCell = row.insertCell(2);
@@ -203,6 +203,7 @@ const GpxTrailEditor = {
       const latitudeCell = row.insertCell(4);
       const latitudeTextBox = document.createElement('input');
       latitudeTextBox.type = 'text';
+      latitudeTextBox.setAttribute('placeholder','Latitude');
       latitudeTextBox.classList.add('form-control');
       latitudeTextBox.value = latitude;
       latitudeCell.appendChild(latitudeTextBox);
@@ -212,6 +213,7 @@ const GpxTrailEditor = {
       const longitudeCell = row.insertCell(5);
       const longitudeTextBox = document.createElement('input');
       longitudeTextBox.type = 'text';
+      longitudeTextBox.setAttribute('placeholder','Longitude');
       longitudeTextBox.classList.add('form-control');
       longitudeTextBox.value = longitude;
       longitudeCell.appendChild(longitudeTextBox);
@@ -221,6 +223,7 @@ const GpxTrailEditor = {
       const elevationCell = row.insertCell(6);
       const elevationTextBox = document.createElement('input');
       elevationTextBox.type = 'text';
+      elevationTextBox.setAttribute('placeholder','Elevation');
       elevationTextBox.classList.add('form-control');
       elevationTextBox.value = elevation;
       elevationCell.appendChild(elevationTextBox);
