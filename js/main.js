@@ -5,21 +5,21 @@ const GpxTrailEditor = {
   points: [], // an array for the points in the table
   markersArray: [], // an array for the markers on the map
 
-  firstMarkerRadius: 8,
-  lastMarkerRadius: 8,
-  normalMarkerRadius: 6,
+  FIRST_MARKER_RADIUS: 8,
+  LAST_MARKER_RADIUS: 8,
+  NORMAL_MARKER_RADIUS: 6,
 
-  polylineColor: 'rgba(192, 0, 128, 1)',
-  polylineWeight: 5,
+  POLYLINE_COLOR: 'rgba(192, 0, 128, 1)',
+  POLYLINE_WEIGHT: 5,
 
-  speedRatioUpH:  0.5, 	//急な上りの速度比(平地を1として)
-  speedRatioUpL:   0.8, 	//なだらかな上りの速度比
-  speedRatioDownH: 0.85, 	//急な下りの速度比
-  speedRadioDownL:  1.15,	//なだらかな下りの速度比
-  thresholdUp1 : 0.04,	//上り傾斜の閾値(4m/100m)
-  thresholdUp2 : 0.5,	//急な上り傾斜の閾値(50m/100m)
-  thresholdDown1: -0.04,	//下り傾斜の閾値
-  thresholdDown2: -0.5,	//急な下り傾斜の閾値
+  SPEED_RATE_UP_STEEP:        0.5, 	//急な上りの速度比(平地を1として)
+  SPEED_RATE_UP_GENTLE:       0.8, 	//なだらかな上りの速度比
+  SPEED_RATE_DW_STEEP:        0.85, //急な下りの速度比
+  SPEED_RATE_DW_GENTLE:       1.15,	//なだらかな下りの速度比
+  SPEED_THRESHOLD_UP_GENTLE:  0.04,	//上り傾斜の閾値(4m/100m)
+  SPEED_THRESHOLD_UP_STEEP:   0.5,	//急な上り傾斜の閾値(50m/100m)
+  SPEED_THRESHOLD_DW_GENTLE: -0.04,	//下り傾斜の閾値
+  SPEED_THRESHOLD_DW_STEEP:  -0.5,	//急な下り傾斜の閾値
 
   calcDistanceSpeedRatio: function(lat1, lon1, lat2, lon2, ele1, ele2 ) {
     const distance = GpxTrailEditor.calcHubenyDistance(lat1, lon1, lat2, lon2);
@@ -28,21 +28,21 @@ const GpxTrailEditor = {
     let slopeType;
     let speedRatio;
     const elevationGradient = ( distance === 0) ?  0 : diffEle / distance;
-    if ( elevationGradient >= GpxTrailEditor.thresholdUp2){ 
+    if ( elevationGradient >= GpxTrailEditor.SPEED_THRESHOLD_UP_STEEP){ 
       slopeType = 'steepClimb';
-      speedRatio = GpxTrailEditor.speedRatioUpH;
-    } else if ((GpxTrailEditor.thresholdUp2 > elevationGradient) && (elevationGradient >= GpxTrailEditor.thresholdUp1)){ 
+      speedRatio = GpxTrailEditor.SPEED_RATE_UP_STEEP;
+    } else if ((GpxTrailEditor.SPEED_THRESHOLD_UP_STEEP > elevationGradient) && (elevationGradient >= GpxTrailEditor.SPEED_THRESHOLD_UP_GENTLE)){ 
       slopeType = 'gentleClimb';
-      speedRatio = GpxTrailEditor.speedRatioUpL;
-    } else if ((GpxTrailEditor.thresholdUp1 > elevationGradient) && ( elevationGradient > GpxTrailEditor.thresholdDown1)){ 
+      speedRatio = GpxTrailEditor.SPEED_RATE_UP_GENTLE;
+    } else if ((GpxTrailEditor.SPEED_THRESHOLD_UP_GENTLE > elevationGradient) && ( elevationGradient > GpxTrailEditor.SPEED_THRESHOLD_DW_GENTLE)){ 
       slopeType = 'flat';
       speedRatio = 1;
-    } else if ((GpxTrailEditor.thresholdDown1 >= elevationGradient) && (elevationGradient > GpxTrailEditor.thresholdDown2)){ 
+    } else if ((GpxTrailEditor.SPEED_THRESHOLD_DW_GENTLE >= elevationGradient) && (elevationGradient > GpxTrailEditor.SPEED_THRESHOLD_DW_STEEP)){ 
       slopeType = 'gentleDescent';
-      speedRatio = GpxTrailEditor.speedRadioDownL;
-    } else if ( GpxTrailEditor.thresholdDown2 >= elevationGradient ){
+      speedRatio = GpxTrailEditor.SPEED_RATE_DW_GENTLE;
+    } else if ( GpxTrailEditor.SPEED_THRESHOLD_DW_STEEP >= elevationGradient ){
       slopeType = 'steepDescent';
-      speedRatio = GpxTrailEditor.speedRatioDownH;
+      speedRatio = GpxTrailEditor.SPEED_RATE_DW_STEEP;
     }
     // return [ distance, speedRatio, elevationGradient, slopeType ];
     return {
@@ -485,7 +485,7 @@ const GpxTrailEditor = {
         // Set the border color to white
         color: 'white',
         // Adjust the weight for the border
-        weight: GpxTrailEditor.polylineWeight + 4,
+        weight: GpxTrailEditor.POLYLINE_WEIGHT + 4,
       };
 
       const borderPolyline = L.polyline(latLngs, borderPolylineOptions).addTo(GpxTrailEditor.map);
@@ -493,8 +493,8 @@ const GpxTrailEditor = {
 
     // Options for polylines
     const polylineOptions = {
-      color: GpxTrailEditor.polylineColor,
-      weight: GpxTrailEditor.polylineWeight,
+      color: GpxTrailEditor.POLYLINE_COLOR,
+      weight: GpxTrailEditor.POLYLINE_WEIGHT,
     };
 
     // Draw polylines with the style options above.
@@ -511,8 +511,8 @@ const GpxTrailEditor = {
       icon: L.divIcon({
         className: 'normal-div-icon',
         html: '',
-        iconSize: [GpxTrailEditor.normalMarkerRadius*2,GpxTrailEditor.normalMarkerRadius*2],
-        iconAnchor: [GpxTrailEditor.normalMarkerRadius,GpxTrailEditor.normalMarkerRadius],
+        iconSize: [GpxTrailEditor.NORMAL_MARKER_RADIUS*2,GpxTrailEditor.NORMAL_MARKER_RADIUS*2],
+        iconAnchor: [GpxTrailEditor.NORMAL_MARKER_RADIUS,GpxTrailEditor.NORMAL_MARKER_RADIUS],
       }),
       draggable: false, // Do not allow to drag the markers by default.
     };
@@ -522,8 +522,8 @@ const GpxTrailEditor = {
       icon: L.divIcon({
         className: 'first-div-icon',
         html: '<span class="label">S</span>',
-        iconSize: [GpxTrailEditor.firstMarkerRadius*2,GpxTrailEditor.firstMarkerRadius*2],
-        iconAnchor: [GpxTrailEditor.firstMarkerRadius,GpxTrailEditor.firstMarkerRadius],
+        iconSize: [GpxTrailEditor.FIRST_MARKER_RADIUS*2,GpxTrailEditor.FIRST_MARKER_RADIUS*2],
+        iconAnchor: [GpxTrailEditor.FIRST_MARKER_RADIUS,GpxTrailEditor.FIRST_MARKER_RADIUS],
       }),
     };
     
@@ -532,8 +532,8 @@ const GpxTrailEditor = {
       icon: L.divIcon({
         className: 'last-div-icon',
         html: '<span class="label">G</span>',
-        iconSize: [GpxTrailEditor.lastMarkerRadius*2,GpxTrailEditor.lastMarkerRadius*2],
-        iconAnchor: [GpxTrailEditor.lastMarkerRadius,GpxTrailEditor.lastMarkerRadius],
+        iconSize: [GpxTrailEditor.LAST_MARKER_RADIUS*2,GpxTrailEditor.LAST_MARKER_RADIUS*2],
+        iconAnchor: [GpxTrailEditor.LAST_MARKER_RADIUS,GpxTrailEditor.LAST_MARKER_RADIUS],
       }),
     };
 
@@ -679,8 +679,8 @@ const GpxTrailEditor = {
 
     const latLngs = GpxTrailEditor.markersArray.map(marker => marker.getLatLng());
     const polylineOptions = {
-      color: GpxTrailEditor.polylineColor,
-      weight: GpxTrailEditor.polylineWeight,
+      color: GpxTrailEditor.POLYLINE_COLOR,
+      weight: GpxTrailEditor.POLYLINE_WEIGHT,
     };
 
     // Add the new polyline to the layerGroup
