@@ -900,7 +900,7 @@ const GpxTrailEditor = {
           GpxTrailEditor.clearUncheckedDateTime();
           break;
         case 'fill-empty-datetime':
-          GpxTrailEditor.interpolateIntermediatePointDateTime();
+          GpxTrailEditor.fillEmptyDateTime();
           break;
         case 'shift-datetime':
           GpxTrailEditor.shiftDateTime();
@@ -937,7 +937,33 @@ const GpxTrailEditor = {
     });
   },
 
-  interpolateIntermediatePointDateTime: function() {
+  fillEmptyDateTime: function() {
+
+    const tableRows = document.getElementById('data-table').tBodies[0].rows;
+    const rowCount = tableRows.length;
+
+    const startDatetime = tableRows[0].querySelector('.datetime input').value;
+    const endDatetime = tableRows[rowCount - 1].querySelector('.datetime input').value;
+
+    // スタート地点とゴール地点の日時が設定されていない場合は警告
+    if (startDatetime && endDatetime) {
+
+      const points = GpxTrailEditor.createPointData();
+
+      GpxTrailEditor.interpolateIntermediatePointTimes(points);
+
+      // GpxTrailEditor ネームスペースの points 属性の値に代入
+      GpxTrailEditor.points = points;
+
+    } else {
+      alert('スタート地点とゴール地点の日時を設定してください。');
+    }
+
+  },
+
+  // 各ポイント（= テーブルの行）の緯度、経度、標高、次ポイントまでの距離などの
+  // 情報をオブジェクトにまとめ、それぞれのポイントの情報を points として返す。
+  createPointData: function() {
 
     const tableElm = document.getElementById('data-table');
     const rowElms = tableElm.tBodies[0].rows;
@@ -975,8 +1001,18 @@ const GpxTrailEditor = {
       points.push(pointData);
     }
 
-    // GpxTrailEditor ネームスペースの points 属性の値に代入
-    GpxTrailEditor.points = points;
+    return points;
+
+  },
+
+  // 日時が設定されていない行の通過日時を、その前後で設定された通過時間を元に計算する。
+  // 計算結果は、変数 passingDatetimes に配列として格納され、
+  // 当該行の <input type="datetime-local" /> 要素に反映される。
+  //
+  // points: data-tableの各行によって表されている地図上のポイントすべて
+  interpolateIntermediatePointTimes: function(points) {
+
+    const rowElms = document.getElementById('data-table').tBodies[0].rows;
 
     const dateTimeIndices = points
     .filter(point => point.datetime !== '') // datetime 属性が空でないオブジェクトのみ抽出
@@ -1017,7 +1053,6 @@ const GpxTrailEditor = {
         }
       }
     }
-
   },
 
   // datetime1 と datetime2 の差を秒で返す
