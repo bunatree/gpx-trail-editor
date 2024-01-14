@@ -144,9 +144,10 @@ const GpxTrailEditor = {
 
         // テーブルの表示内容からpointsデータを作成し、
         // ネームスペースGpxTrailEditorのpointsに代入
-        GpxTrailEditor.points = GpxTrailEditor.createPointData();
+        const points =  GpxTrailEditor.createPointData();
+        GpxTrailEditor.points = points;
 
-        GpxTrailEditor.parseSummaryGPX(xmlDoc);
+        GpxTrailEditor.parseSummary(points);
 
       } catch (error) {
         // Handle parsing error
@@ -303,35 +304,64 @@ const GpxTrailEditor = {
 
   },
 
-  parseSummaryGPX: function(xmlDoc) {
+  parseSummary: function(points) {
 
-    // Container Element
     const container = document.getElementById('data-summary');
 
     // Total GPX Time
-    const totalTime = GpxTrailEditor.calcTotalTime(xmlDoc); // Array
+    const totalTime = GpxTrailEditor.calcTimeTotal(points);
     const spanTimeElm = document.querySelector('#total-gpx-time .value');
     spanTimeElm.innerHTML = totalTime[0] + ':' + totalTime[1] + ':' + totalTime[2];
 
     // Total Distance
-    const totalDistance = GpxTrailEditor.calcTotalDistance(xmlDoc);
+    const totalDistance = GpxTrailEditor.calcDistanceTotal(points);
     const roundedDistance = Number(totalDistance.toFixed(2));
     const spanDistElm = document.querySelector('#total-dist .value');
     spanDistElm.innerHTML = roundedDistance;
 
     // Total Up/Down Evelations
-    const totalElevation = GpxTrailEditor.calcTotalElevation(xmlDoc); // Array
-    const totalUp = Number(totalElevation[0].toFixed(2));
-    const spanUpElm = document.querySelector('#total-eleu .value');
-    spanUpElm.innerHTML = totalUp;
-    const totalDown = Number(totalElevation[1].toFixed(2));
-    const spanDownElm = document.querySelector('#total-eled .value');
-    spanDownElm.innerHTML = totalDown;
+    const totalEleChanges = GpxTrailEditor.calcAscentDescentTotals(points);
+    const totalAscent = Number(totalEleChanges[0].toFixed(2));
+    const spanAscentElm = document.querySelector('#total-ascent .value');
+    spanAscentElm.innerHTML = totalAscent;
+    const totalDescent = Number(totalEleChanges[1].toFixed(2));
+    const spanDescentElm = document.querySelector('#total-descent .value');
+    spanDescentElm.innerHTML = totalDescent;
 
     // Make the container show up.
     container.classList.remove('d-none');
 
   },
+
+  // parseSummary: function(xmlDoc) {
+
+  //   // Container Element
+  //   const container = document.getElementById('data-summary');
+
+  //   // Total GPX Time
+  //   const totalTime = GpxTrailEditor.calcTimeTotal(xmlDoc); // Array
+  //   const spanTimeElm = document.querySelector('#total-gpx-time .value');
+  //   spanTimeElm.innerHTML = totalTime[0] + ':' + totalTime[1] + ':' + totalTime[2];
+
+  //   // Total Distance
+  //   const totalDistance = GpxTrailEditor.calcDistanceTotal(xmlDoc);
+  //   const roundedDistance = Number(totalDistance.toFixed(2));
+  //   const spanDistElm = document.querySelector('#total-dist .value');
+  //   spanDistElm.innerHTML = roundedDistance;
+
+  //   // Total Up/Down Evelations
+  //   const totalElevation = GpxTrailEditor.calcAscentDescentTotals(xmlDoc); // Array
+  //   const totalUp = Number(totalElevation[0].toFixed(2));
+  //   const spanUpElm = document.querySelector('#total-eleu .value');
+  //   spanUpElm.innerHTML = totalUp;
+  //   const totalDown = Number(totalElevation[1].toFixed(2));
+  //   const spanDownElm = document.querySelector('#total-eled .value');
+  //   spanDownElm.innerHTML = totalDown;
+
+  //   // Make the container show up.
+  //   container.classList.remove('d-none');
+
+  // },
 
   millisecToHMS: function (milliseconds) {
     const hours = Math.floor(milliseconds / (1000 * 60 * 60));
@@ -341,83 +371,115 @@ const GpxTrailEditor = {
     return [hours, minutes, seconds];
   },
 
-  calcTotalTime: function(xmlDoc) {
-    const trackPoints = xmlDoc.querySelectorAll('trkpt');
+  calcTimeTotal: function(points) {
 
-    if (trackPoints.length === 0) {
+    if (points.length === 0) {
         // トラックポイントが存在しない場合はゼロの時間を返す
         return [0, 0, 0];
     }
 
     // 最初と最後のトラックポイントの時間を取得
-    const firstTime = new Date(trackPoints[0].querySelector('time').textContent);
-    const lastTime = new Date(trackPoints[trackPoints.length - 1].querySelector('time').textContent);
+    // const firstTime = new Date(trackPoints[0].querySelector('time').textContent);
+    // const lastTime = new Date(trackPoints[trackPoints.length - 1].querySelector('time').textContent);
+    const firstDatetime = new Date(points[0].datetime);
+    const lastDatetime = new Date(points[points.length - 1].datetime);
 
     // 時間の差を計算
-    const timeDiff = Math.abs(lastTime - firstTime);
+    const diff = Math.abs(lastDatetime - firstDatetime);
 
     // 時間、分、秒に変換
-    return GpxTrailEditor.millisecToHMS(timeDiff);
+    return GpxTrailEditor.millisecToHMS(diff);
   },
 
-  calcTotalDistance: function(xmlDoc) {
-    
-    const trackPoints = xmlDoc.querySelectorAll('trkpt');
-
-    // トラックポイント間の距離の合計を保存する変数
+  calcDistanceTotal: function(points) {
     let totalDistance = 0;
-
-    // 最初のトラックポイントの緯度と経度
-    let prevLat = null;
-    let prevLon = null;
-
-    // 各トラックポイントをループ処理
-    trackPoints.forEach(point => {
-      // トラックポイントの緯度と経度を取得
-      const currentLat = parseFloat(point.getAttribute("lat"));
-      const currentLon = parseFloat(point.getAttribute("lon"));
-
-      // 最初のトラックポイントでない場合、前回のトラックポイントとの距離を計算して加算
-      if (prevLat !== null && prevLon !== null) {
-          const distance = GpxTrailEditor.calcHubenyDistance(prevLat, prevLon, currentLat, currentLon);
-          totalDistance += distance;
+    for (let i = 0; i < points.length - 1; i++) {
+      if (points[i].toNextDistance !== null) {
+        totalDistance += points[i].toNextDistance;
       }
-
-      // 現在のトラックポイントの緯度と経度を次の計算のために保存
-      prevLat = currentLat;
-      prevLon = currentLon;
-    });
-
-    // 総距離を返す
+    }
     return totalDistance;
-
   },
 
-  calcTotalElevation(xmlDoc) {
+  // calcDistanceTotal: function(xmlDoc) {
+    
+  //   const trackPoints = xmlDoc.querySelectorAll('trkpt');
 
-    const trackPoints = xmlDoc.querySelectorAll('trkpt');
+  //   // トラックポイント間の距離の合計を保存する変数
+  //   let totalDistance = 0;
 
-    let upElevation = 0;
-    let downElevation = 0;
+  //   // 最初のトラックポイントの緯度と経度
+  //   let prevLat = null;
+  //   let prevLon = null;
 
-    for (let i = 0; i < trackPoints.length - 1; i++) {
-        const currentElevation = parseFloat(trackPoints[i].querySelector('ele').textContent);
-        const nextElevation = parseFloat(trackPoints[i + 1].querySelector('ele').textContent);
+  //   // 各トラックポイントをループ処理
+  //   trackPoints.forEach(point => {
+  //     // トラックポイントの緯度と経度を取得
+  //     const currentLat = parseFloat(point.getAttribute("lat"));
+  //     const currentLon = parseFloat(point.getAttribute("lon"));
 
-        const diffElevation = nextElevation - currentElevation;
+  //     // 最初のトラックポイントでない場合、前回のトラックポイントとの距離を計算して加算
+  //     if (prevLat !== null && prevLon !== null) {
+  //         const distance = GpxTrailEditor.calcHubenyDistance(prevLat, prevLon, currentLat, currentLon);
+  //         totalDistance += distance;
+  //     }
 
-        if (diffElevation > 0) {
-            // 標高が上がっている場合
-            upElevation += diffElevation;
-        } else if (diffElevation < 0) {
-            // 標高が下がっている場合
-            downElevation += Math.abs(diffElevation);
+  //     // 現在のトラックポイントの緯度と経度を次の計算のために保存
+  //     prevLat = currentLat;
+  //     prevLon = currentLon;
+  //   });
+
+  //   // 総距離を返す
+  //   return totalDistance;
+
+  // },
+
+  calcAscentDescentTotals(points) {
+
+    let totalAscent = 0;
+    let totalDescent = 0;
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const elevationDifference = points[i].toNextElevation;
+
+      if (elevationDifference !== null) {
+        if (elevationDifference > 0) {
+          totalAscent += elevationDifference;
+        } else if (elevationDifference < 0) {
+          totalDescent += Math.abs(elevationDifference);
         }
-        // 標高が変わっていない場合は何もしない
+      }
     }
 
-    return [upElevation, downElevation];
+    return [totalAscent, totalDescent];
+
   },
+
+  // calcAscentDescentTotals(xmlDoc) {
+
+  //   const trackPoints = xmlDoc.querySelectorAll('trkpt');
+
+  //   let upElevation = 0;
+  //   let downElevation = 0;
+
+  //   for (let i = 0; i < trackPoints.length - 1; i++) {
+  //       const currentElevation = parseFloat(trackPoints[i].querySelector('ele').textContent);
+  //       const nextElevation = parseFloat(trackPoints[i + 1].querySelector('ele').textContent);
+
+  //       const diffElevation = nextElevation - currentElevation;
+
+  //       if (diffElevation > 0) {
+  //           // 標高が上がっている場合
+  //           upElevation += diffElevation;
+  //       } else if (diffElevation < 0) {
+  //           // 標高が下がっている場合
+  //           downElevation += Math.abs(diffElevation);
+  //       }
+  //       // 標高が変わっていない場合は何もしない
+  //   }
+
+  //   return [upElevation, downElevation];
+  // },
 
   // Draw markers and polylines on the map.
   parseMapGPX: function(xmlDoc) {
