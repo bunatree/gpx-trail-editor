@@ -35,15 +35,6 @@ body {
 
 }
 
-#example-map {
-  background-image: url('../../images/yushin.jpg');
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-  height: 400px;
-  width: 100%;
-}
-
 #map {
 
   height: $mapHeight;
@@ -84,10 +75,9 @@ body {
   }
 }
 
-#map-options {
-  margin: 10px;
-}
-
-.leaflet-container {
-  font-family: $fontFamily;
+#scroll-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: none;
 }

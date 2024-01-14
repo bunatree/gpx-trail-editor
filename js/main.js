@@ -1209,6 +1209,20 @@ const GpxTrailEditor = {
       }
 
     });
+  },
+
+  scrollToTop: function() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+  },
+
+  toggleScrollToTopButton: function() {
+    const button = document.getElementById('scroll-to-top');
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+      button.style.display = 'block';
+    } else {
+      button.style.display = 'none';
+    }
   }
 
 };
@@ -1228,4 +1242,9 @@ document.addEventListener('DOMContentLoaded', function () {
   GpxTrailEditor.setupOpForm();
 
 });
+
+window.onscroll = function() {
+  GpxTrailEditor.toggleScrollToTopButton();
+};
+
 
