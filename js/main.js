@@ -54,7 +54,6 @@ const GpxTrailEditor = {
   },
 
   confirmStartOver: function() {
-    console.log('#### confirmStartOver');
     const isOkay = confirm("読み込み済みのデータを破棄して最初からやり直します。よろしいですか？");
     if (isOkay) {
       location.reload();
@@ -102,9 +101,6 @@ const GpxTrailEditor = {
   },
 
   onUploadGPX: function(files) {
-
-    console.log('#### onUploadGPX');
-
     const file = files[0];
     if (file) {
       // ファイルの解析と地図・テーブルへの反映の処理を呼び出す
@@ -125,8 +121,6 @@ const GpxTrailEditor = {
   // Analyzes an uploaded GPX file, put the data into the table,
   // and draws markers and polylines on the map.
   parseAndDisplayGPX: function(file) {
-
-    console.log('#### parseAndDisplayGPX');
 
     const reader = new FileReader();
 
@@ -429,8 +423,6 @@ const GpxTrailEditor = {
   // Draw markers and polylines on the map.
   parseMapGPX: function(xmlDoc) {
 
-    console.log('#### parseMapGPX');
-
     // If the layer group "GpxTrailEditor.layerGroup" does not yet exist,
     // create a new L.layerGroup() object and add it to GpxTrailEditor.map,
     // preparing to display the new layer on the map.
@@ -700,8 +692,6 @@ const GpxTrailEditor = {
   },
 
   addCustomControl: function() {
-
-    console.log("##### addCustomControl");
 
     // The tool box custom control
     const customControl = L.control({ position: 'topleft' });
@@ -1169,8 +1159,6 @@ const GpxTrailEditor = {
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-
-  console.log('#### DOMContentLoaded');
 
   // Start Over Button
   document.getElementById('btn-start-over').addEventListener('click', GpxTrailEditor.confirmStartOver);
