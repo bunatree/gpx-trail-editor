@@ -137,10 +137,16 @@ const GpxTrailEditor = {
           return;
         }
 
-        GpxTrailEditor.showDataTable();
-        GpxTrailEditor.parseDataTable(xmlDoc);
-        GpxTrailEditor.parseSummaryGPX(xmlDoc);
         GpxTrailEditor.parseMapGPX(xmlDoc);
+
+        GpxTrailEditor.parseDataTable(xmlDoc);
+        GpxTrailEditor.showDataTable();
+
+        // テーブルの表示内容からpointsデータを作成し、
+        // ネームスペースGpxTrailEditorのpointsに代入
+        GpxTrailEditor.points = GpxTrailEditor.createPointData();
+
+        GpxTrailEditor.parseSummaryGPX(xmlDoc);
 
       } catch (error) {
         // Handle parsing error
@@ -935,7 +941,7 @@ const GpxTrailEditor = {
 
       GpxTrailEditor.interpolateIntermediatePointTimes(points);
 
-      // GpxTrailEditor ネームスペースの points 属性の値に代入
+      // ネームスペースGpxTrailEditorのpointsに代入
       GpxTrailEditor.points = points;
 
     } else {
