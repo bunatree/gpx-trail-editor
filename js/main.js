@@ -148,6 +148,7 @@ const GpxTrailEditor = {
         GpxTrailEditor.points = points;
 
         GpxTrailEditor.parseSummary(points);
+        GpxTrailEditor.showSummary();
 
       } catch (error) {
         // Handle parsing error
@@ -168,7 +169,7 @@ const GpxTrailEditor = {
 
   showDataTable: function() {
     const tableElm = document.getElementById('data-table');
-    tableElm.style.display = 'table';
+    tableElm.classList.remove('d-none');
   },
 
   parseDataTable: function(xmlDoc) {
@@ -328,9 +329,11 @@ const GpxTrailEditor = {
     const spanDescentElm = document.querySelector('#total-descent .value');
     spanDescentElm.innerHTML = totalDescent;
 
-    // Make the container show up.
-    container.classList.remove('d-none');
+  },
 
+  showSummary: function() {
+    const container = document.getElementById('data-summary');
+    container.classList.remove('d-none');
   },
 
   // parseSummary: function(xmlDoc) {

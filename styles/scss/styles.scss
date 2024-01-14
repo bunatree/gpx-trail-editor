@@ -19,10 +19,6 @@ body {
 
 #data-table {
 
-  // Hidden by default
-
-  display: none;
-
   tr.clicked-marker {
     background-color: $bgTablePrimaryRow;
   }
