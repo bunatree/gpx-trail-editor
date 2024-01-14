@@ -194,8 +194,9 @@ const GpxTrailEditor = {
     tableBody.innerHTML = '';
 
     const trackPoints = xmlDoc.querySelectorAll('trkpt');
+    const trackPointCount = trackPoints.length;
 
-    for (let i = 0; i < trackPoints.length; i++) {
+    for (let i = 0; i < trackPointCount; i++) {
       const point = trackPoints[i];
       const gpxDateTime = point.querySelector('time').textContent;
       const latitude = point.getAttribute('lat');
@@ -237,6 +238,9 @@ const GpxTrailEditor = {
       eraserElm.classList.add('bi','bi-eraser-fill');
       eraserCell.appendChild(eraserElm);
       eraserCell.classList.add('eraser');
+      if (i === 0 || i === trackPointCount - 1) {
+        eraserCell.classList.add('invisible');
+      }
       eraserElm.addEventListener('click', function () {
         GpxTrailEditor.onEraserButtonClick(eraserElm);
       });
