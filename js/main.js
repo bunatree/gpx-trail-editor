@@ -100,18 +100,18 @@ const GpxTrailEditor = {
     }
   },
 
-  onUploadGPX: function(files) {
+  onGPXFileDropped: function(files) {
     const file = files[0];
     if (file) {
       // ファイルの解析と地図・テーブルへの反映の処理を呼び出す
       GpxTrailEditor.parseAndDisplayGPX(file);
-      // GPXアップロード用フォームを非表示にする
+      // GPXアップロード用フォームを非表示
       GpxTrailEditor.hideDropZoneForm();
-      // Show the operation form.
+      // 操作フォームを表示
       GpxTrailEditor.showOperationForm();
-      // Show "Start Over" button in the navbar.
+      // 「やり直す」ボタンを表示
       GpxTrailEditor.showBtnStartOver();
-      // Show "Export GPX" button in the navbar.
+      // 「エクスポート」ボタンを表示
       GpxTrailEditor.showBtnExportGPX();
     }
   },
@@ -137,16 +137,9 @@ const GpxTrailEditor = {
           return;
         }
 
-        // Show the data table.
         GpxTrailEditor.showDataTable();
-
-        // Put the data into the table.
-        GpxTrailEditor.parseTableGPX(xmlDoc);
-
-        // Calculate the total distance and evelation.
+        GpxTrailEditor.parseDataTable(xmlDoc);
         GpxTrailEditor.parseSummaryGPX(xmlDoc);
-
-        // Draw the map.
         GpxTrailEditor.parseMapGPX(xmlDoc);
 
       } catch (error) {
@@ -171,7 +164,7 @@ const GpxTrailEditor = {
     tableElm.style.display = 'table';
   },
 
-  parseTableGPX: function(xmlDoc) {
+  parseDataTable: function(xmlDoc) {
 
     // The "Check All" checkbox
     const chkboxAllCell = document.querySelector('#data-table thead .chkbox');
@@ -274,7 +267,7 @@ const GpxTrailEditor = {
       const applyButton = document.createElement('a');
       applyButton.classList.add('bi','bi-check-circle-fill');
       applyButton.setAttribute('href', 'javascript:void(0);');
-      applyButton.setAttribute('title','地図に反映');
+      applyButton.setAttribute('title','変更を適用');
       applyButton.addEventListener('click', function () {
         GpxTrailEditor.onApplyButtonClick(applyButton);
       });
@@ -755,40 +748,35 @@ const GpxTrailEditor = {
   },
 
   onEraserButtonClick: function(btnElm) {
-    const trElm = btnElm.closest('tr');
-    const dtInputElm = trElm.querySelector('.datetime input');
+    const rowElm = btnElm.closest('tr');
+    const dtInputElm = rowElm.querySelector('.datetime input');
     dtInputElm.value = '';
   },
 
   onApplyButtonClick: function(btnElm) {
 
-    // Get the table row where the inner Apply icon was clicked.
-    const trElm = btnElm.closest('tr');
+    const rowElm = btnElm.closest('tr');
 
-    // Get the values from the text boxes.
-    const latitude = trElm.querySelector('.latitude input').value;
-    const longitude = trElm.querySelector('.longitude input').value;
-    const elevation = trElm.querySelector('.elevation input').value;
+    const latitude = parseFloat(rowElm.querySelector('.latitude input').value);
+    const longitude = parseFloat(rowElm.querySelector('.longitude input').value);
+    const elevation = parseFloat(rowElm.querySelector('.elevation input').value);
     
-    // If the latitude or longitude is empty (invalid),
-    // cancel this function and return.
-    if (!latitude || !longitude) {
-      alert('Oops! The latitude or longitude is invalid.');
+    // 緯度、経度、標高が正しいかチェック
+    if (!latitude || !longitude || !elevation) {
+      alert('正しい緯度、経度、標高を入力してください。');
       return;
     }
 
-    // Get the marker's index.
-    const markerIdx = Number(trElm.querySelector('.idx').textContent) - 1;
+    const markerIdx = Number(rowElm.querySelector('.idx').textContent) - 1;
+    const targetMarker = GpxTrailEditor.markersArray[markerIdx];
 
-    // Specify the target marker and update its coordinate. 
-    const markersArray = GpxTrailEditor.markersArray;
-    const targetMarker = markersArray[markerIdx];
     if (targetMarker) {
+      
+      // マーカーを更新
       targetMarker.setLatLng([latitude, longitude]);
-      // Update the elevation if the marker has one.
       targetMarker.options.elevation = elevation;
 
-      // Update polylines.
+      // ポリラインを更新
       GpxTrailEditor.updatePolylines();
 
       // マーカーがクリックされたときの処理を更新
@@ -798,6 +786,7 @@ const GpxTrailEditor = {
         // 例: テーブルの対応する行に 'clicked-marker' クラスを追加
         // または他の処理を追加
       });
+
     }
   },
 
@@ -833,13 +822,13 @@ const GpxTrailEditor = {
         // applied to the file input. It leads to a bug that the custom
         // control shows up duplicatedly.
         // fileInputElm.files = e.dataTransfer.files;
-        GpxTrailEditor.onUploadGPX(e.dataTransfer.files);
+        GpxTrailEditor.onGPXFileDropped(e.dataTransfer.files);
       }
     });
 
     fileInputElm.addEventListener('change', e => {
       if (e.target.files.length > 0) {
-        GpxTrailEditor.onUploadGPX(e.target.files);
+        GpxTrailEditor.onGPXFileDropped(e.target.files);
       }
     });
 
@@ -1126,33 +1115,28 @@ const GpxTrailEditor = {
 
   shiftDateTime: function() {
 
-    const tsInput = document.getElementById('fm-ts-input');
-    const rowElms = document.querySelectorAll('#data-table tbody tr');
+    const tsInputElm = document.getElementById('fm-ts-input');
+    const trElms = document.querySelectorAll('#data-table tbody tr');
 
-    rowElms.forEach(trElm => {
+    trElms.forEach(trElm => {
+
       const dtInputElm = trElm.querySelector('td.datetime input');
       const dtValue = dtInputElm.value; // UTC (not JST)
-      const shiftSeconds = parseInt(tsInput.value, 10) || 0;
+      const shiftSeconds = parseInt(tsInputElm.value, 10) || 0;
   
       // Exec only when dtValue has a valid value.
       if (dtValue) {
         // Convert the datetime string to a Date object in local time.
         const curDate = new Date(dtValue + 'Z'); // 'Z' indicates UTC
   
-        // Output current datetime and shiftSeconds for debugging.
-        console.log('Current Date:', curDate.toISOString());
-        console.log('Shift Seconds:', shiftSeconds);
-  
         // Shift the datetime.
         curDate.setSeconds(curDate.getSeconds() + shiftSeconds);
-  
-        // Output the new datetime for debugging.
-        console.log('New Date:', curDate.toISOString());
   
         // Convert the shifted datetime back to the local time and put it into the input element.
         const newDate = curDate.toISOString().slice(0, 19);
         dtInputElm.value = newDate;
       }
+
     });
   }
 
