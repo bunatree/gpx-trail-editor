@@ -2,7 +2,8 @@ const GpxTrailEditor = {
 
   map: null,
   layerGroup: null,
-  markersArray: [],
+  points: [], // an array for the points in the table
+  markersArray: [], // an array for the markers on the map
 
   firstMarkerRadius: 8,
   lastMarkerRadius: 8,
@@ -10,6 +11,47 @@ const GpxTrailEditor = {
 
   polylineColor: 'rgba(192, 0, 128, 1)',
   polylineWeight: 5,
+
+  speedRatioUpH:  0.5, 	//急な上りの速度比(平地を1として)
+  speedRatioUpL:   0.8, 	//なだらかな上りの速度比
+  speedRatioDownH: 0.85, 	//急な下りの速度比
+  speedRadioDownL:  1.15,	//なだらかな下りの速度比
+  thresholdUp1 : 0.04,	//上り傾斜の閾値(4m/100m)
+  thresholdUp2 : 0.5,	//急な上り傾斜の閾値(50m/100m)
+  thresholdDown1: -0.04,	//下り傾斜の閾値
+  thresholdDown2: -0.5,	//急な下り傾斜の閾値
+
+  calcDistanceSpeedRatio: function(lat1, lon1, lat2, lon2, ele1, ele2 ) {
+    const distance = GpxTrailEditor.calcHubenyDistance(lat1, lon1, lat2, lon2);
+    const diffEle = ele2 - ele1;
+
+    let slopeType;
+    let speedRatio;
+    const elevationGradient = ( distance === 0) ?  0 : diffEle / distance;
+    if ( elevationGradient >= GpxTrailEditor.thresholdUp2){ 
+      slopeType = 'steepClimb';
+      speedRatio = GpxTrailEditor.speedRatioUpH;
+    } else if ((GpxTrailEditor.thresholdUp2 > elevationGradient) && (elevationGradient >= GpxTrailEditor.thresholdUp1)){ 
+      slopeType = 'gentleClimb';
+      speedRatio = GpxTrailEditor.speedRatioUpL;
+    } else if ((GpxTrailEditor.thresholdUp1 > elevationGradient) && ( elevationGradient > GpxTrailEditor.thresholdDown1)){ 
+      slopeType = 'flat';
+      speedRatio = 1;
+    } else if ((GpxTrailEditor.thresholdDown1 >= elevationGradient) && (elevationGradient > GpxTrailEditor.thresholdDown2)){ 
+      slopeType = 'gentleDescent';
+      speedRatio = GpxTrailEditor.speedRadioDownL;
+    } else if ( GpxTrailEditor.thresholdDown2 >= elevationGradient ){
+      slopeType = 'steepDescent';
+      speedRatio = GpxTrailEditor.speedRatioDownH;
+    }
+    // return [ distance, speedRatio, elevationGradient, slopeType ];
+    return {
+      "distance": distance,
+      "speedRatio": speedRatio,
+      "elevationGradient": elevationGradient,
+      "slopeType": slopeType
+    };
+  },
 
   confirmStartOver: function() {
     console.log('#### confirmStartOver');
@@ -365,14 +407,14 @@ const GpxTrailEditor = {
         const currentElevation = parseFloat(trackPoints[i].querySelector('ele').textContent);
         const nextElevation = parseFloat(trackPoints[i + 1].querySelector('ele').textContent);
 
-        const elevationDifference = nextElevation - currentElevation;
+        const diffElevation = nextElevation - currentElevation;
 
-        if (elevationDifference > 0) {
+        if (diffElevation > 0) {
             // 標高が上がっている場合
-            upElevation += elevationDifference;
-        } else if (elevationDifference < 0) {
+            upElevation += diffElevation;
+        } else if (diffElevation < 0) {
             // 標高が下がっている場合
-            downElevation += Math.abs(elevationDifference);
+            downElevation += Math.abs(diffElevation);
         }
         // 標高が変わっていない場合は何もしない
     }
@@ -857,6 +899,9 @@ const GpxTrailEditor = {
         case 'clear-unchecked-datetime':
           GpxTrailEditor.clearUncheckedDateTime();
           break;
+        case 'fill-empty-datetime':
+          GpxTrailEditor.interpolateIntermediatePointDateTime();
+          break;
         case 'shift-datetime':
           GpxTrailEditor.shiftDateTime();
           break;
@@ -890,6 +935,164 @@ const GpxTrailEditor = {
       const inputElm = trElm.querySelector('td.datetime input');
       inputElm.value = '';
     });
+  },
+
+  interpolateIntermediatePointDateTime: function() {
+
+    const tableElm = document.getElementById('data-table');
+    const rowElms = tableElm.tBodies[0].rows;
+    const rowCount = rowElms.length;
+
+    const points = [];
+
+    for (let i = 0; i < rowCount; i++) {
+      const curRowElm = rowElms[i];
+      const nextRowElm = rowElms[i+1];
+      const curDateTime = curRowElm.querySelector('.datetime input').value;
+      const curLatitude = parseFloat(curRowElm.querySelector('.latitude input').value);
+      const curLongitude = parseFloat(curRowElm.querySelector('.longitude input').value);
+      const curElevation = parseFloat(curRowElm.querySelector('.elevation input').value);
+      const nextDateTime = (nextRowElm) ? nextRowElm.querySelector('.datetime input').value : null;
+      const nextLatitude = (nextRowElm) ? parseFloat(nextRowElm.querySelector('.latitude input').value) : null;
+      const nextLongitude = (nextRowElm) ? parseFloat(nextRowElm.querySelector('.longitude input').value): null;
+      const nextElevation = (nextRowElm) ? parseFloat(nextRowElm.querySelector('.elevation input').value): null;
+      const toNextDistance = (nextRowElm) ? GpxTrailEditor.calcHubenyDistance(curLatitude, curLongitude, nextLatitude, nextLongitude) : null;
+      const toNextSeconds = (nextDateTime) ? GpxTrailEditor.calcDateTimeDifference(nextDateTime,curDateTime) : null;
+      const toNextElevation = (nextElevation) ? nextElevation - curElevation : null;
+      const toNextSpeedInfo = (nextRowElm) ? GpxTrailEditor.calcDistanceSpeedRatio(curLatitude,curLongitude,nextLatitude,nextLongitude,curElevation,nextElevation) : [];
+      const pointData = {
+        "index": i,
+        "datetime": curDateTime,
+        "latitude": curLatitude,
+        "longitude": curLongitude,
+        "elevation": curElevation,
+        "toNextDistance": toNextDistance,
+        "toNextElevation": toNextElevation,
+        "toNextSeconds": toNextSeconds,
+        "toNextSpeedRatio": toNextSpeedInfo.speedRatio,
+        "toNextSpeedInfo": toNextSpeedInfo
+      };
+      points.push(pointData);
+    }
+
+    // GpxTrailEditor ネームスペースの points 属性の値に代入
+    GpxTrailEditor.points = points;
+
+    const dateTimeIndices = points
+    .filter(point => point.datetime !== '') // datetime 属性が空でないオブジェクトのみ抽出
+    .map(point => point.index); // 抽出したオブジェクトから index 要素の値だけを取り出す
+
+    for (let i = 0; i < dateTimeIndices.length; i++) {
+      const currentIndex = dateTimeIndices[i];
+      const nextIndex = dateTimeIndices[i+1];
+      if (nextIndex) {
+        if (nextIndex - currentIndex > 1) {
+
+          // 日付が入力されていない行番号を取得して配列に代入
+          const noDateTimeIndices = GpxTrailEditor.getInBetweenIndices(currentIndex,nextIndex);
+
+          // 日付入力済み行(最初) + 日付なし行 + 日付入力済み行(最後)
+          const groupIndices = [currentIndex, ...noDateTimeIndices, nextIndex];
+
+          // 配列オブジェクト points から groupIndices のインデックス番号に
+          // 対応したオブジェクトだけを変数 pointsSubset に代入する。
+          const pointsSubset = groupIndices.map(index => points.find(point => point.index === index));
+
+          // 始点と終点の中間点の通過日時を計算する。
+          // 返される値は配列で、最初の要素が開始ポイントの通過日時、中間の要素は
+          // 中間ポイントの通過日時（複数）、最後の要素が終了ポイントの通過日時となる。
+          const passingDatetimes = GpxTrailEditor.calcPassingDatetimes(pointsSubset);
+          
+          // 配列変数 passingDatetimes に格納されているUTC日時をローカル時刻に変換し、
+          // 日付が記入されていない中間ポイントの日時 input フィールドに反映させる。
+          // 例: "2024-01-12T23:19:04Z" --> "2024-01-13T08:19:04" (JST)
+          noDateTimeIndices.forEach((rowIndex,loopIndex) => {
+            const localDatetime = GpxTrailEditor.convertGPXDateTimeToHTMLFormat(passingDatetimes[loopIndex+1]).replace('Z','').replace(' ','T');
+            rowElms[rowIndex].querySelector('.datetime input').value = localDatetime;
+          });
+
+        } else {
+          // currentIndex と nextIndex の値の差が 1 なので、
+          // currentIndex と nextIndex の間に日付が入力されていない行は存在しない。
+        }
+      }
+    }
+
+  },
+
+  // datetime1 と datetime2 の差を秒で返す
+  calcDateTimeDifference: function(datetime1,datetime2) {
+    const date1 = new Date(datetime1);
+    const date2 = new Date(datetime2);
+    const secDifference = Math.abs(date2 - date1) / 1000;
+    return secDifference;
+  },
+
+  // current から next までの範囲にある整数の
+  // インデックスを含む配列を生成して返す
+  getInBetweenIndices: function(current,next) {
+    const result = [];
+    for (let i = current + 1; i < next; i++) {
+      result.push(i);
+    } 
+    return result;
+  },
+
+  // 第1パラメーター points 配列内の、startIndex から endIndex - 1 までの
+  // toNextDistance プロパティの合計を計算して返す。
+  //
+  // points: 距離情報を含むオブジェクトの配列
+  // startIndex: 合計計算の開始インデックス
+  // endIndex: 合計計算の終了インデックス（この値は合計に含まれない）
+  sumDistances: function(points,startIndex,endIndex) {
+    let sum = 0;
+    for (let i = startIndex; i < endIndex; i++) {
+      sum += points[i].toNextDistance;
+    }
+    return sum;
+  },
+
+  // 日時が記入された開始ポイントと終了ポイントの間の、
+  // 日時が記入されていないポイントの通過時間を計算・補間する。
+  // points: [{開始ポイント},{中間ポイント(複数)},{終了ポイント}]
+  calcPassingDatetimes: function(points) {
+
+    // ポイントの数
+    const pointCount = points.length;
+
+    // 開始ポイントの日時と終了ポイントの日時を Date オブジェクトに変換
+    const startDate = new Date(points[0].datetime);
+    const endDate = new Date(points[pointCount - 1].datetime);
+
+    // 所要時間の合計（ミリ秒）
+    const timeDiffS2E = endDate.getTime() - startDate.getTime();
+
+    // 各ポイントの日時を格納する配列を初期化し、
+    // 第1要素として開始ポイントの日時を設定する。
+    const passingDateTimes = [startDate.toISOString().split('.')[0] + "Z"];
+
+    // 各区間の時間係数を計算する。
+    // 終了ポイントには「次のポイントまでの区間」はないため、除外する。
+    const intervalTimeRatios = [];
+    for (let i = 0; i < points.length - 1; i++) {
+      intervalTimeRatios.push(points[i].toNextDistance / points[i].toNextSpeedRatio);
+    }
+
+    // 平均の時間係数
+    const averageTimeRate = timeDiffS2E / intervalTimeRatios.reduce((sum, factor) => sum + factor, 0);
+
+    // 中間ポイントの日時を設定
+    for (let i = 0; i < intervalTimeRatios.length - 1; i++) {
+      const addTime = intervalTimeRatios[i] * averageTimeRate;
+      startDate.setMilliseconds(startDate.getMilliseconds() + addTime);
+      passingDateTimes.push(startDate.toISOString().split('.')[0] + "Z");
+    }
+
+    // 最後に終了ポイントの日時を加える
+    passingDateTimes.push(endDate.toISOString().split('.')[0] + "Z");
+
+    return passingDateTimes;
+
   },
 
   shiftDateTime: function() {
