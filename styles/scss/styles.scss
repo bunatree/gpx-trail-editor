@@ -73,6 +73,15 @@ body {
     }
 
   }
+
+  .leaflet-popup-content {
+    button.remove-this-point {
+      --bs-btn-padding-y: .1rem;
+      --bs-btn-padding-x: .25rem;
+      --bs-btn-font-size: 100%;
+    }
+  }
+  
 }
 
 #scroll-to-top {

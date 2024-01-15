@@ -628,12 +628,14 @@ const GpxTrailEditor = {
 
       // Add popup balloon to the marker
       const formattedDateTime = GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTimes[i]);
-      const popupContent = `<ul class="m-0 p-0 list-unstyled">
+      const popupContent = `<ul class="marker-info m-0 p-0 list-unstyled">
       <li>マーカー番号: ${i+1} <a href="javascript:void(0);" class="move-to-row link-primary bi bi-arrow-right-circle-fill" onclick="GpxTrailEditor.scrollToTableRow(${i})" title="行番号 ${i+1} へ移動"></a></li>
       <li>日時: ${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTimes[i])}</li>
       <li>緯度: ${latLngs[i][0]}</li>
       <li>経度: ${latLngs[i][1]}</li>
-      </ul>`;
+      </ul>
+      <ul class="marker-op mt-2 p-0 list-unstyled">
+      <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li></ul>`;
       marker.bindPopup(popupContent);
 
       // Add marker to the layerGroup
@@ -1239,6 +1241,10 @@ const GpxTrailEditor = {
           behavior: 'smooth'
         });
     }
+  },
+
+  removeThisMarker: function(i) {
+    console.log('#### removeThisMarker');
   }
 
 };
