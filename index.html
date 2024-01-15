@@ -41,24 +41,88 @@
       <h2 class="d-none">Upload GPX</h2>
 
       <div id="drop-zone">
-        <div id="drop-zone-form" class="mt-4 mb-4 p-4 border shadow-sm d-flex flex-column justify-content-center">
+        <div id="drop-zone-form" class="mt-3 mb-3 p-3 border rounded d-flex flex-column justify-content-center">
           <i class="bi bi-cloud-upload text-center fs-3"></i>
           <span class="drop-zone-prompt text-center">ここにGPXファイルをドロップまたはクリックして選択</span>
           <input type="file" id="upload-gpx-fileinput" class="d-none" accept=".gpx" area-hidden="true">
         </div>
       </div>
 
-      <h2 class="d-none">Map</h2>
-      <div id="map" class="border shadow-sm mt-4 mb-4"></div>
+      <div id="log-name-form" class="input-group mt-3 mb-3 d-none">
+        <label class="input-group-text" for="log-name-input">タイトル</label>
+        <input id="log-name-input" type="text" class="form-control" />
+        <button id="apply-name-button" class="btn btn-secondary" disabled>適用</button>
+      </div>
 
-      <div id="operation-form" class="mt-4 mb-4 d-none">
+      <h2 class="d-none">Map</h2>
+      <div id="map" class="border rounded mt-3 mb-3"></div>
+
+      <h2 class="d-none">GPX Details</h2>
+      <div id="data-summary" class="d-none mt-3 mb-3 p-3 bg-light">
+        <div id="total-gpx-time">
+          <h3 class="label fw-light text-center text-secondary">
+            <i class="bi bi-stopwatch"></i>
+            <span>GPS Time</span>
+          </h3>
+          <div class="desc text-center">
+            <span class="value h3"></span>
+          </div>
+        </div>
+
+        <div id="total-dist">
+          <h3 class="label fw-light text-center text-secondary">
+            <i class="bi bi-person-walking"></i>
+            <span>Distance</span>
+            </h3>
+          <div class="desc text-center">
+            <span class="value h3"></span>
+            <span class="unit">m</span>
+          </div>
+        </div>
+        <div id="total-ascent">
+          <h3 class="label fw-light text-center text-secondary">
+            <i class="bi bi-arrow-up-right"></i>
+            <span>Up</span>
+          </h3>
+          <div class="desc text-center">
+            <span class="value h3"></span>
+            <span class="unit">m</span>
+          </div>
+        </div>
+        <div id="total-descent">
+          <h3 class="label fw-light text-center text-secondary">
+            <i class="bi bi-arrow-down-right"></i>
+            <span>Down</span>
+          </h3>
+          <div class="desc text-center">
+            <span class="value h3"></span>
+            <span class="unit">m</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="operation-form" class="input-group mt-3 mb-3 d-none">
+        <label class="input-group-text" for="op-selector">操作</label>
+        <select id="op-selector" class="col-sm-10 form-select" aria-label="What do you want to do?">
+          <option value="" selected>----</option>
+          <option value="clear-all-datetime">Clear all dates and times</option>
+          <option value="clear-checked-datetime">Clear checked dates and times</option>
+          <option value="clear-unchecked-datetime">Clear unckecked dates and times</option>
+          <option value="fill-empty-datetime">Fill empty dates and times</option>
+          <option value="shift-datetime">Shift dates and times</option>
+        </select>
+        <input type="number" id="time-shift-input" class="form-control d-none" placeholder="In seconds" value="0" />
+        <button id="go-button" class="btn btn-secondary disabled">実行</button>
+      </div>
+
+      <!-- <div id="operation-form" class="mt-4 mb-4 d-none">
         <form>
           <div class="row mb-2">
             <div class="col-auto col-label">
-              <label for="fm-op-selector" class="col-form-label">Operaton</label>
+              <label for="op-selector" class="col-form-label">Operaton</label>
             </div>
             <div class="col-auto col-op">
-              <select id="fm-op-selector" class="col-sm-10 form-select" aria-label="What do you want to do?">
+              <select id="op-selector" class="col-sm-10 form-select" aria-label="What do you want to do?">
                 <option value="" selected>----</option>
                 <option value="clear-all-datetime">Clear all dates and times</option>
                 <option value="clear-checked-datetime">Clear checked dates and times</option>
@@ -68,80 +132,38 @@
               </select>
             </div>
             <div class="col-auto col-ts d-none">
-              <input type="number" id="fm-ts-input" class="form-control" placeholder="In seconds" value="0" />
+              <input type="number" id="time-shift-input" class="form-control" placeholder="In seconds" value="0" />
             </div>
             <div class="col-auto col-button">
-              <a id="fm-go-button" class="btn btn-light border disabled text-black-50">Go</a>
+              <a id="go-button" class="btn btn-light border disabled text-black-50">Go</a>
             </div>
           </div>
         </form>
-      </div>
+      </div> -->
 
-      <div id="data-display">
+      
 
-        <h2 class="d-none">GPX Details</h2>
-        <div id="data-summary" class="d-none mt-4 mb-4 p-4 bg-light">
-          <div id="total-gpx-time">
-            <h3 class="label fw-light text-center text-secondary">
-              <i class="bi bi-stopwatch"></i>
-              <span>GPS Time</span>
-            </h3>
-            <div class="desc text-center">
-              <span class="value h3"></span>
-            </div>
-          </div>
+        
 
-          <div id="total-dist">
-            <h3 class="label fw-light text-center text-secondary">
-              <i class="bi bi-person-walking"></i>
-              <span>Distance</span>
-              </h3>
-            <div class="desc text-center">
-              <span class="value h3"></span>
-              <span class="unit">m</span>
-            </div>
-          </div>
-          <div id="total-ascent">
-            <h3 class="label fw-light text-center text-secondary">
-              <i class="bi bi-arrow-up-right"></i>
-              <span>Up</span>
-            </h3>
-            <div class="desc text-center">
-              <span class="value h3"></span>
-              <span class="unit">m</span>
-            </div>
-          </div>
-          <div id="total-descent">
-            <h3 class="label fw-light text-center text-secondary">
-              <i class="bi bi-arrow-down-right"></i>
-              <span>Down</span>
-            </h3>
-            <div class="desc text-center">
-              <span class="value h3"></span>
-              <span class="unit">m</span>
-            </div>
-          </div>
-        </div>
+      <table id="data-table" class="table-sm table-hover w-100 d-none">
+        <thead>
+          <tr>
+            <th class="chkbox"></th>
+            <th class="idx"></th>
+            <th class="datetime">日時</th>
+            <th class="eraser"></th>
+            <th class="latitude">緯度</th>
+            <th class="longitude">経度</th>
+            <th class="elevation">標高</th>
+            <th class="apply"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- The table rows will be inserted by JS. -->
+        </tbody>
+      </table>
 
-        <table id="data-table" class="table-sm table-hover w-100 d-none">
-          <thead>
-            <tr>
-              <th class="chkbox"></th>
-              <th class="idx"></th>
-              <th class="datetime">日時</th>
-              <th class="eraser"></th>
-              <th class="latitude">緯度</th>
-              <th class="longitude">経度</th>
-              <th class="elevation">標高</th>
-              <th class="apply"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- The table rows will be inserted by JS. -->
-          </tbody>
-        </table>
-
-      </div><!-- #data-display -->
+      
   
     </div><!-- .container-fluid -->
 

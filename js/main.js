@@ -2,6 +2,8 @@ const GpxTrailEditor = {
 
   map: null,
   layerGroup: null,
+
+  logName: '', // the name of the trail log
   points: [], // an array for the points in the table
   markersArray: [], // an array for the markers on the map
 
@@ -136,6 +138,12 @@ const GpxTrailEditor = {
           return;
         }
 
+        GpxTrailEditor.logName = GpxTrailEditor.getTrackTitle(xmlDoc);
+        const logNameForm = document.getElementById('log-name-form');
+        logNameForm.classList.remove('d-none');
+        const logNameInputElm = document.getElementById('log-name-input');
+        logNameInputElm.value = GpxTrailEditor.logName;
+
         GpxTrailEditor.parseMapGPX(xmlDoc);
 
         GpxTrailEditor.parseDataTable(xmlDoc);
@@ -164,6 +172,15 @@ const GpxTrailEditor = {
     // Check if the root element is <gpx>
     const rootElement = xmlDoc.documentElement;
     return rootElement && rootElement.nodeName.toLowerCase() === 'gpx';
+  },
+
+  getTrackTitle: function(xmlDoc) {
+    const nameElm = xmlDoc.querySelector('trk > name');
+    if (nameElm) {
+      return nameElm.textContent;
+    } else {
+      return '';
+    }
   },
 
   showDataTable: function() {
@@ -921,31 +938,56 @@ const GpxTrailEditor = {
     return D;
   },
 
-  setupOpForm: function() {
+  setupLogNameForm: function() {
 
-    const goBtnElm = document.getElementById('fm-go-button');
-    const opElm = document.getElementById('fm-op-selector');
-    const tsElm = document.getElementById('fm-ts-input');
-    const colTsElm = document.querySelector('#operation-form div.col-ts');
+    const nameInput = document.getElementById('log-name-input');
+    const applyButton = document.getElementById('apply-name-button');
 
-    opElm.addEventListener('change', (e) => {
-      if (e.target.value) {
-        goBtnElm.classList.remove('btn-light','disabled','border','text-black-50');
-        goBtnElm.classList.add('btn-primary');
-        if (e.target.value === 'shift-datetime') {
-          colTsElm.classList.remove('d-none');
-        } else {
-          colTsElm.classList.add('d-none');
-        }
+    nameInput.addEventListener('input', () => {
+      const shouldDisabled = nameInput.value.trim() === '';
+      applyButton.disabled = shouldDisabled;
+      if (shouldDisabled) {  
+        applyButton.classList.remove('btn-primary');
+        applyButton.classList.add('btn-secondary');
       } else {
-        goBtnElm.classList.remove('btn-primary');
-        goBtnElm.classList.add('btn-light','disabled','border','text-black-50');
-        colTsElm.classList.add('d-none');
+        applyButton.classList.remove('btn-secondary');
+        applyButton.classList.add('btn-primary');
       }
     });
 
-    goBtnElm.addEventListener('click',(e) => {
-      switch (opElm.value) {
+    applyButton.addEventListener('click', () => {
+      GpxTrailEditor.logName = nameInput.value;
+      applyButton.disabled = true;
+      applyButton.classList.remove('btn-primary');
+      applyButton.classList.add('btn-secondary');
+    });
+  },
+
+  setupOpForm: function() {
+
+    const goButton = document.getElementById('go-button');
+    const opSelector = document.getElementById('op-selector');
+    const tsInput = document.getElementById('time-shift-input');
+    const colTsElm = document.querySelector('#operation-form div.col-ts');
+
+    opSelector.addEventListener('change', (e) => {
+      if (e.target.value) {
+        goButton.classList.remove('btn-secondary','disabled');
+        goButton.classList.add('btn-primary');
+        if (e.target.value === 'shift-datetime') {
+          tsInput.classList.remove('d-none');
+        } else {
+          tsInput.classList.add('d-none');
+        }
+      } else {
+        goButton.classList.remove('btn-primary');
+        goButton.classList.add('btn-secondary','disabled');
+        tsInput.classList.add('d-none');
+      }
+    });
+
+    goButton.addEventListener('click',(e) => {
+      switch (opSelector.value) {
         case 'clear-all-datetime':
           GpxTrailEditor.clearAllDateTime();
           break;
@@ -1188,7 +1230,7 @@ const GpxTrailEditor = {
 
   shiftDateTime: function() {
 
-    const tsInputElm = document.getElementById('fm-ts-input');
+    const tsInputElm = document.getElementById('time-shift-input');
     const trElms = document.querySelectorAll('#data-table tbody tr');
 
     trElms.forEach(trElm => {
@@ -1287,16 +1329,14 @@ const GpxTrailEditor = {
 document.addEventListener('DOMContentLoaded', function () {
 
   document.getElementById('btn-start-over').addEventListener('click', GpxTrailEditor.confirmStartOver);
-
   document.getElementById('btn-export-gpx').addEventListener('click', GpxTrailEditor.exportGPX);
 
-  // Initialize the map.
   GpxTrailEditor.initMap();
 
-  // Set up the gpx-file drop zone.
   GpxTrailEditor.setupDropZone();
 
-  // Set up the operation form.
+  GpxTrailEditor.setupLogNameForm();
+
   GpxTrailEditor.setupOpForm();
 
 });
