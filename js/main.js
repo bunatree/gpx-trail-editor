@@ -116,10 +116,8 @@ const GpxTrailEditor = {
     }
   },
 
-  
-
-  // Analyzes an uploaded GPX file, put the data into the table,
-  // and draws markers and polylines on the map.
+  // アップロードされたGPXファイルを解析し、テーブルにデータを表示し、
+  // 地図にマーカーとポリラインを描く。
   parseAndDisplayGPX: function(file) {
 
     const reader = new FileReader();
@@ -132,7 +130,7 @@ const GpxTrailEditor = {
 
         if (!GpxTrailEditor.isValidGPX(xmlDoc)) {
           // Handle invalid GPX file
-          console.error('Invalid GPX file');
+          console.error('Oops! Invalid GPX file.');
           // You can show a user-friendly error message here
           return;
         }
@@ -632,7 +630,7 @@ const GpxTrailEditor = {
       // Add popup balloon to the marker
       const formattedDateTime = GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTimes[i]);
       const popupContent = `<ul class="m-0 p-0 list-unstyled">
-      <li>マーカー番号: ${i + 1}</li>
+      <li>マーカー番号: ${i+1} <a href="javascript:void(0);" onclick="GpxTrailEditor.scrollToTableRow(${i})"><i class="bi bi-arrow-right-circle-fill" title="移動"></i></a></li>
       <li>日時: ${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTimes[i])}</li>
       <li>緯度: ${latLngs[i][0]}</li>
       <li>経度: ${latLngs[i][1]}</li>
@@ -644,9 +642,6 @@ const GpxTrailEditor = {
 
     }
 
-    
-
-    
   },
 
   onMarkerClick: function(i) {
@@ -1222,6 +1217,27 @@ const GpxTrailEditor = {
       button.style.display = 'block';
     } else {
       button.style.display = 'none';
+    }
+  },
+
+  scrollToTableRow: function(rowIndex) {
+    const tableElm = document.getElementById('data-table');
+    const trElms = tableElm.getElementsByTagName('tr');
+
+    if (rowIndex >= 0 && rowIndex < trElms.length) {
+        const targetRow = trElms[rowIndex];
+        const tableOffsetTop = tableElm.offsetTop;
+        const rowOffsetTop = targetRow.offsetTop;
+
+        // Calculate the scroll position to the target row
+        const topMargin = 16;
+        const scrollPosition = rowOffsetTop + tableOffsetTop - topMargin;
+
+        // Scroll to the target position
+        window.scrollTo({
+          top: scrollPosition,
+          behavior: 'smooth' // Add smooth scrolling effect
+        });
     }
   }
 
