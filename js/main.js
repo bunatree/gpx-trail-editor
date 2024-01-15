@@ -192,7 +192,15 @@ const GpxTrailEditor = {
 
     for (let i = 0; i < trackPointCount; i++) {
       const point = trackPoints[i];
-      const gpxDateTime = point.querySelector('time').textContent;
+      let isError = false;
+
+      // If this point doesn't have a time element
+      const timeElm = point.querySelector('time');
+      if (!timeElm) {
+        console.error('No date/time info for the point index ' + i + ' in the gpx file.');
+      }
+
+      const gpxDateTime = (timeElm) ? timeElm.textContent : null;
       const latitude = point.getAttribute('lat');
       const longitude = point.getAttribute('lon');
       const elevation = (point.querySelector('ele')) ? point.querySelector('ele').textContent : '';
@@ -280,6 +288,7 @@ const GpxTrailEditor = {
       });
       applyButtonCell.appendChild(applyButton);
       applyButtonCell.classList.add('apply','align-middle');
+
     }
   },
 
@@ -509,8 +518,11 @@ const GpxTrailEditor = {
         const longitude = parseFloat(point.getAttribute('lon'));
         latLngs.push([latitude, longitude]);
 
-        const gpxDateTime = point.querySelector('time').textContent;
-        dateTimes.push(gpxDateTime);
+        const datetime = point.querySelector('time');
+        if (datetime) {//#####
+          const gpxDateTime = datetime.textContent;
+          dateTimes.push(gpxDateTime);
+        }
     }
 
     if (latLngs.length > 0) {
