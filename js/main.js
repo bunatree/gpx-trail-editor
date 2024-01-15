@@ -5,7 +5,7 @@ const GpxTrailEditor = {
 
   logName: '', // the name of the trail log
   points: [], // an array for the points in the table
-  markersArray: [], // an array for the markers on the map
+  markers: [], // an array for the markers on the map
 
   FIRST_MARKER_RADIUS: 8,
   LAST_MARKER_RADIUS: 8,
@@ -358,36 +358,6 @@ const GpxTrailEditor = {
     container.classList.remove('d-none');
   },
 
-  // parseSummary: function(xmlDoc) {
-
-  //   // Container Element
-  //   const container = document.getElementById('data-summary');
-
-  //   // Total GPX Time
-  //   const totalTime = GpxTrailEditor.calcTimeTotal(xmlDoc); // Array
-  //   const spanTimeElm = document.querySelector('#total-gpx-time .value');
-  //   spanTimeElm.innerHTML = totalTime[0] + ':' + totalTime[1] + ':' + totalTime[2];
-
-  //   // Total Distance
-  //   const totalDistance = GpxTrailEditor.calcDistanceTotal(xmlDoc);
-  //   const roundedDistance = Number(totalDistance.toFixed(2));
-  //   const spanDistElm = document.querySelector('#total-dist .value');
-  //   spanDistElm.innerHTML = roundedDistance;
-
-  //   // Total Up/Down Evelations
-  //   const totalElevation = GpxTrailEditor.calcAscentDescentTotals(xmlDoc); // Array
-  //   const totalUp = Number(totalElevation[0].toFixed(2));
-  //   const spanUpElm = document.querySelector('#total-eleu .value');
-  //   spanUpElm.innerHTML = totalUp;
-  //   const totalDown = Number(totalElevation[1].toFixed(2));
-  //   const spanDownElm = document.querySelector('#total-eled .value');
-  //   spanDownElm.innerHTML = totalDown;
-
-  //   // Make the container show up.
-  //   container.classList.remove('d-none');
-
-  // },
-
   millisecToHMS: function (milliseconds) {
     const hours = Math.floor(milliseconds / (1000 * 60 * 60));
     const minutes = Math.floor((milliseconds % (1000 * 60 * 60)) / (1000 * 60));
@@ -399,13 +369,11 @@ const GpxTrailEditor = {
   calcTimeTotal: function(points) {
 
     if (points.length === 0) {
-        // トラックポイントが存在しない場合はゼロの時間を返す
-        return [0, 0, 0];
+      // トラックポイントが存在しない場合はゼロの時間を返す
+      return [0, 0, 0];
     }
 
     // 最初と最後のトラックポイントの時間を取得
-    // const firstTime = new Date(trackPoints[0].querySelector('time').textContent);
-    // const lastTime = new Date(trackPoints[trackPoints.length - 1].querySelector('time').textContent);
     const firstDatetime = new Date(points[0].datetime);
     const lastDatetime = new Date(points[points.length - 1].datetime);
 
@@ -425,39 +393,6 @@ const GpxTrailEditor = {
     }
     return totalDistance;
   },
-
-  // calcDistanceTotal: function(xmlDoc) {
-    
-  //   const trackPoints = xmlDoc.querySelectorAll('trkpt');
-
-  //   // トラックポイント間の距離の合計を保存する変数
-  //   let totalDistance = 0;
-
-  //   // 最初のトラックポイントの緯度と経度
-  //   let prevLat = null;
-  //   let prevLon = null;
-
-  //   // 各トラックポイントをループ処理
-  //   trackPoints.forEach(point => {
-  //     // トラックポイントの緯度と経度を取得
-  //     const currentLat = parseFloat(point.getAttribute("lat"));
-  //     const currentLon = parseFloat(point.getAttribute("lon"));
-
-  //     // 最初のトラックポイントでない場合、前回のトラックポイントとの距離を計算して加算
-  //     if (prevLat !== null && prevLon !== null) {
-  //         const distance = GpxTrailEditor.calcHubenyDistance(prevLat, prevLon, currentLat, currentLon);
-  //         totalDistance += distance;
-  //     }
-
-  //     // 現在のトラックポイントの緯度と経度を次の計算のために保存
-  //     prevLat = currentLat;
-  //     prevLon = currentLon;
-  //   });
-
-  //   // 総距離を返す
-  //   return totalDistance;
-
-  // },
 
   calcAscentDescentTotals(points) {
 
@@ -479,32 +414,6 @@ const GpxTrailEditor = {
     return [totalAscent, totalDescent];
 
   },
-
-  // calcAscentDescentTotals(xmlDoc) {
-
-  //   const trackPoints = xmlDoc.querySelectorAll('trkpt');
-
-  //   let upElevation = 0;
-  //   let downElevation = 0;
-
-  //   for (let i = 0; i < trackPoints.length - 1; i++) {
-  //       const currentElevation = parseFloat(trackPoints[i].querySelector('ele').textContent);
-  //       const nextElevation = parseFloat(trackPoints[i + 1].querySelector('ele').textContent);
-
-  //       const diffElevation = nextElevation - currentElevation;
-
-  //       if (diffElevation > 0) {
-  //           // 標高が上がっている場合
-  //           upElevation += diffElevation;
-  //       } else if (diffElevation < 0) {
-  //           // 標高が下がっている場合
-  //           downElevation += Math.abs(diffElevation);
-  //       }
-  //       // 標高が変わっていない場合は何もしない
-  //   }
-
-  //   return [upElevation, downElevation];
-  // },
 
   // Draw markers and polylines on the map.
   parseMapGPX: function(xmlDoc) {
@@ -652,7 +561,7 @@ const GpxTrailEditor = {
       });
 
       // Add the marker to the markers array
-      GpxTrailEditor.markersArray.push(marker);
+      GpxTrailEditor.markers.push(marker);
 
       // Add popup balloon to the marker
       const formattedDateTime = GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTimes[i]);
@@ -723,7 +632,6 @@ const GpxTrailEditor = {
       // Get the elevation of the marker's new location.
       const newEle = await GpxTrailEditor.getElevationData(lon, lat);
       if (newEle !== null) {
-        console.log(`New elevation: ${newEle} meters`);
         eleInputElm.value = newEle;
       }
 
@@ -738,16 +646,11 @@ const GpxTrailEditor = {
     try {
       const response = await fetch(apiUrl);
       const data = await response.json();
-
       // Check if the elevation value is valid.
       if (data.elevation !== errorStr && data.hsrc !== errorStr) {
         const elevation = parseFloat(data.elevation);
-        const dataSource = data.hsrc;
-
-        console.log(`Elevation: ${elevation} meters`);
-        console.log(`Data source: ${dataSource}`);        
+        const dataSource = data.hsrc;  
         return elevation;
-
       } else {
         console.error('Could not get an elevation value.');
         return null;
@@ -766,7 +669,7 @@ const GpxTrailEditor = {
     // Clear all the layers
     GpxTrailEditor.layerGroup.clearLayers();
 
-    const latLngs = GpxTrailEditor.markersArray.map(marker => marker.getLatLng());
+    const latLngs = GpxTrailEditor.markers.map(marker => marker.getLatLng());
     const polylineOptions = {
       color: GpxTrailEditor.POLYLINE_COLOR,
       weight: GpxTrailEditor.POLYLINE_WEIGHT,
@@ -811,7 +714,7 @@ const GpxTrailEditor = {
 
   toggleMarkerDraggability: function(buttonElm) {
     if (buttonElm.dataset.draggable === 'false' || !buttonElm.dataset.draggable) {
-      GpxTrailEditor.markersArray.forEach(function (marker) {
+      GpxTrailEditor.markers.forEach(function (marker) {
         marker.dragging.enable();
       });
       buttonElm.dataset.draggable = 'true';
@@ -819,7 +722,7 @@ const GpxTrailEditor = {
       buttonElm.classList.remove('btn-light');
       buttonElm.classList.add('btn-primary');
     } else {
-      GpxTrailEditor.markersArray.forEach(function (marker) {
+      GpxTrailEditor.markers.forEach(function (marker) {
         marker.dragging.disable();
       });
       buttonElm.dataset.draggable = 'false';
@@ -857,8 +760,8 @@ const GpxTrailEditor = {
       return;
     }
 
-    const markerIdx = Number(rowElm.querySelector('.idx').textContent) - 1;
-    const targetMarker = GpxTrailEditor.markersArray[markerIdx];
+    const markerIndex = Number(rowElm.querySelector('.idx').textContent) - 1;
+    const targetMarker = GpxTrailEditor.markers[markerIndex];
 
     if (targetMarker) {
       
@@ -1272,7 +1175,7 @@ const GpxTrailEditor = {
   },
 
   generateGPXContent: function(points) {
-    let gpxContent = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>\n<gpx version="1.1" creator="GPX Trail Editor">\n<trk>\n<name>YourTrailName</name>\n<number>1</number>\n<trkseg>\n`;
+    let gpxContent = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>\n<gpx version="1.1" creator="GPX Trail Editor">\n<trk>\n<name>${GpxTrailEditor.logName}</name>\n<number>1</number>\n<trkseg>\n`;
 
     for (const point of points) {
       gpxContent += `<trkpt lat="${point.latitude}" lon="${point.longitude}">\n`;

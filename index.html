@@ -58,14 +58,14 @@
       <div id="map" class="border rounded mt-3 mb-3"></div>
 
       <h2 class="d-none">GPX Details</h2>
-      <div id="data-summary" class="d-none mt-3 mb-3 p-3 bg-light">
+      <div id="data-summary" class="d-none mt-3 mb-3 p-3 rounded">
         <div id="total-gpx-time">
           <h3 class="label fw-light text-center text-secondary">
             <i class="bi bi-stopwatch"></i>
             <span>GPS Time</span>
           </h3>
           <div class="desc text-center">
-            <span class="value h3"></span>
+            <span class="value h2"></span>
           </div>
         </div>
 
@@ -75,7 +75,7 @@
             <span>Distance</span>
             </h3>
           <div class="desc text-center">
-            <span class="value h3"></span>
+            <span class="value h2"></span>
             <span class="unit">m</span>
           </div>
         </div>
@@ -85,7 +85,7 @@
             <span>Up</span>
           </h3>
           <div class="desc text-center">
-            <span class="value h3"></span>
+            <span class="value h2"></span>
             <span class="unit">m</span>
           </div>
         </div>
@@ -95,7 +95,7 @@
             <span>Down</span>
           </h3>
           <div class="desc text-center">
-            <span class="value h3"></span>
+            <span class="value h2"></span>
             <span class="unit">m</span>
           </div>
         </div>
@@ -115,36 +115,6 @@
         <button id="go-button" class="btn btn-secondary disabled">実行</button>
       </div>
 
-      <!-- <div id="operation-form" class="mt-4 mb-4 d-none">
-        <form>
-          <div class="row mb-2">
-            <div class="col-auto col-label">
-              <label for="op-selector" class="col-form-label">Operaton</label>
-            </div>
-            <div class="col-auto col-op">
-              <select id="op-selector" class="col-sm-10 form-select" aria-label="What do you want to do?">
-                <option value="" selected>----</option>
-                <option value="clear-all-datetime">Clear all dates and times</option>
-                <option value="clear-checked-datetime">Clear checked dates and times</option>
-                <option value="clear-unchecked-datetime">Clear unckecked dates and times</option>
-                <option value="fill-empty-datetime">Fill empty dates and times</option>
-                <option value="shift-datetime">Shift dates and times</option>
-              </select>
-            </div>
-            <div class="col-auto col-ts d-none">
-              <input type="number" id="time-shift-input" class="form-control" placeholder="In seconds" value="0" />
-            </div>
-            <div class="col-auto col-button">
-              <a id="go-button" class="btn btn-light border disabled text-black-50">Go</a>
-            </div>
-          </div>
-        </form>
-      </div> -->
-
-      
-
-        
-
       <table id="data-table" class="table-sm table-hover w-100 d-none">
         <thead>
           <tr>
@@ -163,8 +133,6 @@
         </tbody>
       </table>
 
-      
-  
     </div><!-- .container-fluid -->
 
   </main>

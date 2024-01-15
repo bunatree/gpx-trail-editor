@@ -39,6 +39,10 @@ body {
 
   height: $mapHeight;
 
+  .leaflet-top.leaflet-left {
+    display: flex;
+  }
+
   .leaflet-marker-icon {
 
     // For the letters "S" and "G"
