@@ -192,7 +192,6 @@ const GpxTrailEditor = {
 
     for (let i = 0; i < trackPointCount; i++) {
       const point = trackPoints[i];
-      let isError = false;
 
       // If this point doesn't have a time element
       const timeElm = point.querySelector('time');
@@ -812,12 +811,6 @@ const GpxTrailEditor = {
       buttonElm.classList.add('btn-light');
     }
   },
-  
-  exportToGPX: function() {
-    
-    // Before export, make sure the order of the date/time on the table is correct.
-
-  },
 
   showOperationForm: function() {
     document.getElementById('operation-form').classList.remove('d-none');
@@ -1220,6 +1213,36 @@ const GpxTrailEditor = {
     });
   },
 
+  exportGPX: function() {
+    if (GpxTrailEditor.points.length > 0) {
+      const gpxContent = GpxTrailEditor.generateGPXContent(GpxTrailEditor.points);
+      const blob = new Blob([gpxContent], { type: 'application/gpx+xml' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = 'gpx_trail_editor.gpx';
+      link.click();
+    }
+  },
+
+  converHTMLFormatDateTimeToUTC: function(localdate) {
+    const utcDate = new Date(localdate);
+    return utcDate.toISOString();
+  },
+
+  generateGPXContent: function(points) {
+    let gpxContent = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>\n<gpx version="1.1" creator="GPX Trail Editor">\n<trk>\n<name>YourTrailName</name>\n<number>1</number>\n<trkseg>\n`;
+
+    for (const point of points) {
+      gpxContent += `<trkpt lat="${point.latitude}" lon="${point.longitude}">\n`;
+      gpxContent += `  <ele>${point.elevation}</ele>\n`;
+      gpxContent += `  <time>${GpxTrailEditor.converHTMLFormatDateTimeToUTC(point.datetime)}</time>\n`;
+      gpxContent += `</trkpt>\n`;
+    }
+
+    gpxContent += `</trkseg>\n</trk>\n</gpx>`;
+    return gpxContent;
+  },
+
   scrollToTop: function() {
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
@@ -1263,8 +1286,9 @@ const GpxTrailEditor = {
 
 document.addEventListener('DOMContentLoaded', function () {
 
-  // Start Over Button
   document.getElementById('btn-start-over').addEventListener('click', GpxTrailEditor.confirmStartOver);
+
+  document.getElementById('btn-export-gpx').addEventListener('click', GpxTrailEditor.exportGPX);
 
   // Initialize the map.
   GpxTrailEditor.initMap();
