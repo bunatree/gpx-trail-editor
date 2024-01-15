@@ -84,13 +84,14 @@ const GpxTrailEditor = {
       mapContainer.addEventListener('click', function(event) {
         const clickedElement = event.target;
 
-        // Check if the clicked element is a marker or within a marker
+        // Check if the clicked element is a marker or a move-link in a balloon
         const isMarker = clickedElement.classList.contains('leaflet-interactive');
+        const isMoveLink = clickedElement.classList.contains('move-to-row');
 
         // If the clicked element is not a marker or within a marker, deselect all markers
-        if (!isMarker) {
-          document.querySelectorAll('#data-table tbody tr').forEach(trElm => {
-            trElm.classList.remove('clicked-marker');
+        if (!isMarker && !isMoveLink) {
+          document.querySelectorAll('#data-table tbody tr').forEach(row => {
+            row.classList.remove('clicked-marker');
           });
         }
       });
@@ -304,8 +305,6 @@ const GpxTrailEditor = {
   },
 
   parseSummary: function(points) {
-
-    const container = document.getElementById('data-summary');
 
     // Total GPX Time
     const totalTime = GpxTrailEditor.calcTimeTotal(points);
@@ -630,7 +629,7 @@ const GpxTrailEditor = {
       // Add popup balloon to the marker
       const formattedDateTime = GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTimes[i]);
       const popupContent = `<ul class="m-0 p-0 list-unstyled">
-      <li>マーカー番号: ${i+1} <a href="javascript:void(0);" onclick="GpxTrailEditor.scrollToTableRow(${i})"><i class="bi bi-arrow-right-circle-fill" title="移動"></i></a></li>
+      <li>マーカー番号: ${i+1} <a href="javascript:void(0);" class="move-to-row link-primary bi bi-arrow-right-circle-fill" onclick="GpxTrailEditor.scrollToTableRow(${i})" title="行番号 ${i+1} へ移動"></a></li>
       <li>日時: ${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTimes[i])}</li>
       <li>緯度: ${latLngs[i][0]}</li>
       <li>経度: ${latLngs[i][1]}</li>
@@ -645,6 +644,7 @@ const GpxTrailEditor = {
   },
 
   onMarkerClick: function(i) {
+    console.log('#### onMarkerClick')
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     if (i < tableRows.length) {
       // Remove the "clicked-marker" class from all rows.
@@ -787,14 +787,14 @@ const GpxTrailEditor = {
       buttonElm.dataset.draggable = 'true';
       buttonElm.innerHTML = 'ポイント移動 : 有効';
       buttonElm.classList.remove('btn-light');
-      buttonElm.classList.add('btn-success');
+      buttonElm.classList.add('btn-primary');
     } else {
       GpxTrailEditor.markersArray.forEach(function (marker) {
         marker.dragging.disable();
       });
       buttonElm.dataset.draggable = 'false';
       buttonElm.innerHTML = 'ポイント移動 : 無効';
-      buttonElm.classList.remove('btn-success');
+      buttonElm.classList.remove('btn-primary');
       buttonElm.classList.add('btn-light');
     }
   },
@@ -1236,7 +1236,7 @@ const GpxTrailEditor = {
         // Scroll to the target position
         window.scrollTo({
           top: scrollPosition,
-          behavior: 'smooth' // Add smooth scrolling effect
+          behavior: 'smooth'
         });
     }
   }
