@@ -690,21 +690,34 @@ const GpxTrailEditor = {
 
     // Define the method to add the control.
     customControl.onAdd = function (map) {
-      // Maybe I'll add more class names,  bg-light p-2 rounded border...
-      const divElm = L.DomUtil.create('div', 'custom-control'); // The parent element.
 
-      // Create a button.
-      const buttonElm = L.DomUtil.create('button', 'btn btn-light border border-2', divElm);
-      buttonElm.id = 'btn-toggle-draggable';
-      buttonElm.title = '有効にすると、ドラッグで各ポイントを移動できるようになります。';
-      buttonElm.innerHTML = 'ポイント移動 : 無効';
-      buttonElm.dataset.draggable = 'false';
+      const container = L.DomUtil.create('div', 'custom-control'); // The parent element.
+      const buttonClass = 'btn btn-white border';
 
-      buttonElm.addEventListener('click', function () {
-        GpxTrailEditor.toggleMarkerDraggability(buttonElm);
+      const moveButton = L.DomUtil.create('button', buttonClass, container);
+      moveButton.id = 'btn-toggle-draggable';
+      moveButton.title = '有効にすると、ドラッグで各ポイントを移動できるようになります。';
+      moveButton.innerHTML = '<i class="bi bi-arrows-move"></i>';
+      moveButton.dataset.draggable = 'false';
+      moveButton.addEventListener('click', function () {
+        GpxTrailEditor.toggleMarkerDraggability(moveButton);
       });
 
-      return divElm;
+      const zoomInButton = L.DomUtil.create('button', buttonClass, container);
+      zoomInButton.id = 'btn-zoom-in';
+      zoomInButton.innerHTML = '<i class="bi bi-plus-lg"></i>';
+      zoomInButton.addEventListener('click', function () {
+        GpxTrailEditor.map.zoomIn();
+      });
+
+      const zoomOutButton = L.DomUtil.create('button', buttonClass, container);
+      zoomOutButton.id = 'btn-zoom-out';
+      zoomOutButton.innerHTML = '<i class="bi bi-dash-lg"></i>';
+      zoomOutButton.addEventListener('click', function () {
+        GpxTrailEditor.map.zoomOut();
+      });
+
+      return container;
 
     };
 
@@ -718,17 +731,17 @@ const GpxTrailEditor = {
         marker.dragging.enable();
       });
       buttonElm.dataset.draggable = 'true';
-      buttonElm.innerHTML = 'ポイント移動 : 有効';
-      buttonElm.classList.remove('btn-light');
+      buttonElm.title = 'ポイント移動 : 有効';
+      buttonElm.classList.remove('btn-white');
       buttonElm.classList.add('btn-primary');
     } else {
       GpxTrailEditor.markers.forEach(function (marker) {
         marker.dragging.disable();
       });
       buttonElm.dataset.draggable = 'false';
-      buttonElm.innerHTML = 'ポイント移動 : 無効';
+      buttonElm.title = 'ポイント移動 : 無効';
       buttonElm.classList.remove('btn-primary');
-      buttonElm.classList.add('btn-light');
+      buttonElm.classList.add('btn-white');
     }
   },
 
