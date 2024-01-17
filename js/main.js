@@ -461,6 +461,8 @@ const GpxTrailEditor = {
         if (datetime) {
           const gpxDateTime = datetime.textContent;
           dateTimes.push(gpxDateTime);
+        } else {
+          dateTimes.push(null);
         }
     }
 
@@ -587,6 +589,7 @@ const GpxTrailEditor = {
   },
 
   bindMarkerEvents: function(marker,i,latLng,dateTime) {
+
     // Add a click event listener to this marker
     marker.on('click', function() {
       GpxTrailEditor.onMarkerClick(i);
