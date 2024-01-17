@@ -611,6 +611,9 @@ const GpxTrailEditor = {
       GpxTrailEditor.onMarkerDragStart(i, event.target.getLatLng());
     });
 
+    // Remove existing Popup (if any)
+    marker.unbindPopup();
+
     // Add popup balloon to the marker
     const popupContent = `<ul class="marker-info m-0 p-0 list-unstyled">
     <li>マーカー番号: ${i+1} <a href="javascript:void(0);" class="move-to-row link-primary bi bi-arrow-right-circle-fill" onclick="GpxTrailEditor.scrollToTableRow(${i})" title="行番号 ${i+1} へ移動"></a></li>
@@ -621,10 +624,10 @@ const GpxTrailEditor = {
     <ul class="marker-op mt-2 p-0 list-unstyled">
     <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li></ul>`;
     marker.bindPopup(popupContent);
+    
   },
 
   onMarkerClick: function(i) {
-    console.log('#### onMarkerClick')
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     if (i < tableRows.length) {
       // Remove the "clicked-marker" class from all rows.
@@ -766,8 +769,6 @@ const GpxTrailEditor = {
     // Temporarily save a layer of markers
     const markerLayers = GpxTrailEditor.layerGroup.getLayers().filter(layer => layer instanceof L.Marker);
   
-    console.log({markerLayers})
-
     // Clear all the layers
     GpxTrailEditor.layerGroup.clearLayers();
 
