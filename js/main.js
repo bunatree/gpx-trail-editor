@@ -274,7 +274,7 @@ const GpxTrailEditor = {
         eraserCell.classList.add('invisible');
       }
       eraserElm.addEventListener('click', function () {
-        GpxTrailEditor.onEraserButtonClick(eraserElm);
+        GpxTrailEditor.onEraserIconClicked(eraserElm);
       });
 
       // Latitude
@@ -308,29 +308,155 @@ const GpxTrailEditor = {
       elevationCell.classList.add('elevation');
 
       // Apply button
-      const applyButtonCell = row.insertCell(7);
-      const applyButton = document.createElement('a');
-      applyButton.classList.add('bi','bi-check-circle','text-secondary');
-      applyButton.setAttribute('href', 'javascript:void(0);');
-      applyButton.setAttribute('title','変更を適用');
-      applyButton.addEventListener('click', function () {
-        const applyResult = GpxTrailEditor.onApplyButtonClick(applyButton);
-        if (applyResult) {
-          applyButton.classList.add('text-secondary','bi-check-circle');
-        }
-      });
-      applyButtonCell.appendChild(applyButton);
-      applyButtonCell.classList.add('apply','align-middle');
+      // const applyButtonCell = row.insertCell(7);
+      // const applyButton = document.createElement('a');
+      // applyButton.classList.add('bi','bi-check-circle','text-secondary');
+      // applyButton.setAttribute('href', 'javascript:void(0);');
+      // applyButton.setAttribute('title','変更を適用');
+      // applyButton.addEventListener('click', function () {
+      //   const applyResult = GpxTrailEditor.onApplyButtonClick(applyButton);
+      //   if (applyResult) {
+      //     applyButton.classList.add('text-secondary','bi-check-circle');
+      //   }
+      // });
+      // applyButtonCell.appendChild(applyButton);
+      // applyButtonCell.classList.add('apply','align-middle');
 
       // Detect any changes in the input elements.
-      [datetimeTextBox,latitudeTextBox,longitudeTextBox,elevationTextBox].forEach(inputElm => {
-        inputElm.addEventListener('input', () => {
-          applyButton.classList.remove('text-secondary'); // Color the apply button blue
-          applyButton.classList.remove('bi-check-circle');
-          applyButton.classList.add('bi-check-circle-fill');
-        });
+      // [datetimeTextBox,latitudeTextBox,longitudeTextBox,elevationTextBox].forEach(inputElm => {
+      //   inputElm.addEventListener('input', () => {
+      //     applyButton.classList.remove('text-secondary'); // Color the apply button blue
+      //     applyButton.classList.remove('bi-check-circle');
+      //     applyButton.classList.add('bi-check-circle-fill');
+      //   });
+      // });
+
+      [datetimeTextBox,latitudeTextBox,longitudeTextBox,elevationTextBox].forEach(textBox => {
+        textBox.addEventListener('blur', GpxTrailEditor.onTableInputLostFocus);
       });
 
+    }
+  },
+
+  onTableInputLostFocus: function(event) {
+
+    const trElm = event.target.closest('tr');
+    const index = Number(trElm.querySelector('.idx').innerText) - 1;
+
+    const latitude = parseFloat(trElm.querySelector('.latitude input').value);
+    const longitude = parseFloat(trElm.querySelector('.longitude input').value);
+    const elevation = parseFloat(trElm.querySelector('.elevation input').value);
+    // if (!latitude || !longitude || !elevation) {
+    //   alert('緯度、経度、標高を正しく入力してください。');
+    //   return false;
+    // }
+
+    const datetime = trElm.querySelector('.datetime input').value;
+    // const curDateTime = trElm.querySelector('.datetime input').value;
+    // const prevDateTime = (trElm.previousElementSibling) ? trElm.previousElementSibling.querySelector('.datetime input').value : null;
+    // const nextDateTime = (trElm.nextElementSibling) ? trElm.nextElementSibling.querySelector('.datetime input').value : null;
+
+    // const isDateTimeOrderValid = GpxTrailEditor.isDateTimeOrderValid(prevDateTime,curDateTime,nextDateTime);
+    // if (!isDateTimeOrderValid) {
+    //   const curIndex = trElm.querySelector('td.idx').innerText;
+    //   const prevIndex = (trElm.previousElementSibling) ? trElm.previousElementSibling.querySelector('td.idx').innerText : '';
+    //   const nextIndex = (trElm.nextElementSibling) ? trElm.nextElementSibling.querySelector('td.idx').innerText : '';
+    //   const invalidIndices = [prevIndex, curIndex, nextIndex].filter(index => index !== '');
+    //   const datetimeRows = invalidIndices.map(index => {
+    //     const datetime = trElm.closest('table').querySelector(`tr:nth-child(${index}) .datetime input`).value;
+    //     return `行番号 ${index}: ${datetime.replace('T',' ')}`;
+    //   });
+    //   alert(`日付の順序が正しくありません。\n${datetimeRows.join('\n')}`);
+    //   return false;
+    // }
+
+    const targetMarker = GpxTrailEditor.markers[index];
+    const targetPoint = GpxTrailEditor.points[index];
+
+    if (targetMarker && targetPoint) {
+      
+      // マーカーの座標や標高を更新
+      targetMarker.setLatLng([latitude, longitude]);
+      targetMarker.options.elevation = elevation;
+
+      // マーカーやポリラインを更新
+      GpxTrailEditor.updateMarkersAndPolylines();
+
+      // イベントリスナーを一旦削除
+      targetMarker.off('click');
+      // マーカークリック時の吹き出し表示を更新
+      GpxTrailEditor.bindMarkerEvents(targetMarker,index,[latitude,longitude],datetime);
+
+      // ポイント情報を更新
+      GpxTrailEditor.points[index].datetime = datetime;
+      GpxTrailEditor.points[index].latitude = latitude;
+      GpxTrailEditor.points[index].longitude = longitude;
+      GpxTrailEditor.points[index].elevation = elevation;
+
+      return true;
+
+    } else {
+      console.error(`Oops! Could not find the target marker and/or point at ${index}.`);
+      return false;
+    }
+  },
+
+  onApplyButtonClick: function(btnElm) {
+
+    const trElm = btnElm.closest('tr');
+
+    const latitude = parseFloat(trElm.querySelector('.latitude input').value);
+    const longitude = parseFloat(trElm.querySelector('.longitude input').value);
+    const elevation = parseFloat(trElm.querySelector('.elevation input').value);
+    if (!latitude || !longitude || !elevation) {
+      alert('緯度、経度、標高を正しく入力してください。');
+      return false;
+    }
+
+    const curDateTime = trElm.querySelector('.datetime input').value;
+    const prevDateTime = (trElm.previousElementSibling) ? trElm.previousElementSibling.querySelector('.datetime input').value : null;
+    const nextDateTime = (trElm.nextElementSibling) ? trElm.nextElementSibling.querySelector('.datetime input').value : null;
+
+    const isDateTimeOrderValid = GpxTrailEditor.isDateTimeOrderValid(prevDateTime,curDateTime,nextDateTime);
+    if (!isDateTimeOrderValid) {
+      const curIndex = trElm.querySelector('td.idx').innerText;
+      const prevIndex = (trElm.previousElementSibling) ? trElm.previousElementSibling.querySelector('td.idx').innerText : '';
+      const nextIndex = (trElm.nextElementSibling) ? trElm.nextElementSibling.querySelector('td.idx').innerText : '';
+      const invalidIndices = [prevIndex, curIndex, nextIndex].filter(index => index !== '');
+      const datetimeRows = invalidIndices.map(index => {
+        const datetime = trElm.closest('table').querySelector(`tr:nth-child(${index}) .datetime input`).value;
+        return `行番号 ${index}: ${datetime.replace('T',' ')}`;
+      });
+      alert(`日付の順序が正しくありません。\n${datetimeRows.join('\n')}`);
+      return false;
+    }
+
+    const index = Number(trElm.querySelector('.idx').innerText) - 1;
+    const targetMarker = GpxTrailEditor.markers[index];
+    const targetPoint = GpxTrailEditor.points[index];
+
+    if (targetMarker && targetPoint) {
+      
+      // マーカーの座標や標高を更新
+      targetMarker.setLatLng([latitude, longitude]);
+      targetMarker.options.elevation = elevation;
+
+      // マーカーやポリラインを更新
+      GpxTrailEditor.updateMarkersAndPolylines();
+
+      // ポイント情報を更新
+      GpxTrailEditor.points[index].latitude = latitude;
+      GpxTrailEditor.points[index].longitude = longitude;
+      GpxTrailEditor.points[index].elevation = elevation;
+
+      targetMarker.off('click'); // イベントリスナーを一旦削除
+      GpxTrailEditor.bindMarkerEvents(targetMarker,index,[latitude,longitude],curDateTime);
+
+      return true;
+
+    } else {
+      console.error(`Oops! Could not find the target marker and/or point at ${index}.`);
+      return false;
     }
   },
 
@@ -856,69 +982,46 @@ const GpxTrailEditor = {
     document.getElementById('drop-zone-form').classList.add('d-none');
   },
 
-  onEraserButtonClick: function(btnElm) {
-    const rowElm = btnElm.closest('tr');
-    const dtInputElm = rowElm.querySelector('.datetime input');
-    dtInputElm.value = '';
+  onEraserIconClicked: function(icon) {
+    const row = icon.closest('tr');
+    const datetimeInput = row.querySelector('.datetime input');
+    GpxTrailEditor.clearDateTime(datetimeInput);
   },
 
-  onApplyButtonClick: function(btnElm) {
+  clearDateTime: function(datetimeInput) {
 
-    const trElm = btnElm.closest('tr');
+    datetimeInput.value = '';
 
-    const latitude = parseFloat(trElm.querySelector('.latitude input').value);
-    const longitude = parseFloat(trElm.querySelector('.longitude input').value);
-    const elevation = parseFloat(trElm.querySelector('.elevation input').value);
-    if (!latitude || !longitude || !elevation) {
-      alert('緯度、経度、標高を正しく入力してください。');
-      return false;
-    }
+    const row = datetimeInput.closest('tr');
+    const index = Number(row.querySelector('.idx').innerText) - 1;
+    GpxTrailEditor.points[index].datetime = '';
 
-    const curDateTime = trElm.querySelector('.datetime input').value;
-    const prevDateTime = (trElm.previousElementSibling) ? trElm.previousElementSibling.querySelector('.datetime input').value : null;
-    const nextDateTime = (trElm.nextElementSibling) ? trElm.nextElementSibling.querySelector('.datetime input').value : null;
+  },
 
-    const isDateTimeOrderValid = GpxTrailEditor.isDateTimeOrderValid(prevDateTime,curDateTime,nextDateTime);
-    if (!isDateTimeOrderValid) {
-      const curIndex = trElm.querySelector('td.idx').innerText;
-      const prevIndex = (trElm.previousElementSibling) ? trElm.previousElementSibling.querySelector('td.idx').innerText : '';
-      const nextIndex = (trElm.nextElementSibling) ? trElm.nextElementSibling.querySelector('td.idx').innerText : '';
-      const invalidIndices = [prevIndex, curIndex, nextIndex].filter(index => index !== '');
-      const datetimeRows = invalidIndices.map(index => {
-        const datetime = trElm.closest('table').querySelector(`tr:nth-child(${index}) .datetime input`).value;
-        return `行番号 ${index}: ${datetime.replace('T',' ')}`;
-      });
-      alert(`日付の順序が正しくありません。\n${datetimeRows.join('\n')}`);
-      return false;
-    }
+  clearDateTimeAll: function() {
+    const rows = document.querySelectorAll('#data-table tbody tr');
+    rows.forEach(row => {
+      const datetimeInput = row.querySelector('td.datetime input');
+      GpxTrailEditor.clearDateTime(datetimeInput);
+    });
+  },
 
-    const index = Number(trElm.querySelector('.idx').innerText) - 1;
-    const targetMarker = GpxTrailEditor.markers[index];
-    const targetPoint = GpxTrailEditor.points[index];
+  clearDateTimeChecked: function() {
+    const checkedInputs = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:checked');
+    checkedInputs.forEach(checkbox => {
+      const row = checkbox.closest('tr');
+      const datetimeInput = row.querySelector('td.datetime input');
+      GpxTrailEditor.clearDateTime(datetimeInput);
+    });
+  },
 
-    if (targetMarker && targetPoint) {
-      
-      // マーカーの座標や標高を更新
-      targetMarker.setLatLng([latitude, longitude]);
-      targetMarker.options.elevation = elevation;
-
-      // マーカーやポリラインを更新
-      GpxTrailEditor.updateMarkersAndPolylines();
-
-      // ポイント情報を更新
-      GpxTrailEditor.points[index].latitude = latitude;
-      GpxTrailEditor.points[index].longitude = longitude;
-      GpxTrailEditor.points[index].elevation = elevation;
-
-      targetMarker.off('click'); // イベントリスナーを一旦削除
-      GpxTrailEditor.bindMarkerEvents(targetMarker,index,[latitude,longitude],curDateTime);
-
-      return true;
-
-    } else {
-      console.error(`Oops! Could not find the target marker and/or point at ${index}.`);
-      return false;
-    }
+  clearDateTimeUnchecked: function() {
+    const uncheckedInputs = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:not(:checked)');
+    uncheckedInputs.forEach(checkbox => {
+      const row = checkbox.closest('tr');
+      const datetimeInput = row.querySelector('td.datetime input');
+      GpxTrailEditor.clearDateTime(datetimeInput);
+    });
   },
 
   isDateTimeOrderValid: function(prevDateTime, curDateTime, nextDateTime) {
@@ -1043,13 +1146,13 @@ const GpxTrailEditor = {
     goButton.addEventListener('click',(e) => {
       switch (opSelector.value) {
         case 'clear-all-datetime':
-          GpxTrailEditor.clearAllDateTime();
+          GpxTrailEditor.clearDateTimeAll();
           break;
         case 'clear-checked-datetime':
-          GpxTrailEditor.clearCheckedDateTime();
+          GpxTrailEditor.clearDateTimeChecked();
           break;
         case 'clear-unchecked-datetime':
-          GpxTrailEditor.clearUncheckedDateTime();
+          GpxTrailEditor.clearDateTimeUnchecked();
           break;
         case 'fill-empty-datetime':
           GpxTrailEditor.fillEmptyDateTime();
@@ -1060,32 +1163,6 @@ const GpxTrailEditor = {
         default:
           console.log('Oops. Unknown value: ' + e.target.value);
       }
-    });
-  },
-
-  clearAllDateTime: function() {
-    const rowElms = document.querySelectorAll('#data-table tbody tr');
-    rowElms.forEach(trElm => {
-      const inputElm = trElm.querySelector('td.datetime input');
-      inputElm.value = '';
-    });
-  },
-
-  clearCheckedDateTime: function() {
-    const checkedInputElm = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:checked');
-    checkedInputElm.forEach(chkElm => {
-      const trElm = chkElm.closest('tr');
-      const inputElm = trElm.querySelector('td.datetime input');
-      inputElm.value = '';
-    });
-  },
-
-  clearUncheckedDateTime: function() {
-    const checkedInputElm = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:not(:checked)');
-    checkedInputElm.forEach(chkElm => {
-      const trElm = chkElm.closest('tr');
-      const inputElm = trElm.querySelector('td.datetime input');
-      inputElm.value = '';
     });
   },
 
