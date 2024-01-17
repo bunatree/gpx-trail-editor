@@ -310,14 +310,26 @@ const GpxTrailEditor = {
       // Apply button
       const applyButtonCell = row.insertCell(7);
       const applyButton = document.createElement('a');
-      applyButton.classList.add('bi','bi-check-circle-fill');
+      applyButton.classList.add('bi','bi-check-circle','text-secondary');
       applyButton.setAttribute('href', 'javascript:void(0);');
       applyButton.setAttribute('title','変更を適用');
       applyButton.addEventListener('click', function () {
-        GpxTrailEditor.onApplyButtonClick(applyButton);
+        const applyResult = GpxTrailEditor.onApplyButtonClick(applyButton);
+        if (applyResult) {
+          applyButton.classList.add('text-secondary','bi-check-circle');
+        }
       });
       applyButtonCell.appendChild(applyButton);
       applyButtonCell.classList.add('apply','align-middle');
+
+      // Detect any changes in the input elements.
+      [datetimeTextBox,latitudeTextBox,longitudeTextBox,elevationTextBox].forEach(inputElm => {
+        inputElm.addEventListener('input', () => {
+          applyButton.classList.remove('text-secondary'); // Color the apply button blue
+          applyButton.classList.remove('bi-check-circle');
+          applyButton.classList.add('bi-check-circle-fill');
+        });
+      });
 
     }
   },
@@ -853,15 +865,15 @@ const GpxTrailEditor = {
 
     const trElm = btnElm.closest('tr');
 
+    const curDateTime = trElm.querySelector('.datetime input').value;
     const latitude = parseFloat(trElm.querySelector('.latitude input').value);
     const longitude = parseFloat(trElm.querySelector('.longitude input').value);
     const elevation = parseFloat(trElm.querySelector('.elevation input').value);
-    if (!latitude || !longitude || !elevation) {
-      alert('緯度、経度、標高を入力してください。');
-      return;
+    if (!curDateTime || !latitude || !longitude || !elevation) {
+      alert('日付、緯度、経度、標高を正しく入力してください。');
+      return false;
     }
 
-    const curDateTime = trElm.querySelector('.datetime input').value;
     const prevDateTime = (trElm.previousElementSibling) ? trElm.previousElementSibling.querySelector('.datetime input').value : null;
     const nextDateTime = (trElm.nextElementSibling) ? trElm.nextElementSibling.querySelector('.datetime input').value : null;
 
@@ -876,6 +888,7 @@ const GpxTrailEditor = {
         return `行番号 ${index}: ${datetime.replace('T',' ')}`;
       });
       alert(`日付の順序が正しくありません。\n${datetimeRows.join('\n')}`);
+      return false;
     }
 
     const index = Number(trElm.querySelector('.idx').innerText) - 1;
@@ -899,8 +912,11 @@ const GpxTrailEditor = {
       targetMarker.off('click'); // イベントリスナーを一旦削除
       GpxTrailEditor.bindMarkerEvents(targetMarker,index,[latitude,longitude],curDateTime);
 
+      return true;
+
     } else {
       console.error(`Oops! Could not find the target marker and/or point at ${index}.`);
+      return false;
     }
   },
 
