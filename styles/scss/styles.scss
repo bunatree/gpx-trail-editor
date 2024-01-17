@@ -28,6 +28,16 @@ body {
 
 #data-table {
 
+  thead {
+    th {
+      .th-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+  }
+
   tr.clicked-marker {
     background-color: $bgTablePrimaryRow;
   }
@@ -36,11 +46,8 @@ body {
   }
 
   .elevation {
-    max-width: 4rem;
+    max-width: 6rem;
   }
-  // .apply {
-  //   max-width: 1rem;
-  // }
 
 }
 
