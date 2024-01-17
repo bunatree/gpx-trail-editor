@@ -6,6 +6,8 @@ const GpxTrailEditor = {
   logName: '', // the name of the trail log
   points: [], // an array for the points in the table
   markers: [], // an array for the markers on the map
+  polyline: [], // an array for the markers on the map
+  borderPolyline: [], // an array for the markers on the map
 
   FIRST_MARKER_RADIUS: 8,
   LAST_MARKER_RADIUS: 8,
@@ -13,6 +15,18 @@ const GpxTrailEditor = {
 
   POLYLINE_COLOR: 'rgba(192, 0, 128, 1)',
   POLYLINE_WEIGHT: 5,
+
+  normalPolylineOptions: {
+    color: 'rgba(192, 0, 128, 1)',
+    weight: 4,
+  },
+
+  borderPolylineOptions: {
+    // color: POLYLINE_COLOR,
+    // weight: POLYLINE_WEIGHT,
+    color: 'white',
+    weight: 8,
+  },
 
   SPEED_RATE_UP_STEEP:        0.5, 	//急な上りの速度比(平地を1として)
   SPEED_RATE_UP_GENTLE:       0.8, 	//なだらかな上りの速度比
@@ -444,7 +458,7 @@ const GpxTrailEditor = {
         latLngs.push([latitude, longitude]);
 
         const datetime = point.querySelector('time');
-        if (datetime) {//#####
+        if (datetime) {
           const gpxDateTime = datetime.textContent;
           dateTimes.push(gpxDateTime);
         }
@@ -452,8 +466,11 @@ const GpxTrailEditor = {
 
     if (latLngs.length > 0) {
 
-      GpxTrailEditor.drawPolylines(latLngs);
-      GpxTrailEditor.drawMarkers(latLngs,dateTimes);
+      // Set the polylines array to the GpxTrailEditor name space.
+      GpxTrailEditor.polyline = GpxTrailEditor.drawPolylines(latLngs)[0];
+      GpxTrailEditor.borderPolyline = GpxTrailEditor.drawPolylines(latLngs)[1];
+      // Set the markers array to the GpxTrailEditor name space.
+      GpxTrailEditor.markers = GpxTrailEditor.drawMarkers(latLngs,dateTimes);
 
       GpxTrailEditor.addCustomControl();
 
@@ -476,34 +493,40 @@ const GpxTrailEditor = {
 
   drawPolylines: function(latLngs,drawBorder = true) {
 
+    // const polylines = [];
+    // const borders = [];
+
+    let border, polyline;
     if (drawBorder) {
 
       // Create a duplicate polyline with a larger weight for the border.
-      const borderPolylineOptions = {
-        // Set the border color to white
-        color: 'white',
-        // Adjust the weight for the border
-        weight: GpxTrailEditor.POLYLINE_WEIGHT + 4,
-      };
+      // const borderOptions = {
+      //   color: 'white',
+      //   weight: GpxTrailEditor.POLYLINE_WEIGHT + 4,
+      // };
 
-      const borderPolyline = L.polyline(latLngs, borderPolylineOptions).addTo(GpxTrailEditor.map);
+      border = L.polyline(latLngs, GpxTrailEditor.borderPolylineOptions).addTo(GpxTrailEditor.map);
+      // borders.push(border);  // Store reference
+
+      // Add polyline to the layerGroup
+      GpxTrailEditor.layerGroup.addLayer(border);
     }
 
-    // Options for polylines
-    const polylineOptions = {
-      color: GpxTrailEditor.POLYLINE_COLOR,
-      weight: GpxTrailEditor.POLYLINE_WEIGHT,
-    };
 
     // Draw polylines with the style options above.
-    const polyline = L.polyline(latLngs, polylineOptions).addTo(GpxTrailEditor.map);
+    polyline = L.polyline(latLngs, GpxTrailEditor.normalPolylineOptions).addTo(GpxTrailEditor.map);
+    // polylines.push(polyline);  // Store reference
 
     // Add polyline to the layerGroup
     GpxTrailEditor.layerGroup.addLayer(polyline);
 
+    return [polyline, border];
+
   },
 
   drawMarkers: function(latLngs,dateTimes) {
+
+    const markers = [];  // Array to store references to markers
 
     const normalMarkerOptions = {
       icon: L.divIcon({
@@ -550,36 +573,39 @@ const GpxTrailEditor = {
 
       // const marker = L.circleMarker(latLngs[i], markerOptions).addTo(GpxTrailEditor.map);
       const marker = L.marker(latLngs[i], markerOptions).addTo(GpxTrailEditor.map);
+      markers.push(marker);  // Store reference
 
-      // Add a click event listener to this marker
-      marker.on('click', function() {
-        GpxTrailEditor.onMarkerClick(i);
-      }).on('dragend', function(event) {
-        GpxTrailEditor.onMarkerDragEnd(i, event.target.getLatLng());
-      }).on('dragstart', function(event) {
-        GpxTrailEditor.onMarkerDragStart(i, event.target.getLatLng());
-      });
-
-      // Add the marker to the markers array
-      GpxTrailEditor.markers.push(marker);
-
-      // Add popup balloon to the marker
-      const formattedDateTime = GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTimes[i]);
-      const popupContent = `<ul class="marker-info m-0 p-0 list-unstyled">
-      <li>マーカー番号: ${i+1} <a href="javascript:void(0);" class="move-to-row link-primary bi bi-arrow-right-circle-fill" onclick="GpxTrailEditor.scrollToTableRow(${i})" title="行番号 ${i+1} へ移動"></a></li>
-      <li>日時: ${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTimes[i])}</li>
-      <li>緯度: ${latLngs[i][0]}</li>
-      <li>経度: ${latLngs[i][1]}</li>
-      </ul>
-      <ul class="marker-op mt-2 p-0 list-unstyled">
-      <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li></ul>`;
-      marker.bindPopup(popupContent);
+      GpxTrailEditor.bindMarkerEvents(marker,i,latLngs[i],dateTimes[i]);
 
       // Add marker to the layerGroup
       GpxTrailEditor.layerGroup.addLayer(marker);
 
     }
 
+    return markers;  // Return the array of marker references
+
+  },
+
+  bindMarkerEvents: function(marker,i,latLng,dateTime) {
+    // Add a click event listener to this marker
+    marker.on('click', function() {
+      GpxTrailEditor.onMarkerClick(i);
+    }).on('dragend', function(event) {
+      GpxTrailEditor.onMarkerDragEnd(i, event.target.getLatLng());
+    }).on('dragstart', function(event) {
+      GpxTrailEditor.onMarkerDragStart(i, event.target.getLatLng());
+    });
+
+    // Add popup balloon to the marker
+    const popupContent = `<ul class="marker-info m-0 p-0 list-unstyled">
+    <li>マーカー番号: ${i+1} <a href="javascript:void(0);" class="move-to-row link-primary bi bi-arrow-right-circle-fill" onclick="GpxTrailEditor.scrollToTableRow(${i})" title="行番号 ${i+1} へ移動"></a></li>
+    <li>日時: ${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTime)}</li>
+    <li>緯度: ${latLng[0]}</li>
+    <li>経度: ${latLng[1]}</li>
+    </ul>
+    <ul class="marker-op mt-2 p-0 list-unstyled">
+    <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li></ul>`;
+    marker.bindPopup(popupContent);
   },
 
   onMarkerClick: function(i) {
@@ -610,7 +636,9 @@ const GpxTrailEditor = {
     }
 
     GpxTrailEditor.updateTableRow(i,newLatLng);
-    GpxTrailEditor.updatePolylines();
+    GpxTrailEditor.updatePointInfo(i,newLatLng);
+
+    GpxTrailEditor.updateMarkersAndPolylines(GpxTrailEditor.markers[i]);
 
   },
 
@@ -633,6 +661,63 @@ const GpxTrailEditor = {
       const newEle = await GpxTrailEditor.getElevationData(lon, lat);
       if (newEle !== null) {
         eleInputElm.value = newEle;
+      }
+
+    }
+  },
+
+  updatePointInfo: async function(i,newLatLng) {
+    console.log('#### updatePointInfo');
+
+    const points = GpxTrailEditor.points;
+
+    function setPointInfo(index,curDateTime,curLatitude,curLongitude,curElevation,toNextDistance,toNextElevation,toNextSeconds,toNextSpeedInfo) {
+      if (GpxTrailEditor.points[index]) {
+        GpxTrailEditor.points[index] = {
+          "index": index,
+          "datetime": curDateTime,
+          "latitude": curLatitude,
+          "longitude": curLongitude,
+          "elevation": curElevation,
+          "toNextDistance": toNextDistance,
+          "toNextElevation": toNextElevation,
+          "toNextSeconds": toNextSeconds,
+          "toNextSpeedRatio": toNextSpeedInfo.speedRatio,
+          "toNextSpeedInfo": toNextSpeedInfo
+        };
+      }
+    }
+
+    if (i < points.length) {
+
+      const curDateTime = points[i].datetime;
+      const curLatitude = newLatLng.lat;
+      const curLongitude = newLatLng.lng;
+      const curElevation = await GpxTrailEditor.getElevationData(curLongitude, curLatitude);
+      const nextDateTime = (points[i+1]) ? points[i+1].datetime : null;
+      const nextLatitude = (points[i+1]) ? points[i+1].latitude : null;
+      const nextLongitude = (points[i+1]) ? points[i+1].longitude : null;
+      const nextElevation = (points[i+1]) ? points[i+1].elevation : null;
+      const toNextDistance = (points[i+1]) ? GpxTrailEditor.calcHubenyDistance(curLatitude, curLongitude, nextLatitude, nextLongitude) : null;
+      const toNextElevation = (nextElevation) ? nextElevation - curElevation : null;
+      const toNextSeconds = (nextDateTime) ? GpxTrailEditor.calcDateTimeDifference(nextDateTime,curDateTime) : null;
+      const toNextSpeedInfo = (points[i+1]) ? GpxTrailEditor.calcDistanceSpeedRatio(curLatitude,curLongitude,nextLatitude,nextLongitude,curElevation,nextElevation) : [];
+
+      setPointInfo(i,curDateTime,curLatitude,curLongitude,curElevation,toNextDistance,toNextElevation,toNextSeconds,toNextSpeedInfo);
+
+      if (GpxTrailEditor.points[i-1]) {
+
+        const prevDateTime = points[i-1].datetime;
+        const prevLatitude = points[i-1].latitude;
+        const prevLongitude = points[i-1].longitude;
+        const prevElevation = await GpxTrailEditor.getElevationData(prevLongitude, prevLatitude);
+        const toCurDistance = (points[i]) ? GpxTrailEditor.calcHubenyDistance(prevLatitude, prevLongitude, curLatitude, curLongitude) : null;
+        const toCurElevation = (prevElevation) ? curElevation - prevElevation : null;
+        const toCurSeconds = (prevDateTime) ? GpxTrailEditor.calcDateTimeDifference(prevDateTime,curDateTime) : null;
+        const toCurSpeedInfo = (points[i]) ? GpxTrailEditor.calcDistanceSpeedRatio(prevLatitude,prevLongitude,curLatitude,curLongitude,curElevation,nextElevation) : [];
+
+        setPointInfo(i-1,prevDateTime,prevLatitude,prevLongitude,prevElevation,toCurDistance,toCurElevation,toCurSeconds,toCurSpeedInfo);
+
       }
 
     }
@@ -661,25 +746,27 @@ const GpxTrailEditor = {
     }
   },
 
-  updatePolylines: function() {
+  updateMarkersAndPolylines: function() {
 
     // Temporarily save a layer of markers
     const markerLayers = GpxTrailEditor.layerGroup.getLayers().filter(layer => layer instanceof L.Marker);
   
+    console.log({markerLayers})
+
     // Clear all the layers
     GpxTrailEditor.layerGroup.clearLayers();
 
     const latLngs = GpxTrailEditor.markers.map(marker => marker.getLatLng());
-    const polylineOptions = {
-      color: GpxTrailEditor.POLYLINE_COLOR,
-      weight: GpxTrailEditor.POLYLINE_WEIGHT,
-    };
 
-    // Add the new polyline to the layerGroup
-    const polyline = L.polyline(latLngs, polylineOptions).addTo(GpxTrailEditor.layerGroup);
+    // Add the new polyline (with a border) to the layerGroup
+    const border = L.polyline(latLngs, GpxTrailEditor.borderPolylineOptions).addTo(GpxTrailEditor.layerGroup);
+    const polyline = L.polyline(latLngs, GpxTrailEditor.normalPolylineOptions).addTo(GpxTrailEditor.layerGroup);
 
     // Add the saved marker layer to layerGroup again.
     markerLayers.forEach(layer => GpxTrailEditor.layerGroup.addLayer(layer));
+
+    GpxTrailEditor.borderPolyline = border;
+    GpxTrailEditor.polyline = polyline;
   
   },
 
@@ -761,38 +848,69 @@ const GpxTrailEditor = {
 
   onApplyButtonClick: function(btnElm) {
 
-    const rowElm = btnElm.closest('tr');
+    const trElm = btnElm.closest('tr');
 
-    const latitude = parseFloat(rowElm.querySelector('.latitude input').value);
-    const longitude = parseFloat(rowElm.querySelector('.longitude input').value);
-    const elevation = parseFloat(rowElm.querySelector('.elevation input').value);
-    
-    // 緯度、経度、標高が正しいかチェック
+    const latitude = parseFloat(trElm.querySelector('.latitude input').value);
+    const longitude = parseFloat(trElm.querySelector('.longitude input').value);
+    const elevation = parseFloat(trElm.querySelector('.elevation input').value);
     if (!latitude || !longitude || !elevation) {
-      alert('正しい緯度、経度、標高を入力してください。');
+      alert('緯度、経度、標高を入力してください。');
       return;
     }
 
-    const markerIndex = Number(rowElm.querySelector('.idx').textContent) - 1;
-    const targetMarker = GpxTrailEditor.markers[markerIndex];
+    const curDateTime = trElm.querySelector('.datetime input').value;
+    const prevDateTime = (trElm.previousElementSibling) ? trElm.previousElementSibling.querySelector('.datetime input').value : null;
+    const nextDateTime = (trElm.nextElementSibling) ? trElm.nextElementSibling.querySelector('.datetime input').value : null;
 
-    if (targetMarker) {
+    const isDateTimeOrderValid = GpxTrailEditor.isDateTimeOrderValid(prevDateTime,curDateTime,nextDateTime);
+    if (!isDateTimeOrderValid) {
+      const curIndex = trElm.querySelector('td.idx').innerText;
+      const prevIndex = (trElm.previousElementSibling) ? trElm.previousElementSibling.querySelector('td.idx').innerText : '';
+      const nextIndex = (trElm.nextElementSibling) ? trElm.nextElementSibling.querySelector('td.idx').innerText : '';
+      const invalidIndices = [prevIndex, curIndex, nextIndex].filter(index => index !== '');
+      const datetimeRows = invalidIndices.map(index => {
+        const datetime = trElm.closest('table').querySelector(`tr:nth-child(${index}) .datetime input`).value;
+        return `行番号 ${index}: ${datetime.replace('T',' ')}`;
+      });
+      alert(`日付の順序が正しくありません。\n${datetimeRows.join('\n')}`);
+    }
+
+    const index = Number(trElm.querySelector('.idx').innerText) - 1;
+    const targetMarker = GpxTrailEditor.markers[index];
+    const targetPoint = GpxTrailEditor.points[index];
+
+    if (targetMarker && targetPoint) {
       
-      // マーカーを更新
+      // マーカーの座標や標高を更新
       targetMarker.setLatLng([latitude, longitude]);
       targetMarker.options.elevation = elevation;
 
-      // ポリラインを更新
-      GpxTrailEditor.updatePolylines();
+      // マーカーやポリラインを更新
+      GpxTrailEditor.updateMarkersAndPolylines();
 
-      // マーカーがクリックされたときの処理を更新
+      // ポイント情報を更新
+      GpxTrailEditor.points[index].latitude = latitude;
+      GpxTrailEditor.points[index].longitude = longitude;
+      GpxTrailEditor.points[index].elevation = elevation;
+
       targetMarker.off('click'); // イベントリスナーを一旦削除
-      targetMarker.on('click', function () {
-        // マーカーがクリックされたときの処理をここに記述
-        // 例: テーブルの対応する行に 'clicked-marker' クラスを追加
-        // または他の処理を追加
-      });
+      GpxTrailEditor.bindMarkerEvents(targetMarker,index,[latitude,longitude],curDateTime);
 
+    } else {
+      console.error(`Oops! Could not find the target marker and/or point at ${index}.`);
+    }
+  },
+
+  isDateTimeOrderValid: function(prevDateTime, curDateTime, nextDateTime) {
+    if (!prevDateTime) {
+      // prevDateTime が null の場合は curDateTime と nextDateTime の順序をチェック
+      return curDateTime <= nextDateTime;
+    } else if (!nextDateTime) {
+      // nextDateTime が null の場合は prevDateTime と curDateTime の順序をチェック
+      return prevDateTime <= curDateTime;
+    } else {
+      // どちらも null でない場合は 3 つの順序をチェック
+      return prevDateTime <= curDateTime && curDateTime <= nextDateTime;
     }
   },
 
@@ -811,13 +929,13 @@ const GpxTrailEditor = {
     dropZoneElm.addEventListener('dragover', e => {
       e.preventDefault();
       dropZoneElm.classList.add('drag-over');
-      dropZoneFormElm.classList.add('bg-info');
+      dropZoneFormElm.classList.add('bg-primary','text-light');
     });
 
     ['dragleave','dragend'].forEach(type => {
       dropZoneElm.addEventListener(type, e => {
         dropZoneElm.classList.remove('drag-over');
-        dropZoneFormElm.classList.remove('bg-info');
+        dropZoneFormElm.classList.remove('bg-primary','text-light');
       });
     });
 

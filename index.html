@@ -23,11 +23,12 @@
   <header>
     <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
       <div class="container-fluid">
-        <div class="navbar-brand" href="#">GPX Trail Editor</div>
+        <div class="navbar-brand fw-bold" href="#">GPX Trail Editor</div>
         <div class="justify-content-end" id="nav-buttons">
           <button id="btn-create-new" class="btn btn-sm btn-light">Create New</button>
           <button id="btn-export-gpx" class="btn btn-sm btn-light d-none">Export GPX</button>
           <button id="btn-start-over" class="btn btn-sm btn-danger d-none">Start Over</button>
+          <a id="goto-github" class="btn btn-link" href="https://github.com/bunatree/gpx-trail-editor" title="GitHubレポジトリを開く"><i class="bi bi-github"></i></a>
         </div>
       </div>
     </nav>
@@ -137,7 +138,15 @@
 
   </main>
 
-  <button type="button" id="scroll-to-top" class="btn btn-dark btn-floating btn-lg" onclick="GpxTrailEditor.scrollToTop()">
+  <footer class="bg-dark text-light mt-3 p-4 text-center">
+    <h2 class="h5">GPX Trail Editor</h2>
+    <div class="mb-2">Copyright (c) 2024 Bunatree Melonpan</div>
+    <div class="mb-2"><a href="https://github.com/bunatree/gpx-trail-editor">GitHub</a> <a href="https://github.com/bunatree/gpx-trail-editor?tab=MIT-1-ov-file#readme">MIT License</a></div>
+    <div class="mb-2">Powered by Leaflet, Bootstrap, and more.</div>
+    <!-- <div class="mb-2">Created by <img src="./images/melonpan.png" class="avatar rounded-circle" title="melonpan" /> at <a href="https://github.com/bunatree">GitHub</a>, <a href="https://www.yamareco.com/modules/yamareco/userinfo-3521-prof.html">Yamareco</a>, and <a href="https://yamap.com/users/2697255">YAMAP</a>.</div> -->
+  </footer>
+
+  <button type="button" id="scroll-to-top" class="btn btn-secondary btn-floating btn-lg opacity-75" onclick="GpxTrailEditor.scrollToTop()">
     <i class="bi bi-arrow-up"></i>
   </button>
 

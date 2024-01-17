@@ -8,6 +8,15 @@ body {
   padding: 0;
 }
 
+.navbar {
+  #goto-github {
+    color: rgba(255,255,255,1);
+    &:hover, &:active {
+      color: rgba(255,255,255,0.8);
+    }
+  }
+}
+
 #data-summary {
   display: flex;
   justify-content: center;
@@ -99,6 +108,20 @@ body {
     }
   }
   
+}
+
+footer {
+  a:link, a:visited {
+    color: #fff;
+  }
+  a:hover, a:active {
+    color: #ddd;
+  }
+  .avatar {
+    max-width: 2rem;
+    height: auto;
+    display: inline-block;
+  }
 }
 
 #scroll-to-top {
