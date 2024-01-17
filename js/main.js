@@ -1481,6 +1481,22 @@ const GpxTrailEditor = {
 
   removeThisMarker: function(i) {
     console.log('#### removeThisMarker');
+  },
+
+  setupTableHeaderOps: function() {
+    ['datetime','latitude','longitude','elevation'].forEach(className => {
+      const tableCell = document.querySelector('#data-table thead th.' + className);
+      tableCell.querySelectorAll('.op a').forEach(icon => {
+        icon.addEventListener('click', (event) => {
+          const opName = icon.dataset.opName;
+          GpxTrailEditor.onTableHeaderOpIconClicked(opName,className);
+        });
+      });
+    });
+  },
+
+  onTableHeaderOpIconClicked: function(opName,targetName) {
+    console.log({opName,targetName});
   }
 
 };
@@ -1497,6 +1513,8 @@ document.addEventListener('DOMContentLoaded', function () {
   GpxTrailEditor.setupLogNameForm();
 
   GpxTrailEditor.setupOpForm();
+
+  GpxTrailEditor.setupTableHeaderOps();
 
 });
 
