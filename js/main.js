@@ -1005,7 +1005,7 @@ const GpxTrailEditor = {
       GpxTrailEditor.clearDateTime(datetimeInput);
     });
   },
-
+  
   clearDateTimeChecked: function() {
     const checkedInputs = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:checked');
     checkedInputs.forEach(checkbox => {
@@ -1014,7 +1014,7 @@ const GpxTrailEditor = {
       GpxTrailEditor.clearDateTime(datetimeInput);
     });
   },
-
+  
   clearDateTimeUnchecked: function() {
     const uncheckedInputs = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:not(:checked)');
     uncheckedInputs.forEach(checkbox => {
@@ -1022,6 +1022,114 @@ const GpxTrailEditor = {
       const datetimeInput = row.querySelector('td.datetime input');
       GpxTrailEditor.clearDateTime(datetimeInput);
     });
+  },
+  
+  clearLatitudeAll: function() {
+    const rows = document.querySelectorAll('#data-table tbody tr');
+    rows.forEach(row => {
+      const latInput = row.querySelector('td.latitude input');
+      GpxTrailEditor.clearLatitude(latInput);
+    });
+  },
+
+  clearLatitudeChecked: function() {
+    const checkedInputs = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:checked');
+    checkedInputs.forEach(checkbox => {
+      const row = checkbox.closest('tr');
+      const latInput = row.querySelector('td.latitude input');
+      GpxTrailEditor.clearLatitude(latInput);
+    });
+  },
+  
+  clearLatitudeUnchecked: function() {
+    const uncheckedInputs = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:not(:checked)');
+    uncheckedInputs.forEach(checkbox => {
+      const row = checkbox.closest('tr');
+      const latInput = row.querySelector('td.latitude input');
+      GpxTrailEditor.clearLatitude(latInput);
+    });
+  },
+
+  clearLatitude: function(latInput) {
+
+    latInput.value = '';
+
+    const row = latInput.closest('tr');
+    const index = Number(row.querySelector('.idx').innerText) - 1;
+    GpxTrailEditor.points[index].latitude = null;
+ 
+  },
+
+  clearLongitudeAll: function() {
+    const rows = document.querySelectorAll('#data-table tbody tr');
+    rows.forEach(row => {
+      const lngInput = row.querySelector('td.longitude input');
+      GpxTrailEditor.clearLongitude(lngInput);
+    });
+  },
+
+  clearLongitudeChecked: function() {
+    const checkedInputs = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:checked');
+    checkedInputs.forEach(checkbox => {
+      const row = checkbox.closest('tr');
+      const lngInput = row.querySelector('td.longitude input');
+      GpxTrailEditor.clearLongitude(lngInput);
+    });
+  },
+  
+  clearLongitudeUnchecked: function() {
+    const uncheckedInputs = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:not(:checked)');
+    uncheckedInputs.forEach(checkbox => {
+      const row = checkbox.closest('tr');
+      const lngInput = row.querySelector('td.longitude input');
+      GpxTrailEditor.clearLongitude(lngInput);
+    });
+  },
+
+  clearLongitude: function(lngInput) {
+
+    lngInput.value = '';
+
+    const row = lngInput.closest('tr');
+    const index = Number(row.querySelector('.idx').innerText) - 1;
+    GpxTrailEditor.points[index].longitude = null;
+ 
+  },
+
+  clearElevationAll: function() {
+    const rows = document.querySelectorAll('#data-table tbody tr');
+    rows.forEach(row => {
+      const eleInput = row.querySelector('td.elevation input');
+      GpxTrailEditor.clearElevation(eleInput);
+    });
+  },
+
+  clearElevationChecked: function() {
+    const checkedInputs = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:checked');
+    checkedInputs.forEach(checkbox => {
+      const row = checkbox.closest('tr');
+      const eleInput = row.querySelector('td.elevation input');
+      GpxTrailEditor.clearElevation(eleInput);
+    });
+  },
+  
+  clearElevationUnchecked: function() {
+    const uncheckedInputs = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:not(:checked)');
+    uncheckedInputs.forEach(checkbox => {
+      const row = checkbox.closest('tr');
+      const eleInput = row.querySelector('td.elevation input');
+      GpxTrailEditor.clearElevation(eleInput);
+    });
+  },
+
+  clearElevation: function(eleInput) {
+
+    eleInput.value = '';
+
+    const row = eleInput.closest('tr');
+    const index = Number(row.querySelector('.idx').innerText) - 1;
+    GpxTrailEditor.points[index].elevation = null;
+ 
   },
 
   isDateTimeOrderValid: function(prevDateTime, curDateTime, nextDateTime) {
@@ -1495,8 +1603,37 @@ const GpxTrailEditor = {
     });
   },
 
-  onTableHeaderOpIconClicked: function(opName,targetName) {
-    console.log({opName,targetName});
+  onTableHeaderOpIconClicked: function(opName,className) {
+    
+    const operationMap = {
+      datetime: {
+          'clear-all': GpxTrailEditor.clearDateTimeAll,
+          'clear-checked': GpxTrailEditor.clearDateTimeChecked,
+          'clear-unchecked': GpxTrailEditor.clearDateTimeUnchecked,
+      },
+      latitude: {
+          'clear-all': GpxTrailEditor.clearLatitudeAll,
+          'clear-checked': GpxTrailEditor.clearLatitudeChecked,
+          'clear-unchecked': GpxTrailEditor.clearLatitudeUnchecked,
+      },
+      longitude: {
+          'clear-all': GpxTrailEditor.clearLongitudeAll,
+          'clear-checked': GpxTrailEditor.clearLongitudeChecked,
+          'clear-unchecked': GpxTrailEditor.clearLongitudeUnchecked,
+      },
+      elevation: {
+          'clear-all': GpxTrailEditor.clearElevationAll,
+          'clear-checked': GpxTrailEditor.clearElevationChecked,
+          'clear-unchecked': GpxTrailEditor.clearElevationUnchecked,
+      }
+    };
+
+    const operationFunction = operationMap[className] && operationMap[className][opName];
+
+    if (operationFunction) {
+        operationFunction();
+    }
+
   }
 
 };
