@@ -866,15 +866,15 @@ const GpxTrailEditor = {
 
     const trElm = btnElm.closest('tr');
 
-    const curDateTime = trElm.querySelector('.datetime input').value;
     const latitude = parseFloat(trElm.querySelector('.latitude input').value);
     const longitude = parseFloat(trElm.querySelector('.longitude input').value);
     const elevation = parseFloat(trElm.querySelector('.elevation input').value);
-    if (!curDateTime || !latitude || !longitude || !elevation) {
-      alert('日付、緯度、経度、標高を正しく入力してください。');
+    if (!latitude || !longitude || !elevation) {
+      alert('緯度、経度、標高を正しく入力してください。');
       return false;
     }
 
+    const curDateTime = trElm.querySelector('.datetime input').value;
     const prevDateTime = (trElm.previousElementSibling) ? trElm.previousElementSibling.querySelector('.datetime input').value : null;
     const nextDateTime = (trElm.nextElementSibling) ? trElm.nextElementSibling.querySelector('.datetime input').value : null;
 
@@ -1112,8 +1112,6 @@ const GpxTrailEditor = {
 
         GpxTrailEditor.interpolateIntermediatePointTimes(points);
   
-        // ネームスペースGpxTrailEditorのpointsに代入
-        GpxTrailEditor.points = points;
       }
 
     } else {
@@ -1188,7 +1186,8 @@ const GpxTrailEditor = {
   // points: data-tableの各行によって表されている地図上のポイントすべて
   interpolateIntermediatePointTimes: function(points) {
 
-    const rowElms = document.getElementById('data-table').tBodies[0].rows;
+    // const rowElms = document.getElementById('data-table').tBodies[0].rows;
+    const rowElms = document.querySelectorAll('#data-table tbody tr');
 
     const dateTimeIndices = points
     .filter(point => point.datetime !== '') // datetime 属性が空でないオブジェクトのみ抽出
@@ -1217,10 +1216,12 @@ const GpxTrailEditor = {
           
           // 配列変数 passingDatetimes に格納されているUTC日時をローカル時刻に変換し、
           // 日付が記入されていない中間ポイントの日時 input フィールドに反映させる。
+          // また、GpxTrailEditor.points 配列にも反映させる。
           // 例: "2024-01-12T23:19:04Z" --> "2024-01-13T08:19:04" (JST)
           noDateTimeIndices.forEach((rowIndex,loopIndex) => {
             const localDatetime = GpxTrailEditor.convertGPXDateTimeToHTMLFormat(passingDatetimes[loopIndex+1]).replace('Z','').replace(' ','T');
             rowElms[rowIndex].querySelector('.datetime input').value = localDatetime;
+            GpxTrailEditor.points[rowIndex].datetime = localDatetime;
           });
 
         } else {
