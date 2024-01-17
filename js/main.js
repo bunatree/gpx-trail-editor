@@ -1091,26 +1091,50 @@ const GpxTrailEditor = {
 
   fillEmptyDateTime: function() {
 
-    const tableRows = document.getElementById('data-table').tBodies[0].rows;
-    const rowCount = tableRows.length;
+    const rows = document.querySelectorAll('#data-table tbody tr');
+    const rowCount = rows.length;
 
-    const startDatetime = tableRows[0].querySelector('.datetime input').value;
-    const endDatetime = tableRows[rowCount - 1].querySelector('.datetime input').value;
+    const startDateTime = rows[0].querySelector('.datetime input').value;
+    const endDateTime = rows[rowCount - 1].querySelector('.datetime input').value;
 
     // スタート地点とゴール地点の日時が設定されていない場合は警告
-    if (startDatetime && endDatetime) {
+    if (startDateTime && endDateTime) {
 
-      const points = GpxTrailEditor.createPointData();
+      // 緯度、経度、標高がvalidかどうかをチェック
+      // 返り値: [true/false, rowIndex]
+      const isRowLatLngEleValid = GpxTrailEditor.isRowLatLngEleValid(rows);
+      console.log({isRowLatLngEleValid})
+      if (!isRowLatLngEleValid[0]) {
+        alert(`緯度、経度、標高のいずれかが空または誤っています。\n行番号: ${isRowLatLngEleValid[1]+1}`);
+        return false;
+      } else {
+        const points = GpxTrailEditor.createPointData();
 
-      GpxTrailEditor.interpolateIntermediatePointTimes(points);
-
-      // ネームスペースGpxTrailEditorのpointsに代入
-      GpxTrailEditor.points = points;
+        GpxTrailEditor.interpolateIntermediatePointTimes(points);
+  
+        // ネームスペースGpxTrailEditorのpointsに代入
+        GpxTrailEditor.points = points;
+      }
 
     } else {
       alert('スタート地点とゴール地点の日時を設定してください。');
+      return false;
     }
 
+  },
+
+  isRowLatLngEleValid: function(rows) {
+    let result = [true,0];
+    rows.forEach((row,i) => {
+      const latitude = parseFloat(row.querySelector('.latitude input').value);
+      const longitude = parseFloat(row.querySelector('.longitude input').value);
+      const elevation = parseFloat(row.querySelector('.elevation input').value);
+      if (!latitude || !longitude || !elevation) {
+        result[0] = false;
+        result[1] = i;
+      }
+    });
+    return result;
   },
 
   // 各ポイント（= テーブルの行）の緯度、経度、標高、次ポイントまでの距離などの
@@ -1241,8 +1265,11 @@ const GpxTrailEditor = {
 
   // 日時が記入された開始ポイントと終了ポイントの間の、
   // 日時が記入されていないポイントの通過時間を計算・補間する。
-  // points: [{開始ポイント},{中間ポイント(複数)},{終了ポイント}]
+  // points: [{開始ポイント},{中間ポイント}(複数),{終了ポイント}]
   calcPassingDatetimes: function(points) {
+
+    console.log('#### calcPassingDatetimes')
+    console.log({points})
 
     // ポイントの数
     const pointCount = points.length;
