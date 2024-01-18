@@ -205,14 +205,14 @@ const GpxTrailEditor = {
   parseDataTable: function(xmlDoc) {
 
     // The "Check All" checkbox
-    const chkboxAllCell = document.querySelector('#data-table thead .chkbox');
-    const chkAllElm = document.createElement('input');
-    chkAllElm.id = 'chk-all';
-    chkAllElm.type = 'checkbox';
-    chkAllElm.classList.add('form-check-input');
-    chkboxAllCell.appendChild(chkAllElm);
-    chkboxAllCell.classList.add('align-middle');
-    chkAllElm.addEventListener('change',GpxTrailEditor.onChkAllChange);
+    const headerChkCell = document.querySelector('#data-table thead .chkbox');
+    const headerChkbox = headerChkCell.querySelector('input');
+    // chkAllElm.id = 'chk-all';
+    // chkAllElm.type = 'checkbox';
+    // chkAllElm.classList.add('form-check-input');
+    // chkboxAllCell.appendChild(chkAllElm);
+    // chkboxAllCell.classList.add('align-middle');
+    headerChkbox.addEventListener('change',GpxTrailEditor.onChkAllChanged);
 
     const tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
 
@@ -460,7 +460,7 @@ const GpxTrailEditor = {
     }
   },
 
-  onChkAllChange: function(e) {
+  onChkAllChanged: function(e) {
     const chkElms = document.querySelectorAll('#data-table tbody tr input[type=checkbox]');
     const isChecked = e.target.checked;
     chkElms.forEach(chkElm => {
@@ -1594,44 +1594,45 @@ const GpxTrailEditor = {
   setupTableHeaderOps: function() {
     ['datetime','latitude','longitude','elevation'].forEach(className => {
       const tableCell = document.querySelector('#data-table thead th.' + className);
-      tableCell.querySelectorAll('.op a').forEach(icon => {
-        icon.addEventListener('click', (event) => {
-          const opName = icon.dataset.opName;
-          GpxTrailEditor.onTableHeaderOpIconClicked(opName,className);
+      tableCell.querySelectorAll('.op ul.dropdown-menu > li > a').forEach(menuLink => {
+        menuLink.addEventListener('click', (event) => {
+          const opName = menuLink.dataset.opName;
+          const targetName = menuLink.dataset.targetName;
+          GpxTrailEditor.onTableHeaderOpMenuItemClicked(opName,targetName);
         });
       });
     });
   },
 
-  onTableHeaderOpIconClicked: function(opName,className) {
+  onTableHeaderOpMenuItemClicked: function(opName,targetName) {
     
     const operationMap = {
       datetime: {
-          'clear-all': GpxTrailEditor.clearDateTimeAll,
-          'clear-checked': GpxTrailEditor.clearDateTimeChecked,
-          'clear-unchecked': GpxTrailEditor.clearDateTimeUnchecked,
+        'clear-all': GpxTrailEditor.clearDateTimeAll,
+        'clear-checked': GpxTrailEditor.clearDateTimeChecked,
+        'clear-unchecked': GpxTrailEditor.clearDateTimeUnchecked,
       },
       latitude: {
-          'clear-all': GpxTrailEditor.clearLatitudeAll,
-          'clear-checked': GpxTrailEditor.clearLatitudeChecked,
-          'clear-unchecked': GpxTrailEditor.clearLatitudeUnchecked,
+        'clear-all': GpxTrailEditor.clearLatitudeAll,
+        'clear-checked': GpxTrailEditor.clearLatitudeChecked,
+        'clear-unchecked': GpxTrailEditor.clearLatitudeUnchecked,
       },
       longitude: {
-          'clear-all': GpxTrailEditor.clearLongitudeAll,
-          'clear-checked': GpxTrailEditor.clearLongitudeChecked,
-          'clear-unchecked': GpxTrailEditor.clearLongitudeUnchecked,
+        'clear-all': GpxTrailEditor.clearLongitudeAll,
+        'clear-checked': GpxTrailEditor.clearLongitudeChecked,
+        'clear-unchecked': GpxTrailEditor.clearLongitudeUnchecked,
       },
       elevation: {
-          'clear-all': GpxTrailEditor.clearElevationAll,
-          'clear-checked': GpxTrailEditor.clearElevationChecked,
-          'clear-unchecked': GpxTrailEditor.clearElevationUnchecked,
+        'clear-all': GpxTrailEditor.clearElevationAll,
+        'clear-checked': GpxTrailEditor.clearElevationChecked,
+        'clear-unchecked': GpxTrailEditor.clearElevationUnchecked,
       }
     };
 
-    const operationFunction = operationMap[className] && operationMap[className][opName];
+    const operationFunction = operationMap[targetName] && operationMap[targetName][opName];
 
     if (operationFunction) {
-        operationFunction();
+      operationFunction();
     }
 
   }
@@ -1652,6 +1653,12 @@ document.addEventListener('DOMContentLoaded', function () {
   GpxTrailEditor.setupOpForm();
 
   GpxTrailEditor.setupTableHeaderOps();
+
+  // Tooltipを初期化
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
 
 });
 
