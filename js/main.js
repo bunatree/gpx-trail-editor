@@ -745,7 +745,7 @@ const GpxTrailEditor = {
   onMarkerDragStart: function(i,curLatLng) {
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     if (i < tableRows.length) {
-      tableRows[i].classList.add('dragged-marker');
+      tableRows[i].classList.add('dragged-marker','table-primary');
     }
   },
 
@@ -753,7 +753,7 @@ const GpxTrailEditor = {
   onMarkerDragEnd: function (i,newLatLng) {
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     if (i < tableRows.length) {
-      tableRows[i].classList.remove('dragged-marker');
+      tableRows[i].classList.remove('dragged-marker','table-primary');
     }
 
     GpxTrailEditor.updateTableRow(i,newLatLng);
@@ -1122,40 +1122,49 @@ const GpxTrailEditor = {
   setupDropZone: function() {
 
     // Input element to select a gpx file
-    const fileInputElm = document.getElementById('upload-gpx-fileinput');
+    const fileInput = document.getElementById('upload-gpx-fileinput');
     // Div element as the drop-zone container
-    const dropZoneElm = document.getElementById('drop-zone');
-    const dropZoneFormElm = document.getElementById('drop-zone-form');
+    const dropZoneContainer = document.getElementById('drop-zone');
+    const dropZoneForm = document.getElementById('drop-zone-form');
 
-    dropZoneElm.addEventListener('click', e => {
-      fileInputElm.click();
+    dropZoneContainer.addEventListener('click', e => {
+      if (dropZoneContainer.dataset.wasFileDropped === 'false') {
+        fileInput.click();
+      }
     });
 
-    dropZoneElm.addEventListener('dragover', e => {
+    dropZoneContainer.addEventListener('dragover', e => {
       e.preventDefault();
-      dropZoneElm.classList.add('drag-over');
-      dropZoneFormElm.classList.add('bg-primary','text-light');
+      dropZoneContainer.classList.add('drag-over');
+    });
+    
+    dropZoneForm.addEventListener('dragover', e => {
+      dropZoneForm.classList.add('bg-primary','text-light');
     });
 
     ['dragleave','dragend'].forEach(type => {
-      dropZoneElm.addEventListener(type, e => {
-        dropZoneElm.classList.remove('drag-over');
-        dropZoneFormElm.classList.remove('bg-primary','text-light');
+      dropZoneContainer.addEventListener(type, e => {
+        dropZoneContainer.classList.remove('drag-over');
+        
+      });
+      dropZoneForm.addEventListener(type, e => {
+        dropZoneForm.classList.remove('bg-primary','text-light');
       });
     });
 
-    dropZoneElm.addEventListener('drop', e => {
+    dropZoneContainer.addEventListener('drop', e => {
       e.preventDefault();
-      if (e.dataTransfer.files.length > 0) {
+      if (e.dataTransfer.files.length > 0 && dropZoneContainer.dataset.wasFileDropped === 'false') {
+        dropZoneContainer.dataset.wasFileDropped = 'true';
         // Safari fires the change event when the dropped file(s) is
         // applied to the file input. It leads to a bug that the custom
         // control shows up duplicatedly.
-        // fileInputElm.files = e.dataTransfer.files;
+        // fileInput.files = e.dataTransfer.files;
         GpxTrailEditor.onGPXFileDropped(e.dataTransfer.files);
       }
     });
 
-    fileInputElm.addEventListener('change', e => {
+    fileInput.addEventListener('change', e => {
       if (e.target.files.length > 0) {
         GpxTrailEditor.onGPXFileDropped(e.target.files);
       }
