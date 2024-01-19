@@ -26,7 +26,6 @@
         <div class="navbar-brand fw-bold" href="#">GPX Trail Editor</div>
         <div class="justify-content-end" id="nav-buttons">
           <button id="btn-create-new" class="btn btn-sm btn-light">Create New</button>
-          <button id="btn-export-gpx" class="btn btn-sm btn-light d-none">Export GPX</button>
           <button id="btn-start-over" class="btn btn-sm btn-danger d-none">Start Over</button>
           <a id="goto-github" class="btn btn-link" href="https://github.com/bunatree/gpx-trail-editor" title="GitHubレポジトリを開く"><i class="bi bi-github"></i></a>
         </div>
@@ -105,7 +104,7 @@
         </div>
       </div>
 
-      <div id="operation-form" class="input-group mt-3 mb-3 d-none">
+      <!-- <div id="operation-form" class="input-group mt-3 mb-3 d-none">
         <label class="input-group-text" for="op-selector">操作</label>
         <select id="op-selector" class="col-sm-10 form-select" aria-label="What do you want to do?">
           <option value="" selected>----</option>
@@ -117,6 +116,33 @@
         </select>
         <input type="number" id="time-shift-input" class="form-control d-none" placeholder="In seconds" value="0" />
         <button id="go-button" class="btn btn-secondary disabled">実行</button>
+      </div> -->
+
+      <div id="op-btn-toolbar" class="d-flex justify-content-center mt-3 mb-3" role="toolbar">
+        <button id="btn-add" class="btn btn-light border me-1">
+          <i class="bi bi-plus-lg"></i>
+          <span class="label">Add</span>
+        </button>
+        <button id="btn-reverse" class="btn btn-light border me-1">
+          <i class="bi bi-arrow-down-up"></i>
+          <span class="label">Reverse</span>
+        </button>
+        <button id="btn-shift" class="btn btn-light border me-1">
+          <i class="bi bi-shift"></i>
+          <span class="label">Shift</span>
+        </button>
+        <button id="btn-fill" class="btn btn-light border me-1">
+          <i class="bi bi-clock-history"></i>
+          <span class="label">Fill</span>
+        </button>
+        <button id="btn-export" class="btn btn-light border me-1">
+          <i class="bi bi-download"></i>
+          <span class="label">Export GPX</span>
+        </button>
+        <button id="btn-startover" class="btn btn-light border">
+          <i class="bi bi-trash"></i>
+          <span class="label">Start Over</span>
+        </button>
       </div>
 
       <table id="data-table" class="table table-sm table-borderless table-hover w-100 d-none">

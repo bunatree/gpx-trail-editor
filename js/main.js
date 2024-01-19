@@ -81,10 +81,10 @@ const GpxTrailEditor = {
     btnElm.classList.remove('d-none');
   },
 
-  showBtnExportGPX: function() {
-    const btnElm = document.getElementById('btn-export-gpx');
-    btnElm.classList.remove('d-none');
-  },
+  // showBtnExportGPX: function() {
+  //   const btnElm = document.getElementById('btn-export-gpx');
+  //   btnElm.classList.remove('d-none');
+  // },
 
   initMap: function() {
     if (!this.map) {
@@ -125,11 +125,11 @@ const GpxTrailEditor = {
       // GPXアップロード用フォームを非表示
       GpxTrailEditor.hideDropZoneForm();
       // 操作フォームを表示
-      GpxTrailEditor.showOperationForm();
+      // GpxTrailEditor.showOperationForm();
       // 「やり直す」ボタンを表示
       GpxTrailEditor.showBtnStartOver();
       // 「エクスポート」ボタンを表示
-      GpxTrailEditor.showBtnExportGPX();
+      // GpxTrailEditor.showBtnExportGPX();
     }
   },
 
@@ -951,9 +951,9 @@ const GpxTrailEditor = {
     }
   },
 
-  showOperationForm: function() {
-    document.getElementById('operation-form').classList.remove('d-none');
-  },
+  // showOperationForm: function() {
+  //   document.getElementById('operation-form').classList.remove('d-none');
+  // },
 
   hideDropZoneForm: function() {
     document.getElementById('drop-zone-form').classList.add('d-none');
@@ -1480,29 +1480,34 @@ const GpxTrailEditor = {
 
   shiftDateTime: function() {
 
-    const tsInputElm = document.getElementById('time-shift-input');
-    const trElms = document.querySelectorAll('#data-table tbody tr');
+    const shiftSeconds = Number(prompt('How many seconds do you want to shift?\nIf you want to shift to the past, enter a negative number.'));
 
-    trElms.forEach(trElm => {
+    if (shiftSeconds) {
 
-      const dtInputElm = trElm.querySelector('td.datetime input');
-      const dtValue = dtInputElm.value; // UTC (not JST)
-      const shiftSeconds = parseInt(tsInputElm.value, 10) || 0;
-  
-      // Exec only when dtValue has a valid value.
-      if (dtValue) {
-        // Convert the datetime string to a Date object in local time.
-        const curDate = new Date(dtValue + 'Z'); // 'Z' indicates UTC
-  
-        // Shift the datetime.
-        curDate.setSeconds(curDate.getSeconds() + shiftSeconds);
-  
-        // Convert the shifted datetime back to the local time and put it into the input element.
-        const newDate = curDate.toISOString().slice(0, 19);
-        dtInputElm.value = newDate;
-      }
+      document.querySelectorAll('#data-table tbody tr').forEach(trElm => {
 
-    });
+        const dtInputElm = trElm.querySelector('td.datetime input');
+        const dtValue = dtInputElm.value; // UTC (not JST)
+    
+        // Exec only when dtValue has a valid value.
+        if (dtValue) {
+          // Convert the datetime string to a Date object in local time.
+          const curDate = new Date(dtValue + 'Z'); // 'Z' indicates UTC
+    
+          // Shift the datetime.
+          curDate.setSeconds(curDate.getSeconds() + shiftSeconds);
+    
+          // Convert the shifted datetime back to the local time and put it into the input element.
+          const newDate = curDate.toISOString().slice(0, 19);
+          dtInputElm.value = newDate;
+        }
+
+      });
+
+    } else {
+      alert('Oops! The value you entered didn\'t make sense.');
+    }
+
   },
 
   onExportGPXBtnClicked: function() {
@@ -1706,14 +1711,31 @@ const GpxTrailEditor = {
       operationFunction();
     }
 
+  },
+
+  setupButtonToolbar: function() {
+
+    const buttonAdd = document.getElementById('btn-add-point');
+    const buttonReverse = document.getElementById('btn-reverse');
+    const buttonShift = document.getElementById('btn-shift');
+    const buttonFill = document.getElementById('btn-fill');
+    const buttonExport = document.getElementById('btn-export');
+    const buttonStartOver = document.getElementById('btn-startover');
+
+
+    buttonShift.addEventListener('click', GpxTrailEditor.shiftDateTime);
+    buttonFill.addEventListener('click', GpxTrailEditor.fillEmptyDateTime);
+    buttonExport.addEventListener('click', GpxTrailEditor.onExportGPXBtnClicked);
+    buttonStartOver.addEventListener('click', GpxTrailEditor.confirmStartOver);
+
   }
 
 };
 
 document.addEventListener('DOMContentLoaded', function () {
 
-  document.getElementById('btn-start-over').addEventListener('click', GpxTrailEditor.confirmStartOver);
-  document.getElementById('btn-export-gpx').addEventListener('click', GpxTrailEditor.onExportGPXBtnClicked);
+  // document.getElementById('btn-start-over').addEventListener('click', GpxTrailEditor.confirmStartOver);
+  // document.getElementById('btn-export-gpx').addEventListener('click', GpxTrailEditor.onExportGPXBtnClicked);
 
   GpxTrailEditor.initMap();
 
@@ -1721,7 +1743,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   GpxTrailEditor.setupLogNameForm();
 
-  GpxTrailEditor.setupOpForm();
+  // GpxTrailEditor.setupOpForm();
+
+  GpxTrailEditor.setupButtonToolbar();
 
   GpxTrailEditor.setupTableHeaderOps();
 
