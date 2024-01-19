@@ -1,5 +1,5 @@
 $mapHeight: 480px;
-$bgTablePrimaryRow: #cfe2ff; // Borrowed from Bootstrap5. (table-primary)
+// $bgTablePrimaryRow: #cfe2ff; // Borrowed from Bootstrap5. (table-primary)
 $fontFamily: 'M PLUS 1p', sans-serif;
 
 body {
@@ -38,12 +38,12 @@ body {
     }
   }
 
-  tr.clicked-marker {
-    background-color: $bgTablePrimaryRow;
-  }
-  tr.dragged-marker {
-    background-color: $bgTablePrimaryRow;
-  }
+  // tr.clicked-marker {
+  //   background-color: $bgTablePrimaryRow;
+  // }
+  // tr.dragged-marker {
+  //   background-color: $bgTablePrimaryRow;
+  // }
 
   .elevation {
     max-width: 6rem;

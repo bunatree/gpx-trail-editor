@@ -107,7 +107,7 @@ const GpxTrailEditor = {
         // If the clicked element is not a marker or within a marker, deselect all markers
         if (!isMarker && !isMoveLink) {
           document.querySelectorAll('#data-table tbody tr').forEach(row => {
-            row.classList.remove('clicked-marker');
+            row.classList.remove('clicked-marker','table-primary');
           });
         }
       });
@@ -264,17 +264,17 @@ const GpxTrailEditor = {
 
       // Eraser
       const eraserCell = row.insertCell(3);
-      const eraserElm = document.createElement('a');
-      eraserElm.setAttribute('href','javascript:void(0);');
-      eraserElm.setAttribute('title','Clear the date and time.');
-      eraserElm.classList.add('bi','bi-eraser-fill');
-      eraserCell.appendChild(eraserElm);
-      eraserCell.classList.add('eraser');
+      const eraserIcon = document.createElement('a');
+      eraserIcon.setAttribute('href','javascript:void(0);');
+      eraserIcon.setAttribute('title','Clear the date and time.');
+      eraserIcon.classList.add('bi','bi-eraser-fill');
+      eraserCell.appendChild(eraserIcon);
+      eraserCell.classList.add('eraser','align-middle');
       if (i === 0 || i === trackPointCount - 1) {
         eraserCell.classList.add('invisible');
       }
-      eraserElm.addEventListener('click', function () {
-        GpxTrailEditor.onEraserIconClicked(eraserElm);
+      eraserIcon.addEventListener('click', function () {
+        GpxTrailEditor.onEraserIconClicked(eraserIcon);
       });
 
       // Latitude
@@ -332,56 +332,27 @@ const GpxTrailEditor = {
       // });
 
       [datetimeTextBox,latitudeTextBox,longitudeTextBox,elevationTextBox].forEach(textBox => {
-        textBox.addEventListener('blur', GpxTrailEditor.onTableInputLostFocus);
+        textBox.addEventListener('blur', GpxTrailEditor.onDataTableInputLostFocus);
       });
 
     }
   },
 
-  onTableInputLostFocus: function(event) {
+  onDataTableInputLostFocus: function(event) {
 
-    const trElm = event.target.closest('tr');
-    const index = Number(trElm.querySelector('.idx').innerText) - 1;
+    const row = event.target.closest('tr');
+    const index = Number(row.querySelector('.idx').innerText) - 1;
 
-    const latitude = parseFloat(trElm.querySelector('.latitude input').value);
-    const longitude = parseFloat(trElm.querySelector('.longitude input').value);
-    const elevation = parseFloat(trElm.querySelector('.elevation input').value);
-    // if (!latitude || !longitude || !elevation) {
-    //   alert('緯度、経度、標高を正しく入力してください。');
-    //   return false;
-    // }
-
-    const datetime = trElm.querySelector('.datetime input').value;
-    // const curDateTime = trElm.querySelector('.datetime input').value;
-    // const prevDateTime = (trElm.previousElementSibling) ? trElm.previousElementSibling.querySelector('.datetime input').value : null;
-    // const nextDateTime = (trElm.nextElementSibling) ? trElm.nextElementSibling.querySelector('.datetime input').value : null;
-
-    // const isDateTimeOrderValid = GpxTrailEditor.isDateTimeOrderValid(prevDateTime,curDateTime,nextDateTime);
-    // if (!isDateTimeOrderValid) {
-    //   const curIndex = trElm.querySelector('td.idx').innerText;
-    //   const prevIndex = (trElm.previousElementSibling) ? trElm.previousElementSibling.querySelector('td.idx').innerText : '';
-    //   const nextIndex = (trElm.nextElementSibling) ? trElm.nextElementSibling.querySelector('td.idx').innerText : '';
-    //   const invalidIndices = [prevIndex, curIndex, nextIndex].filter(index => index !== '');
-    //   const datetimeRows = invalidIndices.map(index => {
-    //     const datetime = trElm.closest('table').querySelector(`tr:nth-child(${index}) .datetime input`).value;
-    //     return `行番号 ${index}: ${datetime.replace('T',' ')}`;
-    //   });
-    //   alert(`日付の順序が正しくありません。\n${datetimeRows.join('\n')}`);
-    //   return false;
-    // }
+    const datetime = row.querySelector('.datetime input').value;
+    const latitude = parseFloat(row.querySelector('.latitude input').value);
+    const longitude = parseFloat(row.querySelector('.longitude input').value);
+    const elevation = parseFloat(row.querySelector('.elevation input').value);
 
     const targetMarker = GpxTrailEditor.markers[index];
     const targetPoint = GpxTrailEditor.points[index];
 
     if (targetMarker && targetPoint) {
       
-      // マーカーの座標や標高を更新
-      targetMarker.setLatLng([latitude, longitude]);
-      targetMarker.options.elevation = elevation;
-
-      // マーカーやポリラインを更新
-      GpxTrailEditor.updateMarkersAndPolylines();
-
       // イベントリスナーを一旦削除
       targetMarker.off('click');
       // マーカークリック時の吹き出し表示を更新
@@ -392,6 +363,14 @@ const GpxTrailEditor = {
       GpxTrailEditor.points[index].latitude = latitude;
       GpxTrailEditor.points[index].longitude = longitude;
       GpxTrailEditor.points[index].elevation = elevation;
+
+      targetMarker.options.elevation = elevation;  
+
+      // 緯度と経度がvalidな場合のみマーカーとポリラインを更新
+      if (latitude && longitude) {
+        targetMarker.setLatLng([latitude, longitude]);
+        GpxTrailEditor.updateMarkersAndPolylines();
+      }
 
       return true;
 
@@ -756,12 +735,10 @@ const GpxTrailEditor = {
   onMarkerClick: function(i) {
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     if (i < tableRows.length) {
-      // Remove the "clicked-marker" class from all rows.
       for (const row of tableRows) {
-        row.classList.remove('clicked-marker');
+        row.classList.remove('clicked-marker','table-primary');
       }
-      // Add the "clicked-marker" classs to the corresponding row.
-      tableRows[i].classList.add('clicked-marker');
+      tableRows[i].classList.add('clicked-marker','table-primary');
     }
   },
 
@@ -1051,13 +1028,10 @@ const GpxTrailEditor = {
   },
 
   clearLatitude: function(latInput) {
-
     latInput.value = '';
-
     const row = latInput.closest('tr');
     const index = Number(row.querySelector('.idx').innerText) - 1;
     GpxTrailEditor.points[index].latitude = null;
- 
   },
 
   clearLongitudeAll: function() {
@@ -1522,20 +1496,108 @@ const GpxTrailEditor = {
     });
   },
 
-  exportGPX: function() {
+  onExportGPXBtnClicked: function() {
+
+    console.log('#### onExportGPXBtnClicked');
+
     if (GpxTrailEditor.points.length > 0) {
-      const gpxContent = GpxTrailEditor.generateGPXContent(GpxTrailEditor.points);
-      const blob = new Blob([gpxContent], { type: 'application/gpx+xml' });
-      const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = 'gpx_trail_editor.gpx';
-      link.click();
+
+      // isDateTimeLatLngValid (object)
+      // result: true = valid, false = invalid (boolean)
+      // index: an array that contains invalid indices
+      // datetime: an array that contains invalid datetimes
+      // latitude: an array that contains invalid latitudes
+      // longitude: an array that contains invalid longitudes
+      // row: an array that contains invalid rows
+      const isDateTimeLatLngValid = GpxTrailEditor.isDateTimeLatLngValid();
+
+      if (isDateTimeLatLngValid[0]) {
+        const gpxContent = GpxTrailEditor.generateGPXContent(GpxTrailEditor.points);
+        GpxTrailEditor.downloadGPXFile(gpxContent);
+      } else {
+        GpxTrailEditor.alertDateTimeLatLngInvalid(isDateTimeLatLngValid);
+        return;
+      }
+
     }
+  },
+
+  isDateTimeLatLngValid: function() {
+    const invalidIndices = [];
+    const invalidDateTimes = [];
+    const invalidLatitudes = [];
+    const invalidLongitude = [];
+    const invalidRows = [];
+    for (const [index, point] of GpxTrailEditor.points.entries()) {
+      if (!point.datetime) {
+        invalidDateTimes.push(index);
+        invalidIndices.push(index);
+        invalidRows.push(index + 1);
+      }
+      if (!point.latitude) {
+        invalidLatitudes.push(index);
+        invalidIndices.push(index);
+        invalidRows.push(index + 1);
+      }
+      if (!point.longitude) {
+        invalidLongitude.push(index);
+        invalidIndices.push(index);
+        invalidRows.push(index + 1);
+      }
+    }
+    return {
+      "result": (invalidIndices.length === 0),
+      "index": invalidIndices,
+      "datetime": invalidDateTimes,
+      "latitude": invalidLatitudes,
+      "longitude": invalidLongitude,
+      "row": invalidRows
+    };
+  },
+
+  // boolean, invalidIndices, invalidDateTimes, invalidLatitudes, invalidLongitude, invalidRows
+  alertDateTimeLatLngInvalid: function(isDateTimeLatLngValid) {
+
+    console.dir(isDateTimeLatLngValid)
+
+    const tableRows = document.querySelectorAll('#data-table tbody tr');
+    tableRows.forEach((row,i) => {
+      if (isDateTimeLatLngValid.index.includes(i)) {
+        if (isDateTimeLatLngValid.datetime.includes(i)) {
+          const dtCell = row.querySelector('td.datetime');
+          dtCell.classList.add('table-warning');
+        }
+        if (isDateTimeLatLngValid.latitude.includes(i)) {
+          const latCell = row.querySelector('td.latitude');
+          latCell.classList.add('table-warning');
+        }
+        if (isDateTimeLatLngValid.longitude.includes(i)) {
+          const lngCell = row.querySelector('td.longitude');
+          lngCell.classList.add('table-warning');
+        }
+      }
+    });
+
+    const indicesString = isDateTimeLatLngValid.index.join(', ');
+    const rowsString = isDateTimeLatLngValid.row.join(', ');
+    console.error('Invalid point data for GPX export at index', indicesString, ':', rowsString);
+    alert(`Missing or invalid data.\nIndex: ${indicesString}\nRow: ${rowsString}\nPlease check and correct them before exporting.`);
+
+    return;
+
   },
 
   converHTMLFormatDateTimeToUTC: function(localdate) {
     const utcDate = new Date(localdate);
     return utcDate.toISOString();
+  },
+
+  downloadGPXFile: function(gpxContent) {
+    const blob = new Blob([gpxContent], { type: 'application/gpx+xml' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = 'gpx_trail_editor.gpx';
+    link.click();
   },
 
   generateGPXContent: function(points) {
@@ -1642,7 +1704,7 @@ const GpxTrailEditor = {
 document.addEventListener('DOMContentLoaded', function () {
 
   document.getElementById('btn-start-over').addEventListener('click', GpxTrailEditor.confirmStartOver);
-  document.getElementById('btn-export-gpx').addEventListener('click', GpxTrailEditor.exportGPX);
+  document.getElementById('btn-export-gpx').addEventListener('click', GpxTrailEditor.onExportGPXBtnClicked);
 
   GpxTrailEditor.initMap();
 
@@ -1655,10 +1717,10 @@ document.addEventListener('DOMContentLoaded', function () {
   GpxTrailEditor.setupTableHeaderOps();
 
   // Tooltipを初期化
-  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-  const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-    return new bootstrap.Tooltip(tooltipTriggerEl);
-  });
+  // const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  // const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+  //   return new bootstrap.Tooltip(tooltipTriggerEl);
+  // });
 
 });
 
