@@ -61,7 +61,7 @@
       </div>
 
       <h2 class="d-none">GPX Details</h2>
-      <div id="data-summary" class="d-none mt-3 mb-3 p-3 rounded">
+      <div id="data-summary" class="d-flex justify-content-center align-items-center mt-3 mb-3 p-3 rounded d-none">
         <div id="total-gpx-time">
           <h3 class="label fw-light text-center text-secondary">
             <i class="bi bi-stopwatch"></i>
@@ -102,6 +102,9 @@
             <span class="unit">m</span>
           </div>
         </div>
+        <div id="recalc">
+          <button id="button-recalc" class="btn btn-sm btn-light" title="再計算する"><i class="bi bi-arrow-clockwise"></i></button>
+        </div>
       </div>
 
       <!-- <div id="operation-form" class="input-group mt-3 mb-3 d-none">
@@ -118,30 +121,30 @@
         <button id="go-button" class="btn btn-secondary disabled">実行</button>
       </div> -->
 
-      <div id="op-btn-toolbar" class="d-flex justify-content-center mt-3 mb-3" role="toolbar">
+      <div id="op-btn-toolbar" class="d-flex justify-content-center mt-3 mb-3 d-none" role="toolbar">
         <button id="btn-add" class="btn btn-light border me-1">
           <i class="bi bi-plus-lg"></i>
-          <span class="label">Add</span>
+          <span class="label d-none d-sm-none d-md-inline">Add</span>
         </button>
         <button id="btn-reverse" class="btn btn-light border me-1">
           <i class="bi bi-arrow-down-up"></i>
-          <span class="label">Reverse</span>
+          <span class="label d-none d-sm-none d-md-inline">Reverse</span>
         </button>
         <button id="btn-shift" class="btn btn-light border me-1">
           <i class="bi bi-shift"></i>
-          <span class="label">Shift</span>
+          <span class="label d-none d-sm-none d-md-inline">Shift</span>
         </button>
         <button id="btn-fill" class="btn btn-light border me-1">
           <i class="bi bi-clock-history"></i>
-          <span class="label">Fill</span>
+          <span class="label d-none d-sm-none d-md-inline">Fill</span>
         </button>
         <button id="btn-export" class="btn btn-light border me-1">
           <i class="bi bi-download"></i>
-          <span class="label">Export GPX</span>
+          <span class="label d-none d-sm-none d-md-inline">Export</span>
         </button>
         <button id="btn-startover" class="btn btn-light border">
           <i class="bi bi-trash"></i>
-          <span class="label">Start Over</span>
+          <span class="label d-none d-sm-none d-md-inline">Discard</span>
         </button>
       </div>
 

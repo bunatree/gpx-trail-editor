@@ -120,14 +120,13 @@ const GpxTrailEditor = {
   onGPXFileDropped: function(files) {
     const file = files[0];
     if (file) {
-      // ファイルの解析と地図・テーブルへの反映の処理を呼び出す
       GpxTrailEditor.parseAndDisplayGPX(file);
-      // GPXアップロード用フォームを非表示
       GpxTrailEditor.hideDropZoneForm();
+      GpxTrailEditor.showButtonToolbar();
       // 操作フォームを表示
       // GpxTrailEditor.showOperationForm();
       // 「やり直す」ボタンを表示
-      GpxTrailEditor.showBtnStartOver();
+      // GpxTrailEditor.showBtnStartOver();
       // 「エクスポート」ボタンを表示
       // GpxTrailEditor.showBtnExportGPX();
     }
@@ -949,6 +948,11 @@ const GpxTrailEditor = {
       buttonElm.classList.remove('btn-primary');
       buttonElm.classList.add('btn-white');
     }
+  },
+
+
+  showButtonToolbar: function() {
+    document.getElementById('op-btn-toolbar').classList.remove('d-none');
   },
 
   // showOperationForm: function() {
