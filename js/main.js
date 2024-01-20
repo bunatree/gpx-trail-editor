@@ -306,30 +306,6 @@ const GpxTrailEditor = {
       elevationCell.appendChild(elevationTextBox);
       elevationCell.classList.add('elevation');
 
-      // Apply button
-      // const applyButtonCell = row.insertCell(7);
-      // const applyButton = document.createElement('a');
-      // applyButton.classList.add('bi','bi-check-circle','text-secondary');
-      // applyButton.setAttribute('href', 'javascript:void(0);');
-      // applyButton.setAttribute('title','変更を適用');
-      // applyButton.addEventListener('click', function () {
-      //   const applyResult = GpxTrailEditor.onApplyButtonClick(applyButton);
-      //   if (applyResult) {
-      //     applyButton.classList.add('text-secondary','bi-check-circle');
-      //   }
-      // });
-      // applyButtonCell.appendChild(applyButton);
-      // applyButtonCell.classList.add('apply','align-middle');
-
-      // Detect any changes in the input elements.
-      // [datetimeTextBox,latitudeTextBox,longitudeTextBox,elevationTextBox].forEach(inputElm => {
-      //   inputElm.addEventListener('input', () => {
-      //     applyButton.classList.remove('text-secondary'); // Color the apply button blue
-      //     applyButton.classList.remove('bi-check-circle');
-      //     applyButton.classList.add('bi-check-circle-fill');
-      //   });
-      // });
-
       [datetimeTextBox,latitudeTextBox,longitudeTextBox,elevationTextBox].forEach(textBox => {
         textBox.addEventListener('blur', GpxTrailEditor.onDataTableInputLostFocus);
       });
@@ -359,9 +335,10 @@ const GpxTrailEditor = {
 
       // ポイント情報を更新
       GpxTrailEditor.points[index].datetime = datetime;
-      GpxTrailEditor.points[index].latitude = latitude;
-      GpxTrailEditor.points[index].longitude = longitude;
-      GpxTrailEditor.points[index].elevation = elevation;
+      // GpxTrailEditor.points[index].latitude = latitude;
+      // GpxTrailEditor.points[index].longitude = longitude;
+      // GpxTrailEditor.points[index].elevation = elevation;
+      GpxTrailEditor.updatePointInfo(index,{"lat":latitude,"lng":longitude},elevation)
 
       targetMarker.options.elevation = elevation;  
 
@@ -457,6 +434,14 @@ const GpxTrailEditor = {
 
     return formattedDateTime;
 
+  },
+
+  setupSummary: function() {
+    const recalcButton = document.getElementById('button-recalc');
+    recalcButton.addEventListener('click', () => {
+      GpxTrailEditor.parseSummary(GpxTrailEditor.points);
+    });
+    GpxTrailEditor.setI18nTitle('#button-recalc', GpxTrailEditor.i18n.recalcButtonTitle);
   },
 
   parseSummary: function(points) {
@@ -786,8 +771,9 @@ const GpxTrailEditor = {
     }
   },
 
-  updatePointInfo: async function(i,newLatLng) {
+  updatePointInfo: async function(i,newLatLng,newElevation) {
     console.log('#### updatePointInfo');
+    console.log({i,newLatLng,newElevation});
 
     const points = GpxTrailEditor.points;
 
@@ -813,7 +799,7 @@ const GpxTrailEditor = {
       const curDateTime = points[i].datetime;
       const curLatitude = newLatLng.lat;
       const curLongitude = newLatLng.lng;
-      const curElevation = await GpxTrailEditor.getElevationData(curLongitude, curLatitude);
+      const curElevation = (newElevation) ? newElevation : await GpxTrailEditor.getElevationData(curLongitude, curLatitude);
       const nextDateTime = (points[i+1]) ? points[i+1].datetime : null;
       const nextLatitude = (points[i+1]) ? points[i+1].latitude : null;
       const nextLongitude = (points[i+1]) ? points[i+1].longitude : null;
@@ -1667,7 +1653,7 @@ const GpxTrailEditor = {
 
   },
 
-  setupButtonToolbar: function() {
+  setupOpButtonToolbar: function() {
 
     const buttonAdd = document.getElementById('btn-add-point');
     const buttonReverse = document.getElementById('btn-reverse');
@@ -1730,7 +1716,9 @@ const i18nData = {
     "opShiftButtonTitle": "Shifts the passing date and time of all points by the specified number of seconds.",
     "opFillButtonTitle": "Calculates and interpolates missing dates from those and the elevations of the points before and after.",
     "opExportButtonTitle": "Exports as a GPX file.",
-    "opStartOverButtonTitle": "Discards the data being edited and start over."
+    "opStartOverButtonTitle": "Discards the data being edited and start over.",
+
+    "recalcButtonTitle": "Re-calculate the summary."
   },
   "ja": {
     "opReverseButtonLabel": "ルート反転",
@@ -1743,6 +1731,8 @@ const i18nData = {
     "opFillButtonTitle": "入力されていない日時を、その前後のポイントの通過日時と標高から計算し、補間します。",
     "opExportButtonTitle": "GPXファイルとしてエクスポートします。",
     "opStartOverButtonTitle": "編集中のデータを破棄し、最初からやり直します。",
+
+    "recalcButtonTitle": "再計算を行います。"
   }
 };
 
@@ -1756,7 +1746,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   GpxTrailEditor.setupLogNameForm();
 
-  GpxTrailEditor.setupButtonToolbar();
+  GpxTrailEditor.setupSummary();
+
+  GpxTrailEditor.setupOpButtonToolbar();
 
   GpxTrailEditor.setupTableHeaderOps();
 
