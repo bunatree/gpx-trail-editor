@@ -955,10 +955,6 @@ const GpxTrailEditor = {
     document.getElementById('op-btn-toolbar').classList.remove('d-none');
   },
 
-  // showOperationForm: function() {
-  //   document.getElementById('operation-form').classList.remove('d-none');
-  // },
-
   hideDropZoneForm: function() {
     document.getElementById('drop-zone-form').classList.add('d-none');
   },
@@ -1212,52 +1208,6 @@ const GpxTrailEditor = {
       applyButton.disabled = true;
       applyButton.classList.remove('btn-primary');
       applyButton.classList.add('btn-secondary');
-    });
-  },
-
-  setupOpForm: function() {
-
-    const goButton = document.getElementById('go-button');
-    const opSelector = document.getElementById('op-selector');
-    const tsInput = document.getElementById('time-shift-input');
-    const colTsElm = document.querySelector('#operation-form div.col-ts');
-
-    opSelector.addEventListener('change', (e) => {
-      if (e.target.value) {
-        goButton.classList.remove('btn-secondary','disabled');
-        goButton.classList.add('btn-primary');
-        if (e.target.value === 'shift-datetime') {
-          tsInput.classList.remove('d-none');
-        } else {
-          tsInput.classList.add('d-none');
-        }
-      } else {
-        goButton.classList.remove('btn-primary');
-        goButton.classList.add('btn-secondary','disabled');
-        tsInput.classList.add('d-none');
-      }
-    });
-
-    goButton.addEventListener('click',(e) => {
-      switch (opSelector.value) {
-        case 'clear-all-datetime':
-          GpxTrailEditor.clearDateTimeAll();
-          break;
-        case 'clear-checked-datetime':
-          GpxTrailEditor.clearDateTimeChecked();
-          break;
-        case 'clear-unchecked-datetime':
-          GpxTrailEditor.clearDateTimeUnchecked();
-          break;
-        case 'fill-empty-datetime':
-          GpxTrailEditor.fillEmptyDateTime();
-          break;
-        case 'shift-datetime':
-          GpxTrailEditor.shiftDateTime();
-          break;
-        default:
-          console.log('Oops. Unknown value: ' + e.target.value);
-      }
     });
   },
 
@@ -1732,14 +1682,73 @@ const GpxTrailEditor = {
     buttonExport.addEventListener('click', GpxTrailEditor.onExportGPXBtnClicked);
     buttonStartOver.addEventListener('click', GpxTrailEditor.confirmStartOver);
 
-  }
+  },
 
+  getI18nObject: function(language) {
+    return i18nData[language] || i18nData['en'];
+  },
+
+  applyI18n: function() {
+    GpxTrailEditor.setI18nInnerText('#btn-reverse > span', GpxTrailEditor.i18n.opReverseButtonLabel);
+    GpxTrailEditor.setI18nInnerText('#btn-shift > span', GpxTrailEditor.i18n.opShiftButtonLabel);
+    GpxTrailEditor.setI18nInnerText('#btn-fill > span', GpxTrailEditor.i18n.opFillButtonLabel);
+    GpxTrailEditor.setI18nInnerText('#btn-export > span', GpxTrailEditor.i18n.opExportButtonLabel);
+    GpxTrailEditor.setI18nInnerText('#btn-startover > span', GpxTrailEditor.i18n.opStartOverButtonLabel);
+
+    GpxTrailEditor.setI18nTitle('#btn-reverse > span', GpxTrailEditor.i18n.opReverseButtonTitle);
+    GpxTrailEditor.setI18nTitle('#btn-shift > span', GpxTrailEditor.i18n.opShiftButtonTitle);
+    GpxTrailEditor.setI18nTitle('#btn-fill > span', GpxTrailEditor.i18n.opFillButtonTitle);
+    GpxTrailEditor.setI18nTitle('#btn-export > span', GpxTrailEditor.i18n.opExportButtonTitle);
+    GpxTrailEditor.setI18nTitle('#btn-startover > span', GpxTrailEditor.i18n.opStartOverButtonTitle);
+  },
+
+  setI18nInnerText: function(selector,innerText) {
+    const element = document.querySelector(selector);
+    if (element && innerText) {
+      element.innerText = innerText;
+    }
+  },
+
+  setI18nTitle: function(selector,titleDesc) {
+    const element = document.querySelector(selector);
+    if (element && titleDesc) {
+      element.title = titleDesc;
+    }
+  },
+
+
+};
+
+const i18nData = {
+  "en": {
+    "opReverseButtonLabel": "Reverse",
+    "opShiftButtonLabel": "Shift",
+    "opFillButtonLabel": "Fill",
+    "opExportButtonLabel": "Export",
+    "opStartOverButtonLabel": "Start Over",
+    "opReverseButtonTitle": "Reverses the route order from start to goal.",
+    "opShiftButtonTitle": "Shifts the passing date and time of all points by the specified number of seconds.",
+    "opFillButtonTitle": "Calculates and interpolates missing dates from those and the elevations of the points before and after.",
+    "opExportButtonTitle": "Exports as a GPX file.",
+    "opStartOverButtonTitle": "Discards the data being edited and start over."
+  },
+  "ja": {
+    "opReverseButtonLabel": "ルート反転",
+    "opShiftButtonLabel": "日時をずらす",
+    "opFillButtonLabel": "日時を補間",
+    "opExportButtonLabel": "エクスポート",
+    "opStartOverButtonLabel": "破棄",
+    "opReverseButtonTitle": "スタートからゴールへのルート順序を反転させます。",
+    "opShiftButtonTitle": "すべてのポイントの通過日時を指定された秒数だけずらします。",
+    "opFillButtonTitle": "入力されていない日時を、その前後のポイントの通過日時と標高から計算し、補間します。",
+    "opExportButtonTitle": "GPXファイルとしてエクスポートします。",
+    "opStartOverButtonTitle": "編集中のデータを破棄し、最初からやり直します。",
+  }
 };
 
 document.addEventListener('DOMContentLoaded', function () {
 
-  // document.getElementById('btn-start-over').addEventListener('click', GpxTrailEditor.confirmStartOver);
-  // document.getElementById('btn-export-gpx').addEventListener('click', GpxTrailEditor.onExportGPXBtnClicked);
+  GpxTrailEditor.i18n = GpxTrailEditor.getI18nObject(navigator.language);
 
   GpxTrailEditor.initMap();
 
@@ -1747,11 +1756,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   GpxTrailEditor.setupLogNameForm();
 
-  // GpxTrailEditor.setupOpForm();
-
   GpxTrailEditor.setupButtonToolbar();
 
   GpxTrailEditor.setupTableHeaderOps();
+
+  GpxTrailEditor.applyI18n();
 
   // Tooltipを初期化
   // const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
