@@ -103,28 +103,30 @@
           </div>
         </div>
         <div id="recalc">
-          <button id="button-recalc" class="btn btn-sm btn-light" title="再計算する"><i class="bi bi-arrow-clockwise"></i></button>
+          <button id="button-recalc" class="btn btn-sm btn-light" title="再計算する" data-bs-toggle="tooltip">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
         </div>
       </div>
 
       <div id="op-btn-toolbar" class="d-flex justify-content-center mt-3 mb-3 d-none" role="toolbar">
-        <button id="btn-reverse" class="btn btn-light border me-1">
+        <button id="btn-reverse" class="btn btn-light border me-1" data-bs-toggle="tooltip">
           <i class="bi bi-arrow-down-up"></i>
           <span class="label d-none d-sm-none d-md-inline">Reverse</span>
         </button>
-        <button id="btn-shift" class="btn btn-light border me-1">
+        <button id="btn-shift" class="btn btn-light border me-1" data-bs-toggle="tooltip">
           <i class="bi bi-shift"></i>
           <span class="label d-none d-sm-none d-md-inline">Shift</span>
         </button>
-        <button id="btn-fill" class="btn btn-light border me-1">
+        <button id="btn-fill" class="btn btn-light border me-1" data-bs-toggle="tooltip">
           <i class="bi bi-clock-history"></i>
           <span class="label d-none d-sm-none d-md-inline">Fill</span>
         </button>
-        <button id="btn-export" class="btn btn-light border me-1">
+        <button id="btn-export" class="btn btn-light border me-1" data-bs-toggle="tooltip">
           <i class="bi bi-download"></i>
           <span class="label d-none d-sm-none d-md-inline">Export</span>
         </button>
-        <button id="btn-startover" class="btn btn-light border">
+        <button id="btn-startover" class="btn btn-light border" data-bs-toggle="tooltip">
           <i class="bi bi-trash"></i>
           <span class="label d-none d-sm-none d-md-inline">Discard</span>
         </button>
@@ -235,7 +237,7 @@
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="./js/main.js"></script>
-  <!-- <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

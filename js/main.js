@@ -226,10 +226,14 @@ const GpxTrailEditor = {
       // If this point doesn't have a time element
       const timeElm = point.querySelector('time');
       if (!timeElm) {
-        console.error('No date/time info for the point index ' + i + ' in the gpx file.');
+        console.error(GpxTrailEditor.i18n.errorMsgTimeElmMissingGPX.replace('${i}', i));
       }
 
       const gpxDateTime = (timeElm) ? timeElm.textContent : null;
+      if (timeElm && !gpxDateTime) {
+        console.error(GpxTrailEditor.i18n.errorMsgDateTimeInvalidGPX.replace('${i}', i));
+      }
+
       const latitude = point.getAttribute('lat');
       const longitude = point.getAttribute('lon');
       const elevation = (point.querySelector('ele')) ? point.querySelector('ele').textContent : '';
@@ -265,7 +269,7 @@ const GpxTrailEditor = {
       const eraserCell = row.insertCell(3);
       const eraserIcon = document.createElement('a');
       eraserIcon.setAttribute('href','javascript:void(0);');
-      eraserIcon.setAttribute('title','Clear the date and time.');
+      eraserIcon.setAttribute('title',GpxTrailEditor.i18n.titleEraserIcon);
       eraserIcon.classList.add('bi','bi-eraser-fill');
       eraserCell.appendChild(eraserIcon);
       eraserCell.classList.add('eraser','align-middle');
@@ -280,7 +284,7 @@ const GpxTrailEditor = {
       const latitudeCell = row.insertCell(4);
       const latitudeTextBox = document.createElement('input');
       latitudeTextBox.type = 'text';
-      latitudeTextBox.setAttribute('placeholder','Latitude');
+      latitudeTextBox.setAttribute('placeholder',GpxTrailEditor.i18n.latitude);
       latitudeTextBox.classList.add('form-control');
       latitudeTextBox.value = latitude;
       latitudeCell.appendChild(latitudeTextBox);
@@ -290,7 +294,7 @@ const GpxTrailEditor = {
       const longitudeCell = row.insertCell(5);
       const longitudeTextBox = document.createElement('input');
       longitudeTextBox.type = 'text';
-      longitudeTextBox.setAttribute('placeholder','Longitude');
+      longitudeTextBox.setAttribute('placeholder',GpxTrailEditor.i18n.lognitude);
       longitudeTextBox.classList.add('form-control');
       longitudeTextBox.value = longitude;
       longitudeCell.appendChild(longitudeTextBox);
@@ -300,7 +304,7 @@ const GpxTrailEditor = {
       const elevationCell = row.insertCell(6);
       const elevationTextBox = document.createElement('input');
       elevationTextBox.type = 'text';
-      elevationTextBox.setAttribute('placeholder','Elevation');
+      elevationTextBox.setAttribute('placeholder',GpxTrailEditor.i18n.elevationss);
       elevationTextBox.classList.add('form-control');
       elevationTextBox.value = elevation;
       elevationCell.appendChild(elevationTextBox);
@@ -441,7 +445,7 @@ const GpxTrailEditor = {
     recalcButton.addEventListener('click', () => {
       GpxTrailEditor.parseSummary(GpxTrailEditor.points);
     });
-    GpxTrailEditor.setI18nTitle('#button-recalc', GpxTrailEditor.i18n.recalcButtonTitle);
+    GpxTrailEditor.setI18nTitle('#button-recalc', GpxTrailEditor.i18n.titleRecalcButton);
   },
 
   parseSummary: function(points) {
@@ -1675,17 +1679,17 @@ const GpxTrailEditor = {
   },
 
   applyI18n: function() {
-    GpxTrailEditor.setI18nInnerText('#btn-reverse > span', GpxTrailEditor.i18n.opReverseButtonLabel);
-    GpxTrailEditor.setI18nInnerText('#btn-shift > span', GpxTrailEditor.i18n.opShiftButtonLabel);
-    GpxTrailEditor.setI18nInnerText('#btn-fill > span', GpxTrailEditor.i18n.opFillButtonLabel);
-    GpxTrailEditor.setI18nInnerText('#btn-export > span', GpxTrailEditor.i18n.opExportButtonLabel);
-    GpxTrailEditor.setI18nInnerText('#btn-startover > span', GpxTrailEditor.i18n.opStartOverButtonLabel);
+    GpxTrailEditor.setI18nInnerText('#btn-reverse > span', GpxTrailEditor.i18n.labelReverseButton);
+    GpxTrailEditor.setI18nInnerText('#btn-shift > span', GpxTrailEditor.i18n.labelShiftButton);
+    GpxTrailEditor.setI18nInnerText('#btn-fill > span', GpxTrailEditor.i18n.labelFillButton);
+    GpxTrailEditor.setI18nInnerText('#btn-export > span', GpxTrailEditor.i18n.labelExportButton);
+    GpxTrailEditor.setI18nInnerText('#btn-startover > span', GpxTrailEditor.i18n.labelStartOverButton);
 
-    GpxTrailEditor.setI18nTitle('#btn-reverse > span', GpxTrailEditor.i18n.opReverseButtonTitle);
-    GpxTrailEditor.setI18nTitle('#btn-shift > span', GpxTrailEditor.i18n.opShiftButtonTitle);
-    GpxTrailEditor.setI18nTitle('#btn-fill > span', GpxTrailEditor.i18n.opFillButtonTitle);
-    GpxTrailEditor.setI18nTitle('#btn-export > span', GpxTrailEditor.i18n.opExportButtonTitle);
-    GpxTrailEditor.setI18nTitle('#btn-startover > span', GpxTrailEditor.i18n.opStartOverButtonTitle);
+    GpxTrailEditor.setI18nTitle('#btn-reverse', GpxTrailEditor.i18n.titleReverseButton);
+    GpxTrailEditor.setI18nTitle('#btn-shift', GpxTrailEditor.i18n.titleShiftButton);
+    GpxTrailEditor.setI18nTitle('#btn-fill', GpxTrailEditor.i18n.titleFillButton);
+    GpxTrailEditor.setI18nTitle('#btn-export', GpxTrailEditor.i18n.titleExportButton);
+    GpxTrailEditor.setI18nTitle('#btn-startover', GpxTrailEditor.i18n.titleStartOverButton);
   },
 
   setI18nInnerText: function(selector,innerText) {
@@ -1707,58 +1711,85 @@ const GpxTrailEditor = {
 
 const i18nData = {
   "en": {
-    "opReverseButtonLabel": "Reverse",
-    "opShiftButtonLabel": "Shift",
-    "opFillButtonLabel": "Fill",
-    "opExportButtonLabel": "Export",
-    "opStartOverButtonLabel": "Start Over",
-    "opReverseButtonTitle": "Reverses the route order from start to goal.",
-    "opShiftButtonTitle": "Shifts the passing date and time of all points by the specified number of seconds.",
-    "opFillButtonTitle": "Calculates and interpolates missing dates from those and the elevations of the points before and after.",
-    "opExportButtonTitle": "Exports as a GPX file.",
-    "opStartOverButtonTitle": "Discards the data being edited and start over.",
 
-    "recalcButtonTitle": "Re-calculate the summary."
+    // General
+    "latitude": "Latitude",
+    "lognitude": "Lognitude",
+    "elevation": "Elevation",
+    "distance": "Distance",
+
+    // Button Toolbar
+    "labelReverseButton": "Reverse",
+    "labelShiftButton": "Shift",
+    "labelFillButton": "Fill",
+    "labelExportButton": "Export",
+    "labelStartOverButton": "Start Over",
+    "titleReverseButton": "Reverses the route order from start to goal.",
+    "titleShiftButton": "Shifts the passing date and time of all points by the specified number of seconds.",
+    "titleFillButton": "Calculates and interpolates missing dates from those and the elevations of the points before and after.",
+    "titleExportButton": "Exports as a GPX file.",
+    "titleStartOverButton": "Discards the data being edited and start over.",
+
+    // Summary
+    "titleRecalcButton": "Re-calculate the summary.",
+
+    // Data Table
+    "titleEraserIcon": "Clear the date and time.",
+
+    // Error Messages
+    "errorMsgTimeElmMissingGPX": "No time element for the point index ${i} in the gpx file.",
+    "errorMsgDateTimeInvalidGPX": "The datetime info for the point index ${i} is invalid in the gpx file."
+
   },
   "ja": {
-    "opReverseButtonLabel": "ルート反転",
-    "opShiftButtonLabel": "日時をずらす",
-    "opFillButtonLabel": "日時を補間",
-    "opExportButtonLabel": "エクスポート",
-    "opStartOverButtonLabel": "破棄",
-    "opReverseButtonTitle": "スタートからゴールへのルート順序を反転させます。",
-    "opShiftButtonTitle": "すべてのポイントの通過日時を指定された秒数だけずらします。",
-    "opFillButtonTitle": "入力されていない日時を、その前後のポイントの通過日時と標高から計算し、補間します。",
-    "opExportButtonTitle": "GPXファイルとしてエクスポートします。",
-    "opStartOverButtonTitle": "編集中のデータを破棄し、最初からやり直します。",
 
-    "recalcButtonTitle": "再計算を行います。"
+    // General
+    "latitude": "緯度",
+    "lognitude": "経度",
+    "elevation": "標高",
+    "distance": "距離",
+
+    // Button Toolbar
+    "labelReverseButton": "ルート反転",
+    "labelShiftButton": "日時をずらす",
+    "labelFillButton": "日時を補間",
+    "labelExportButton": "エクスポート",
+    "labelStartOverButton": "破棄",
+    "titleReverseButton": "スタートからゴールへのルート順序を反転させます。",
+    "titleShiftButton": "すべてのポイントの通過日時を指定された秒数だけずらします。",
+    "titleFillButton": "入力されていない日時を、その前後のポイントの通過日時と標高から計算し、補間します。",
+    "titleExportButton": "GPXファイルとしてエクスポートします。",
+    "titleStartOverButton": "編集中のデータを破棄し、最初からやり直します。",
+
+    // Summary
+    "titleRecalcButton": "再計算を行います。",
+
+    // Data Table
+    "titleEraserIcon": "左の欄の日時を消去します。",
+
+    // Error Messages
+    "errorMsgTimeElmMissingGPX": "GPXファイル中のポイントのtime要素がありません。 (インデックス ${i})",
+    "errorMsgDateTimeInvalidGPX": "GPXファイル中のポイントの日時情報が正しくありません。 (インデックス ${i})"
+
   }
 };
 
 document.addEventListener('DOMContentLoaded', function () {
 
   GpxTrailEditor.i18n = GpxTrailEditor.getI18nObject(navigator.language);
-
   GpxTrailEditor.initMap();
-
   GpxTrailEditor.setupDropZone();
-
   GpxTrailEditor.setupLogNameForm();
-
   GpxTrailEditor.setupSummary();
-
   GpxTrailEditor.setupOpButtonToolbar();
-
   GpxTrailEditor.setupTableHeaderOps();
-
   GpxTrailEditor.applyI18n();
 
-  // Tooltipを初期化
-  // const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-  // const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-  //   return new bootstrap.Tooltip(tooltipTriggerEl);
-  // });
+  // Initialize the tooltip
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
 
 });
 
