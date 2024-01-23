@@ -8,6 +8,7 @@ const GpxTrailEditor = {
   markers: [], // an array for the markers on the map
   polyline: [], // an array for the markers on the map
   borderPolyline: [], // an array for the markers on the map
+  eleTiles: {}, // Elevation tile data
 
   FIRST_MARKER_RADIUS: 8,
   LAST_MARKER_RADIUS: 8,
@@ -338,6 +339,7 @@ const GpxTrailEditor = {
       GpxTrailEditor.bindMarkerEvents(targetMarker,index,[latitude,longitude],datetime);
 
       // ポイント情報を更新
+
       GpxTrailEditor.points[index].datetime = datetime;
       // GpxTrailEditor.points[index].latitude = latitude;
       // GpxTrailEditor.points[index].longitude = longitude;
@@ -755,21 +757,18 @@ const GpxTrailEditor = {
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     if (i < tableRows.length) {
 
-      const lon = newLatLng.lng;
-      const lat = newLatLng.lat;
-
-      const latInputElm = tableRows[i].querySelector('td.latitude input');
-      const lonInputElm = tableRows[i].querySelector('td.longitude input');
-      latInputElm.value = newLatLng.lat;
-      lonInputElm.value = newLatLng.lng;
+      const latInput = tableRows[i].querySelector('td.latitude input');
+      const lngInput = tableRows[i].querySelector('td.longitude input');
+      latInput.value = newLatLng.lat;
+      lngInput.value = newLatLng.lng;
 
       // Save the current existing elevation.
-      const eleInputElm = tableRows[i].querySelector('td.elevation input');
+      const eleInput = tableRows[i].querySelector('td.elevation input');
 
       // Get the elevation of the marker's new location.
-      const newEle = await GpxTrailEditor.getElevationData(lon, lat);
+      const newEle = await GpxTrailEditor.getElevationData(newLatLng.lat,newLatLng.lng);
       if (newEle !== null) {
-        eleInputElm.value = newEle;
+        eleInput.value = newEle;
       }
 
     }
@@ -777,7 +776,7 @@ const GpxTrailEditor = {
 
   updatePointInfo: async function(i,newLatLng,newElevation) {
     console.log('#### updatePointInfo');
-    console.log({i,newLatLng,newElevation});
+    // console.log({i,newLatLng,newElevation});
 
     const points = GpxTrailEditor.points;
 
@@ -803,7 +802,7 @@ const GpxTrailEditor = {
       const curDateTime = points[i].datetime;
       const curLatitude = newLatLng.lat;
       const curLongitude = newLatLng.lng;
-      const curElevation = (newElevation) ? newElevation : await GpxTrailEditor.getElevationData(curLongitude, curLatitude);
+      const curElevation = (newElevation) ? newElevation : await GpxTrailEditor.getElevationData(curLatitude,curLongitude);
       const nextDateTime = (points[i+1]) ? points[i+1].datetime : null;
       const nextLatitude = (points[i+1]) ? points[i+1].latitude : null;
       const nextLongitude = (points[i+1]) ? points[i+1].longitude : null;
@@ -820,7 +819,7 @@ const GpxTrailEditor = {
         const prevDateTime = points[i-1].datetime;
         const prevLatitude = points[i-1].latitude;
         const prevLongitude = points[i-1].longitude;
-        const prevElevation = await GpxTrailEditor.getElevationData(prevLongitude, prevLatitude);
+        const prevElevation = await GpxTrailEditor.getElevationData(prevLatitude,prevLongitude);
         const toCurDistance = (points[i]) ? GpxTrailEditor.calcHubenyDistance(prevLatitude, prevLongitude, curLatitude, curLongitude) : null;
         const toCurElevation = (prevElevation) ? curElevation - prevElevation : null;
         const toCurSeconds = (prevDateTime) ? GpxTrailEditor.calcDateTimeDifference(prevDateTime,curDateTime) : null;
@@ -833,9 +832,9 @@ const GpxTrailEditor = {
     }
   },
 
-  getElevationData: async function(lon, lat) {
+  getElevationData: async function(latitude,longitude) {
 
-    const apiUrl = `https://cyberjapandata2.gsi.go.jp/general/dem/scripts/getelevation.php?lon=${lon}&lat=${lat}&outtype=JSON`;
+    const apiUrl = `https://cyberjapandata2.gsi.go.jp/general/dem/scripts/getelevation.php?lon=${longitude}&lat=${latitude}&outtype=JSON`;
     const errorStr = '-----';
 
     try {
@@ -854,7 +853,21 @@ const GpxTrailEditor = {
       console.error('Unexpected error: ', error);
       return null;
     }
+
+    
   },
+
+  
+
+
+  
+
+
+
+
+
+
+
 
   updateMarkersAndPolylines: function() {
 
@@ -1059,6 +1072,250 @@ const GpxTrailEditor = {
     GpxTrailEditor.points[index].longitude = null;
  
   },
+
+  // 標高情報を取得して表示する関数
+  replaceElevationAll: async function() {
+    console.log('#### replaceElevationAll');
+ 
+    const noElevationPoints = [];
+
+    GpxTrailEditor.points.forEach(point => {
+      const chkResult = GpxTrailEditor.isTileInfoDownloaded(point);
+      if (chkResult) {
+        noElevationPoints.push(chkResult);
+      }
+    });
+
+    // 緯度経度から標高タイルのダウンロードリストを作成
+    // let DLtileList = makeDownloadTileList(latlonAll);
+
+    // 標高タイルのダウンロード
+    // if (DLtileList.length !== 0) {
+    //   for (let i = 0; i < DLtileList.length; i++) {
+    //     await downloadTile(DLtileList[i][0], DLtileList[i][1]);
+    //     // ダウンロード進捗を表示
+    //     console.log(`標高データ取得 ${Math.round(100 * (i + 1) / DLtileList.length)}%`);
+    //   }
+    // }
+
+    // // ルートの標高情報を更新
+    // updateElevationText(routeId);
+
+    // // 完了メッセージ表示
+    console.log('#### Completed!');
+  },
+
+  isTileInfoDownloaded: function(point) {
+
+  },
+
+  // ダウンロード済みタイルから緯度経度の標高値を取得する関数
+  // ダウンロードされていない場合はfetchTile関数を実行して国土地理院から取得する
+  // 戻り値は標高（数値）
+  latLngToEle: async function(latitude, longitude) {
+
+    console.log('#### latLngToEle');
+
+    let tileInfoObj = GpxTrailEditor.latLngToTile(latitude, longitude, 15);
+    let tileKey = `${15}/${tileInfoObj.tileX}/${tileInfoObj.tileY}`;
+    let tileText = '';
+    let elevationValue = null;
+  
+    // eleTilesにデータが存在する場合
+    if (GpxTrailEditor.eleTiles.hasOwnProperty(tileKey)) {
+      tileText = GpxTrailEditor.eleTiles[tileKey];
+      elevationValue = GpxTrailEditor.findElevationInTileText(tileInfoObj.tilePixelX, tileInfoObj.tilePixelY, tileText);
+  
+      // 標高データがinvalidの場合（元々の取得した標高が文字列"e"を含む場合）
+      if (!elevationValue) {
+        const resultObj = await GpxTrailEditor.fetchTile(tileInfoObj.tileX, tileInfoObj.tileY);
+        // console.log({resultObj})
+        // tileText = GpxTrailEditor.eleTiles[tileKey];
+        tileText = resultObj.tileText;
+        elevationValue = GpxTrailEditor.findElevationInTileText(tileInfoObj.tilePixelX, tileInfoObj.tilePixelY, tileText);
+      }
+    } else {
+      // eleTilesにデータが存在しない場合、DEM10を取得
+      const resultObj = await GpxTrailEditor.fetchTile(tileInfoObj.tileX, tileInfoObj.tileY);
+      // console.log({resultObj})
+      // tileText = GpxTrailEditor.eleTiles[tileKey];
+      tileText = resultObj.tileText;
+      elevationValue = GpxTrailEditor.findElevationInTileText(tileInfoObj.tilePixelX, tileInfoObj.tilePixelY, tileText);
+    }
+  
+    return elevationValue;
+
+  },
+
+  // 経度、緯度、ズームレベルからタイル情報を取得する
+  latLngToTile: function(latitude, longitude, zoomLevel) {
+    // 最大緯度
+    const maxLatitude = 85.05112878;
+    
+    // 入力値の変換
+    const lat = parseFloat(latitude);
+    const lng = parseFloat(longitude);
+    const zoom = parseInt(zoomLevel);
+
+    // 緯度経度からピクセル座標への変換
+    const pixelX = Math.pow(2, zoom + 7) * (lng / 180 + 1);
+    const pixelY = (Math.pow(2, zoom + 7) / Math.PI) * ((-1 * Math.atanh(Math.sin((Math.PI / 180) * lat))) + Math.atanh(Math.sin((Math.PI / 180) * maxLatitude)));
+
+    // ピクセル座標からタイル座標への変換
+    const tileX = parseInt(pixelX / 256);
+    const tileY = parseInt(pixelY / 256);
+
+    // タイル座標からタイル内ピクセル座標への変換
+    const tilePixelX = Math.floor(pixelX % 256) + 1;
+    const tilePixelY = Math.floor(pixelY % 256) + 1;
+
+    // 結果をオブジェクトで返す
+    return {
+      "pixelX": pixelX,
+      "pixelY": pixelY,
+      "tileX": tileX,
+      "tileY": tileY,
+      "tilePixelX": tilePixelX,
+      "tilePixelY": tilePixelY
+    };
+  },
+
+
+// 標高タイル内ピクセル座標の値を取り出す関数
+// 引数：タイル内ピクセル座標X, タイル内ピクセル座標Y, tileTxtデータ
+// 戻り値：標高値（ストリング）または"e"
+findElevationInTileText: function (tilePixelX, tilePixelY, tileText) {
+
+  console.log('#### findElevationInTileText');
+  console.log({tilePixelX, tilePixelY, tileText});
+
+  // 初期化
+  let startIndex = 0;
+  let commaIndex = 0;
+
+  // tpY回改行文字を見つける
+  if (tilePixelY > 1) {
+    for (let i = 0; i < tilePixelY - 1; i++) {
+      startIndex = tileText.indexOf("\n", startIndex + 1);
+    }
+  }
+
+  // tpX回カンマを見つける
+  if (tilePixelX > 1) {
+    for (let i = 0; i < tilePixelX - 1; i++) {
+      startIndex = tileText.indexOf(",", startIndex + 1);
+    }
+  }
+
+  // カンマまたは改行までの部分文字列を取得
+  if (tilePixelX <= 255) {
+    commaIndex = tileText.indexOf(",", startIndex + 1);
+  } else {
+    commaIndex = tileText.indexOf("\n", startIndex + 1);
+  }
+
+  // インデックスの補正
+  startIndex = (startIndex === 0) ? 0 : startIndex + 1;
+
+  // 指定座標に対応する部分文字列（標高）を取得
+  const eleString = tileText.substring(startIndex, commaIndex);
+
+  return Number(eleString);
+
+},
+
+fetchTile: async function(tileX, tileY) {
+  // DEM5のURLを構築
+  let url15 = `https://cyberjapandata.gsi.go.jp/xyz/dem5a/15/${tileX}/${tileY}.txt`;
+  const response = await fetch(url15);
+  let readText = await response.text();
+
+  // DEM5が存在するか確認
+  if (response.status === 200) {
+    const tileKey15 = `15/${tileX}/${tileY}`;
+    GpxTrailEditor.eleTiles[tileKey15] = readText;
+    // return Promise.resolve(); // DEM5の取得が成功した場合はresolve
+    return {
+      "result": "success",
+      "tileKey": tileKey15,
+      "type": "DEM5",
+      "zoomLevel": 15,
+      "tileText": readText
+    };
+  }
+
+  // "e"が含まれているかまたはステータスコードが400の場合
+  if (readText.indexOf('e') !== -1 || response.status === 400) {
+    const tileKey14 = `14/${Math.floor(tileX / 2)}/${Math.floor(tileY / 2)}`;
+    // DEM10のURLを構築
+    let url14 = `https://cyberjapandata.gsi.go.jp/xyz/dem/14/${tileKey14}.txt`;
+    const response = await fetch(url14);
+    readText = await response.text();
+
+    // DEM10が存在するか確認
+    if (response.status === 200) {
+      GpxTrailEditor.eleTiles[tileKey14] = readText;
+      // return Promise.resolve(); // DEM10の取得が成功した場合はresolve
+      return {
+        "result": "success",
+        "tileKey": tileKey14,
+        "type": "DEM10",
+        "zoomLevel": 14,
+        "tileText": readText
+      };
+    }
+  }
+
+  // 標高が不明の場合
+  return {
+    "result": "failure",
+    "tileKey": null,
+    "type": null,
+    "zoomLevel": null,
+    "tileText": null
+  };
+},
+
+
+// trksegTxtから緯度経度の配列を作成する関数
+ makeLatLonFromTrkTxt: function(trksegTxt) {
+  let latlon = [];
+  let pointIndex = 0;
+
+  // ポイントが見つかる限り繰り返す
+  while (pointIndex !== -1) {
+    // trkptのデータを取得
+    let trkptData = GpxTrailEditor.getTrkptData(trksegTxt, pointIndex);
+
+    // ポイントが見つかった場合
+    if (trkptData[0] !== -1) {
+      // 緯度経度を配列に追加
+      latlon.push([trkptData[1], trkptData[2]]);
+      pointIndex++;
+    }
+  }
+
+  return latlon;
+},
+
+getTrkptData: function(trksegTxt, pointIndex) {
+
+},
+
+// 緯度経度から標高タイルのダウンロードリストを作成する関数
+makeDownloadTileList: function(latlonAll) {
+  // 実装は省略
+},
+
+// 標高タイルをダウンロードする関数
+downloadTile: async function(tileX, tileY) {
+  // 実装は省略
+},
+
+// ルートの標高情報を更新する関数
+updateElevationText: function(routeId) {
+  // 実装は省略
+},
 
   clearElevationAll: function() {
     const rows = document.querySelectorAll('#data-table tbody tr');
@@ -1643,6 +1900,7 @@ const GpxTrailEditor = {
         'clear-unchecked': GpxTrailEditor.clearLongitudeUnchecked,
       },
       elevation: {
+        'replace-all': GpxTrailEditor.replaceElevationAll,
         'clear-all': GpxTrailEditor.clearElevationAll,
         'clear-checked': GpxTrailEditor.clearElevationChecked,
         'clear-unchecked': GpxTrailEditor.clearElevationUnchecked,
@@ -1673,6 +1931,50 @@ const GpxTrailEditor = {
     buttonStartOver.addEventListener('click', GpxTrailEditor.confirmStartOver);
 
   },
+
+  // ###### Edit later #######
+  getElevationTile: async function(tileX, tileY) {
+    console.log({ tileX, tileY }); // ####
+    
+    // DEM5AのURLを構築
+    const urlDEM5A = `https://cyberjapandata.gsi.go.jp/xyz/dem5a/15/${tileX}/${tileY}.txt`;
+    
+    // DEM5Aを取得
+    const responseDEM5A = await fetch(urlDEM5A);
+    const elevationDataDEM5A = await responseDEM5A.text();
+    
+    // もしDEM5Aが存在する場合、eleTileに格納
+    if (responseDEM5A.status === 200) {
+      eleTile[`15/${tileX}/${tileY}`] = elevationDataDEM5A;
+    }
+  
+    // もしDEM5Aが無いか、"e"が含まれている場合、DEM10を取得
+    if (elevationDataDEM5A.indexOf("e") !== -1 || responseDEM5A.status === 400) {
+      // DEM10のURLを構築
+      const urlDEM10 = `https://cyberjapandata.gsi.go.jp/xyz/dem/14/${Math.floor(tileX / 2)}/${Math.floor(tileY / 2)}.txt`;
+      
+      // DEM10を取得
+      const responseDEM10 = await fetch(urlDEM10);
+      const elevationDataDEM10 = await responseDEM10.text();
+  
+      // もしDEM10が存在する場合、eleTileに格納
+      if (responseDEM10.status === 200) {
+        eleTile[`14/${Math.floor(tileX / 2)}/${Math.floor(tileY / 2)}`] = elevationDataDEM10;
+      }
+    }
+  
+    // Promiseを返す（resolveの引数は空）
+    return new Promise(function (resolve, reject) { resolve(); });
+  },
+  
+
+  
+
+
+
+
+
+
 
   getI18nObject: function(language) {
     return i18nData[language] || i18nData['en'];
