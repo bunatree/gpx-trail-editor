@@ -1098,36 +1098,30 @@ const GpxTrailEditor = {
  
   },
 
-  // 標高情報を取得して表示する関数
-  replaceElevationAll: async function() {
-    console.log('#### replaceElevationAll');
+  // 国土地理院の標高タイルから標高を取り出して更新
+  replaceElevationChecked: async function() {
+    console.log('#### replaceElevationChecked');
  
-    const noElevationPoints = [];
+    const checkedInputs = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:checked');
 
-    GpxTrailEditor.points.forEach(point => {
-      const chkResult = GpxTrailEditor.isTileInfoDownloaded(point);
-      if (chkResult) {
-        noElevationPoints.push(chkResult);
+    checkedInputs.forEach(async (checkbox) => {
+
+      const row = checkbox.closest('tr');
+      const index = row.rowIndex - 1;
+      const latitude = GpxTrailEditor.points[index].latitude;
+      const longitude = GpxTrailEditor.points[index].longitude;
+      if (latitude && longitude) {
+        const elevation = await GpxTrailEditor.latLngToEle(latitude,longitude);
+        const eleInput = row.querySelector('td.elevation input');
+        eleInput.value = elevation;
+        GpxTrailEditor.points[index].elevation = elevation;
+      } else {
+        console.warn(`The latitude or lognitude is invalid in the table row ${index+1}. Not going to replace the elavation. (latitude: ${latitude}, lognitude: ${longitude})`);
       }
+
     });
 
-    // 緯度経度から標高タイルのダウンロードリストを作成
-    // let DLtileList = makeDownloadTileList(latlonAll);
-
-    // 標高タイルのダウンロード
-    // if (DLtileList.length !== 0) {
-    //   for (let i = 0; i < DLtileList.length; i++) {
-    //     await downloadTile(DLtileList[i][0], DLtileList[i][1]);
-    //     // ダウンロード進捗を表示
-    //     console.log(`標高データ取得 ${Math.round(100 * (i + 1) / DLtileList.length)}%`);
-    //   }
-    // }
-
-    // // ルートの標高情報を更新
-    // updateElevationText(routeId);
-
-    // // 完了メッセージ表示
-    console.log('#### Completed!');
+    
   },
 
   isTileInfoDownloaded: function(point) {
@@ -1930,7 +1924,7 @@ updateElevationText: function(routeId) {
         'clear-unchecked': GpxTrailEditor.clearLongitudeUnchecked,
       },
       elevation: {
-        'replace-all': GpxTrailEditor.replaceElevationAll,
+        'replace-checked': GpxTrailEditor.replaceElevationChecked,
         'clear-all': GpxTrailEditor.clearElevationAll,
         'clear-checked': GpxTrailEditor.clearElevationChecked,
         'clear-unchecked': GpxTrailEditor.clearElevationUnchecked,
