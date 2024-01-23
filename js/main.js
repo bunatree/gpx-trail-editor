@@ -261,23 +261,23 @@ const GpxTrailEditor = {
       timeCell.appendChild(datetimeTextBox);
       timeCell.classList.add('datetime');
 
-      // Eraser
-      const eraserCell = row.insertCell(3);
-      const eraserIcon = document.createElement('a');
-      eraserIcon.setAttribute('href','javascript:void(0);');
-      eraserIcon.setAttribute('title',GpxTrailEditor.i18n.titleEraserIcon);
-      eraserIcon.classList.add('bi','bi-eraser-fill');
-      eraserCell.appendChild(eraserIcon);
-      eraserCell.classList.add('eraser','align-middle');
-      if (i === 0 || i === trackPointCount - 1) {
-        eraserCell.classList.add('invisible');
-      }
-      eraserIcon.addEventListener('click', function () {
-        GpxTrailEditor.onEraserIconClicked(eraserIcon);
-      });
+      // // Eraser
+      // const eraserCell = row.insertCell(3);
+      // const eraserIcon = document.createElement('a');
+      // eraserIcon.setAttribute('href','javascript:void(0);');
+      // eraserIcon.setAttribute('title',GpxTrailEditor.i18n.titleEraserIcon);
+      // eraserIcon.classList.add('bi','bi-eraser-fill');
+      // eraserCell.appendChild(eraserIcon);
+      // eraserCell.classList.add('eraser','align-middle');
+      // if (i === 0 || i === trackPointCount - 1) {
+      //   eraserCell.classList.add('invisible');
+      // }
+      // eraserIcon.addEventListener('click', function () {
+      //   GpxTrailEditor.onEraserIconClicked(eraserIcon);
+      // });
 
       // Latitude
-      const latitudeCell = row.insertCell(4);
+      const latitudeCell = row.insertCell(3);
       const latitudeTextBox = document.createElement('input');
       latitudeTextBox.type = 'text';
       latitudeTextBox.setAttribute('placeholder',GpxTrailEditor.i18n.latitude);
@@ -287,7 +287,7 @@ const GpxTrailEditor = {
       latitudeCell.classList.add('latitude');
 
       // Longitude
-      const longitudeCell = row.insertCell(5);
+      const longitudeCell = row.insertCell(4);
       const longitudeTextBox = document.createElement('input');
       longitudeTextBox.type = 'text';
       longitudeTextBox.setAttribute('placeholder',GpxTrailEditor.i18n.lognitude);
@@ -297,7 +297,7 @@ const GpxTrailEditor = {
       longitudeCell.classList.add('longitude');
 
       // Elevation
-      const elevationCell = row.insertCell(6);
+      const elevationCell = row.insertCell(5);
       const elevationTextBox = document.createElement('input');
       elevationTextBox.type = 'text';
       elevationTextBox.setAttribute('placeholder',GpxTrailEditor.i18n.elevation);
