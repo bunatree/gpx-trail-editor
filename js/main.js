@@ -1102,29 +1102,51 @@ const GpxTrailEditor = {
   replaceElevationChecked: async function() {
     console.log('#### replaceElevationChecked');
  
+    let alertMsg = '';
+
     const checkedInputs = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:checked');
 
-    checkedInputs.forEach(async (checkbox) => {
+    if (checkedInputs.length !== 0) {
+      checkedInputs.forEach(async (checkbox) => {
+        const row = checkbox.closest('tr');
+        const index = row.rowIndex - 1;
+        const latitude = GpxTrailEditor.points[index].latitude;
+        const longitude = GpxTrailEditor.points[index].longitude;
+        if (latitude && longitude) {
+          const elevation = await GpxTrailEditor.latLngToEle(latitude,longitude);
+          const eleInput = row.querySelector('td.elevation input');
+          eleInput.value = elevation;
+          GpxTrailEditor.points[index].elevation = elevation;
+        } else {
+          console.warn(`The latitude or lognitude is invalid in the table row ${index+1}. Not going to replace the elavation. (latitude: ${latitude}, lognitude: ${longitude})`);
+        }
+      });
+    } else {
+      alertMsg = '標高を更新したい行のチェックボックスを ON にしてください。';
+    }
 
-      const row = checkbox.closest('tr');
-      const index = row.rowIndex - 1;
-      const latitude = GpxTrailEditor.points[index].latitude;
-      const longitude = GpxTrailEditor.points[index].longitude;
-      if (latitude && longitude) {
-        const elevation = await GpxTrailEditor.latLngToEle(latitude,longitude);
-        const eleInput = row.querySelector('td.elevation input');
-        eleInput.value = elevation;
-        GpxTrailEditor.points[index].elevation = elevation;
-      } else {
-        console.warn(`The latitude or lognitude is invalid in the table row ${index+1}. Not going to replace the elavation. (latitude: ${latitude}, lognitude: ${longitude})`);
-      }
-
-    });
-
+    if (alertMsg) {
+      GpxTrailEditor.showAlert('warning',alertMsg);
+    }
     
   },
 
-  isTileInfoDownloaded: function(point) {
+  showAlert: function(type,message) {
+
+    const alertContainer = document.getElementById('alert-container');
+    alertContainer.innerHTML = ''; // Clear the inner content.
+
+    const alertBox = document.createElement('div');
+    alertBox.id = 'alert-box';
+    alertBox.classList.add('alert','alert-'+type,'alert-dismissible','fade','show');
+    const dismissButton = document.createElement('button');
+    dismissButton.classList.add('btn-close');
+    dismissButton.setAttribute('type','button');
+    dismissButton.dataset.bsDismiss = 'alert';
+    dismissButton.areaLabel = 'Close'
+    alertBox.innerHTML = message;
+    alertBox.appendChild(dismissButton);
+    alertContainer.appendChild(alertBox);
 
   },
 
