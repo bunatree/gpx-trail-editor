@@ -135,12 +135,26 @@
       <table id="data-table" class="table table-sm table-borderless table-hover w-100 d-none">
         <thead>
           <tr>
-            <th class="chkbox align-middle">
-              <input type="checkbox" id="chk-all" class="form-check-input" title="すべての行のチェックボックスの ON と OFF を切り替えます。" />
-            </th>
             <th class="idx align-middle"></th>
+            <th class="chkbox align-middle text-center">
+              <!-- <input type="checkbox" id="chk-all" class="form-check-input" title="すべての行のチェックボックスの ON と OFF を切り替えます。" /> -->
+              <div class="th-content d-flex justify-content-center align-items-center">
+                <span class="label d-none">チェック</span>
+                <div class="op dropdown fw-light">
+                  <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" data-target-name="check" data-op-name="turn-on">チェック ON
+                    </a></li>
+                    <li><a class="dropdown-item" data-target-name="check" data-op-name="turn-off">チェック OFF</a></li>
+                    <li><a class="dropdown-item" data-target-name="check" data-op-name="toggle">チェック反転</a></li>
+                  </ul>
+                </div>
+              </div>
+            </th>
             <th class="datetime">
-              <div class="th-content">
+              <div class="th-content d-flex justify-content-between align-items-center">
                 <span class="label">日時</span>
                 <div class="op dropdown fw-light">
                   <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -158,7 +172,7 @@
               </th>
             <th class="eraser"></th>
             <th class="latitude">
-              <div class="th-content">
+              <div class="th-content d-flex justify-content-between align-items-center">
                 <span class="label">緯度</span>
                 <div class="op dropdown fw-light">
                   <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -176,7 +190,7 @@
               </div>
             </th>
             <th class="longitude">
-              <div class="th-content">
+              <div class="th-content d-flex justify-content-between align-items-center">
                 <span class="label">経度</span>
                 <div class="op dropdown fw-light">
                   <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -194,20 +208,20 @@
               </div>
             </th>
             <th class="elevation">
-              <div class="th-content">
+              <div class="th-content d-flex justify-content-between align-items-center">
                 <span class="label">標高</span>
                 <div class="op dropdown fw-light">
                   <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-three-dots-vertical"></i>
                   </button>
                   <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" data-target-name="elevation" data-op-name="replace-all" title="標高を国土地理院の標高に置き換えます。">国土地理院の標高で更新</a></li>
                     <li><a class="dropdown-item" data-target-name="elevation" data-op-name="clear-all">すべての行を消去
                     </a></li>
                     <li><a class="dropdown-item" data-target-name="elevation" data-op-name="clear-checked">チェックされた行を消去
                     </a></li>
                     <li><a class="dropdown-item" data-target-name="elevation" data-op-name="clear-unchecked">チェックされていない行を消去
                     </a></li>
-                    <li><a class="dropdown-item" data-target-name="elevation" data-op-name="replace-all" title="未記入の標高を国土地理院の標高に置き換えます。">国土地理院の標高で更新</a></li>
                   </ul>
                 </div>
               </div>

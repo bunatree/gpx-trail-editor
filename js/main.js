@@ -206,13 +206,8 @@ const GpxTrailEditor = {
 
     // The "Check All" checkbox
     const headerChkCell = document.querySelector('#data-table thead .chkbox');
-    const headerChkbox = headerChkCell.querySelector('input');
-    // chkAllElm.id = 'chk-all';
-    // chkAllElm.type = 'checkbox';
-    // chkAllElm.classList.add('form-check-input');
-    // chkboxAllCell.appendChild(chkAllElm);
-    // chkboxAllCell.classList.add('align-middle');
-    headerChkbox.addEventListener('change',GpxTrailEditor.onChkAllChanged);
+    // const headerChkbox = headerChkCell.querySelector('input');
+    // headerChkbox.addEventListener('change',GpxTrailEditor.onChkAllChanged);
 
     const tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
 
@@ -242,18 +237,18 @@ const GpxTrailEditor = {
       // Create a row.
       const row = tableBody.insertRow(i);
 
-      // Checkbox
-      const checkboxCell = row.insertCell(0);
-      const checkboxElm = document.createElement('input');
-      checkboxElm.type = 'checkbox';
-      checkboxElm.classList.add('form-check-input','text-center');
-      checkboxCell.appendChild(checkboxElm);
-      checkboxCell.classList.add('chkbox','align-middle');
-
       // Index (Starts from 1)
-      const idxCell = row.insertCell(1);
+      const idxCell = row.insertCell(0);
       idxCell.innerText = i + 1;
       idxCell.classList.add('idx','align-middle','text-end');
+
+      // Checkbox
+      const checkboxCell = row.insertCell(1);
+      const checkboxInput = document.createElement('input');
+      checkboxInput.type = 'checkbox';
+      checkboxInput.classList.add('form-check-input','text-center');
+      checkboxCell.appendChild(checkboxInput);
+      checkboxCell.classList.add('chkbox','align-middle','text-center');
 
       // Date/Time
       const timeCell = row.insertCell(2);
@@ -976,14 +971,36 @@ const GpxTrailEditor = {
     GpxTrailEditor.clearDateTime(datetimeInput);
   },
 
+  turnOnCheckboxAll: function() {
+    document.querySelectorAll('#data-table tbody tr').forEach(row => {
+      const checkbox = row.querySelector('td.chkbox input[type=checkbox]');
+      checkbox.checked = true;
+    });
+  },
+
+  turnOffCheckboxAll: function() {
+    document.querySelectorAll('#data-table tbody tr').forEach(row => {
+      const checkbox = row.querySelector('td.chkbox input[type=checkbox]');
+      checkbox.checked = false;
+    });
+  },
+
+  toggleCheckboxAll: function() {
+    document.querySelectorAll('#data-table tbody tr').forEach(row => {
+      const checkbox = row.querySelector('td.chkbox input[type=checkbox]');
+      if (checkbox.checked) {
+        checkbox.checked = false;
+      } else {
+        checkbox.checked = true;
+      }
+    });
+  },
+
   clearDateTime: function(datetimeInput) {
-
     datetimeInput.value = '';
-
     const row = datetimeInput.closest('tr');
     const index = Number(row.querySelector('.idx').innerText) - 1;
     GpxTrailEditor.points[index].datetime = '';
-
   },
 
   clearDateTimeAll: function() {
@@ -1877,7 +1894,7 @@ updateElevationText: function(routeId) {
   },
 
   setupTableHeaderOps: function() {
-    ['datetime','latitude','longitude','elevation'].forEach(className => {
+    ['chkbox','datetime','latitude','longitude','elevation'].forEach(className => {
       const tableCell = document.querySelector('#data-table thead th.' + className);
       tableCell.querySelectorAll('.op ul.dropdown-menu > li > a').forEach(menuLink => {
         menuLink.addEventListener('click', (event) => {
@@ -1890,8 +1907,13 @@ updateElevationText: function(routeId) {
   },
 
   onTableHeaderOpMenuItemClicked: function(opName,targetName) {
-    
+
     const operationMap = {
+      check: {
+        "turn-on": GpxTrailEditor.turnOnCheckboxAll,
+        "turn-off": GpxTrailEditor.turnOffCheckboxAll,
+        "toggle": GpxTrailEditor.toggleCheckboxAll,
+      },
       datetime: {
         'clear-all': GpxTrailEditor.clearDateTimeAll,
         'clear-checked': GpxTrailEditor.clearDateTimeChecked,
