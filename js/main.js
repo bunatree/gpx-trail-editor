@@ -1102,6 +1102,7 @@ const GpxTrailEditor = {
   replaceElevationChecked: async function() {
     console.log('#### replaceElevationChecked');
  
+    let shouldAlert = false;
     let alertMsg = '';
 
     const checkedInputs = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:checked');
@@ -1118,14 +1119,17 @@ const GpxTrailEditor = {
           eleInput.value = elevation;
           GpxTrailEditor.points[index].elevation = elevation;
         } else {
-          console.warn(`The latitude or lognitude is invalid in the table row ${index+1}. Not going to replace the elavation. (latitude: ${latitude}, lognitude: ${longitude})`);
+          shouldAlert = true;
+          alertMsg = `The latitude or lognitude is invalid in the table row ${index+1}. Not going to replace the elavation. (latitude: ${latitude}, lognitude: ${longitude})`;
+          // console.warn(`The latitude or lognitude is invalid in the table row ${index+1}. Not going to replace the elavation. (latitude: ${latitude}, lognitude: ${longitude})`);
         }
       });
     } else {
+      shouldAlert = true;
       alertMsg = '標高を更新したい行のチェックボックスを ON にしてください。';
     }
 
-    if (alertMsg) {
+    if (shouldAlert) {
       GpxTrailEditor.showAlert('warning',alertMsg);
     }
     
@@ -1368,11 +1372,21 @@ updateElevationText: function(routeId) {
 
   clearElevationChecked: function() {
     const checkedInputs = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:checked');
-    checkedInputs.forEach(checkbox => {
-      const row = checkbox.closest('tr');
-      const eleInput = row.querySelector('td.elevation input');
-      GpxTrailEditor.clearElevation(eleInput);
-    });
+    let shouldAlert = false;
+    let alertMsg = '';
+    if (checkedInputs.length > 0) {
+      checkedInputs.forEach(checkbox => {
+        const row = checkbox.closest('tr');
+        const eleInput = row.querySelector('td.elevation input');
+        GpxTrailEditor.clearElevation(eleInput);
+      });
+    } else {
+      shouldAlert = true;
+      alertMsg = '標高を消去したい行のチェックボックスを ON にしてください。';
+    }
+    if (shouldAlert) {
+      GpxTrailEditor.showAlert('warning',alertMsg);
+    }
   },
   
   clearElevationUnchecked: function() {
