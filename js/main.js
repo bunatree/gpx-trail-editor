@@ -369,11 +369,15 @@ const GpxTrailEditor = {
   convertGPXDateTimeToHTMLFormat: function(gpxDateTime) {
 
     const date = new Date(gpxDateTime);
+    let formattedDateTime;
 
-    const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-    const formattedTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
-
-    const formattedDateTime = `${formattedDate} ${formattedTime}`;
+    if (!isNaN(date)) {
+      const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+      const formattedTime = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+      formattedDateTime = `${formattedDate} ${formattedTime}`;
+    } else {
+      formattedDateTime = 'N/A';
+    }
 
     return formattedDateTime;
 
