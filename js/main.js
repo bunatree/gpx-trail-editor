@@ -799,14 +799,10 @@ const GpxTrailEditor = {
   },
 
   updatePointInfo: async function(i,newLatLng,newElevation) {
-    console.log('#### updatePointInfo');
-    console.log({i,newLatLng,newElevation});
 
     const points = GpxTrailEditor.points;
 
     function setPointInfo(index,curDateTime,curLatitude,curLongitude,curElevation,toNextDistance,toNextElevation,toNextSeconds,toNextSpeedInfo) {
-      console.log('#### setPointInfo');
-      console.log({index,curDateTime,curLatitude,curLongitude,curElevation,toNextDistance,toNextElevation,toNextSeconds,toNextSpeedInfo})
       if (GpxTrailEditor.points[index]) {
         GpxTrailEditor.points[index] = {
           "index": index,
@@ -828,7 +824,6 @@ const GpxTrailEditor = {
       const curDateTime = points[i].datetime;
       const curLatitude = newLatLng.lat;
       const curLongitude = newLatLng.lng;
-      // const curElevation = (newElevation) ? newElevation : await GpxTrailEditor.getElevationData(curLatitude,curLongitude);
       const curElevation = newElevation;
       const nextDateTime = (points[i+1]) ? points[i+1].datetime : null;
       const nextLatitude = (points[i+1]) ? points[i+1].latitude : null;
@@ -2042,6 +2037,7 @@ const GpxTrailEditor = {
         'clear-checked': GpxTrailEditor.clearDateTimeChecked,
         'clear-unchecked': GpxTrailEditor.clearDateTimeUnchecked,
         'shift-datetime': GpxTrailEditor.shiftDateTime,
+        'fill-datetime': GpxTrailEditor.fillEmptyDateTime,
       },
       latitude: {
         'clear-all': GpxTrailEditor.clearLatitudeAll,
