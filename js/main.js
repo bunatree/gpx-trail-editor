@@ -316,6 +316,7 @@ const GpxTrailEditor = {
   onDataTableInputLostFocus: function(event) {
 
     const row = event.target.closest('tr');
+    const cell = event.target.closest('td');
     const index = Number(row.querySelector('.idx').innerText) - 1;
 
     const datetime = row.querySelector('.datetime input').value;
@@ -325,6 +326,9 @@ const GpxTrailEditor = {
 
     const targetMarker = GpxTrailEditor.markers[index];
     const targetPoint = GpxTrailEditor.points[index];
+
+    // Remove the warning background color from the cell.
+    cell.classList.remove('table-warning');
 
     if (targetMarker && targetPoint) {
       
@@ -1284,141 +1288,100 @@ const GpxTrailEditor = {
   },
 
 
-// 標高タイル内ピクセル座標の値を取り出す関数
-// 引数：タイル内ピクセル座標X, タイル内ピクセル座標Y, tileTxtデータ
-// 戻り値：標高値（ストリング）または"e"
-findElevationInTileText: function (tilePixelX, tilePixelY, tileText) {
+  // 標高タイル内ピクセル座標の値を取り出す関数
+  // 引数：タイル内ピクセル座標X, タイル内ピクセル座標Y, tileTxtデータ
+  // 戻り値：標高値（ストリング）または"e"
+  findElevationInTileText: function (tilePixelX, tilePixelY, tileText) {
 
-  console.log('#### findElevationInTileText');
-  console.log({tilePixelX, tilePixelY, tileText});
+    console.log('#### findElevationInTileText');
+    console.log({tilePixelX, tilePixelY, tileText});
 
-  // 初期化
-  let startIndex = 0;
-  let commaIndex = 0;
+    // 初期化
+    let startIndex = 0;
+    let commaIndex = 0;
 
-  // tpY回改行文字を見つける
-  if (tilePixelY > 1) {
-    for (let i = 0; i < tilePixelY - 1; i++) {
-      startIndex = tileText.indexOf("\n", startIndex + 1);
+    // tpY回改行文字を見つける
+    if (tilePixelY > 1) {
+      for (let i = 0; i < tilePixelY - 1; i++) {
+        startIndex = tileText.indexOf("\n", startIndex + 1);
+      }
     }
-  }
 
-  // tpX回カンマを見つける
-  if (tilePixelX > 1) {
-    for (let i = 0; i < tilePixelX - 1; i++) {
-      startIndex = tileText.indexOf(",", startIndex + 1);
+    // tpX回カンマを見つける
+    if (tilePixelX > 1) {
+      for (let i = 0; i < tilePixelX - 1; i++) {
+        startIndex = tileText.indexOf(",", startIndex + 1);
+      }
     }
-  }
 
-  // カンマまたは改行までの部分文字列を取得
-  if (tilePixelX <= 255) {
-    commaIndex = tileText.indexOf(",", startIndex + 1);
-  } else {
-    commaIndex = tileText.indexOf("\n", startIndex + 1);
-  }
+    // カンマまたは改行までの部分文字列を取得
+    if (tilePixelX <= 255) {
+      commaIndex = tileText.indexOf(",", startIndex + 1);
+    } else {
+      commaIndex = tileText.indexOf("\n", startIndex + 1);
+    }
 
-  // インデックスの補正
-  startIndex = (startIndex === 0) ? 0 : startIndex + 1;
+    // インデックスの補正
+    startIndex = (startIndex === 0) ? 0 : startIndex + 1;
 
-  // 指定座標に対応する部分文字列（標高）を取得
-  const eleString = tileText.substring(startIndex, commaIndex);
+    // 指定座標に対応する部分文字列（標高）を取得
+    const eleString = tileText.substring(startIndex, commaIndex);
 
-  return Number(eleString);
+    return Number(eleString);
 
-},
+  },
 
-fetchTile: async function(tileX, tileY) {
-  // DEM5のURLを構築
-  let url15 = `https://cyberjapandata.gsi.go.jp/xyz/dem5a/15/${tileX}/${tileY}.txt`;
-  const response = await fetch(url15);
-  let readText = await response.text();
+  fetchTile: async function(tileX, tileY) {
+    // DEM5のURLを構築
+    let url15 = `https://cyberjapandata.gsi.go.jp/xyz/dem5a/15/${tileX}/${tileY}.txt`;
+    const response = await fetch(url15);
+    let readText = await response.text();
 
-  // DEM5が存在するか確認
-  if (response.status === 200) {
-    const tileKey15 = `15/${tileX}/${tileY}`;
-    GpxTrailEditor.eleTiles[tileKey15] = readText;
-    // return Promise.resolve(); // DEM5の取得が成功した場合はresolve
-    return {
-      "result": "success",
-      "tileKey": tileKey15,
-      "type": "DEM5",
-      "zoomLevel": 15,
-      "tileText": readText
-    };
-  }
-
-  // "e"が含まれているかまたはステータスコードが400の場合
-  if (readText.indexOf('e') !== -1 || response.status === 400) {
-    const tileKey14 = `14/${Math.floor(tileX / 2)}/${Math.floor(tileY / 2)}`;
-    // DEM10のURLを構築
-    let url14 = `https://cyberjapandata.gsi.go.jp/xyz/dem/14/${tileKey14}.txt`;
-    const response = await fetch(url14);
-    readText = await response.text();
-
-    // DEM10が存在するか確認
+    // DEM5が存在するか確認
     if (response.status === 200) {
-      GpxTrailEditor.eleTiles[tileKey14] = readText;
-      // return Promise.resolve(); // DEM10の取得が成功した場合はresolve
+      const tileKey15 = `15/${tileX}/${tileY}`;
+      GpxTrailEditor.eleTiles[tileKey15] = readText;
+      // return Promise.resolve(); // DEM5の取得が成功した場合はresolve
       return {
         "result": "success",
-        "tileKey": tileKey14,
-        "type": "DEM10",
-        "zoomLevel": 14,
+        "tileKey": tileKey15,
+        "type": "DEM5",
+        "zoomLevel": 15,
         "tileText": readText
       };
     }
-  }
 
-  // 標高が不明の場合
-  return {
-    "result": "failure",
-    "tileKey": null,
-    "type": null,
-    "zoomLevel": null,
-    "tileText": null
-  };
-},
+    // "e"が含まれているかまたはステータスコードが400の場合
+    if (readText.indexOf('e') !== -1 || response.status === 400) {
+      const tileKey14 = `14/${Math.floor(tileX / 2)}/${Math.floor(tileY / 2)}`;
+      // DEM10のURLを構築
+      let url14 = `https://cyberjapandata.gsi.go.jp/xyz/dem/14/${tileKey14}.txt`;
+      const response = await fetch(url14);
+      readText = await response.text();
 
-
-// trksegTxtから緯度経度の配列を作成する関数
- makeLatLonFromTrkTxt: function(trksegTxt) {
-  let latlon = [];
-  let pointIndex = 0;
-
-  // ポイントが見つかる限り繰り返す
-  while (pointIndex !== -1) {
-    // trkptのデータを取得
-    let trkptData = GpxTrailEditor.getTrkptData(trksegTxt, pointIndex);
-
-    // ポイントが見つかった場合
-    if (trkptData[0] !== -1) {
-      // 緯度経度を配列に追加
-      latlon.push([trkptData[1], trkptData[2]]);
-      pointIndex++;
+      // DEM10が存在するか確認
+      if (response.status === 200) {
+        GpxTrailEditor.eleTiles[tileKey14] = readText;
+        // return Promise.resolve(); // DEM10の取得が成功した場合はresolve
+        return {
+          "result": "success",
+          "tileKey": tileKey14,
+          "type": "DEM10",
+          "zoomLevel": 14,
+          "tileText": readText
+        };
+      }
     }
-  }
 
-  return latlon;
-},
-
-getTrkptData: function(trksegTxt, pointIndex) {
-
-},
-
-// 緯度経度から標高タイルのダウンロードリストを作成する関数
-makeDownloadTileList: function(latlonAll) {
-  // 実装は省略
-},
-
-// 標高タイルをダウンロードする関数
-downloadTile: async function(tileX, tileY) {
-  // 実装は省略
-},
-
-// ルートの標高情報を更新する関数
-updateElevationText: function(routeId) {
-  // 実装は省略
-},
+    // 標高が不明の場合
+    return {
+      "result": "failure",
+      "tileKey": null,
+      "type": null,
+      "zoomLevel": null,
+      "tileText": null
+    };
+  },
 
   clearElevationAll: function() {
     const rows = document.querySelectorAll('#data-table tbody tr');
@@ -1847,7 +1810,7 @@ updateElevationText: function(routeId) {
       // row: an array that contains invalid rows
       const isDateTimeLatLngValid = GpxTrailEditor.isDateTimeLatLngValid();
 
-      if (isDateTimeLatLngValid[0]) {
+      if (isDateTimeLatLngValid.result) {
         const gpxContent = GpxTrailEditor.generateGPXContent(GpxTrailEditor.points);
         GpxTrailEditor.downloadGPXFile(gpxContent);
       } else {
@@ -1894,8 +1857,6 @@ updateElevationText: function(routeId) {
   // boolean, invalidIndices, invalidDateTimes, invalidLatitudes, invalidLongitude, invalidRows
   alertDateTimeLatLngInvalid: function(isDateTimeLatLngValid) {
 
-    console.dir(isDateTimeLatLngValid)
-
     const tableRows = document.querySelectorAll('#data-table tbody tr');
     tableRows.forEach((row,i) => {
       if (isDateTimeLatLngValid.index.includes(i)) {
@@ -1917,8 +1878,9 @@ updateElevationText: function(routeId) {
     const indicesString = isDateTimeLatLngValid.index.join(', ');
     const rowsString = isDateTimeLatLngValid.row.join(', ');
     console.error('Invalid point data for GPX export at index', indicesString, ':', rowsString);
-    alert(`Missing or invalid data.\nIndex: ${indicesString}\nRow: ${rowsString}\nPlease check and correct them before exporting.`);
-
+  
+    const errorMsg = `<div class="fw-bold">Missing or invalid data</div><div>Row: ${rowsString}</div><div>Please check and correct them before exporting.</div>`;
+    GpxTrailEditor.showAlert('warning',errorMsg);
     return;
 
   },
