@@ -17,12 +17,6 @@ body {
   }
 }
 
-// #op-btn-toolbar {
-//   .label {
-//     display: none;
-//   }
-// }
-
 #data-summary {
   display: flex;
   justify-content: center;
@@ -124,6 +118,10 @@ body {
     }
   }
   
+}
+
+.tooltip-inner {
+  text-align: unset;
 }
 
 footer {
