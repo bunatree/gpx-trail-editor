@@ -1796,32 +1796,38 @@ updateElevationText: function(routeId) {
 
   shiftDateTime: function() {
 
-    const shiftSeconds = Number(prompt('How many seconds do you want to shift?\nIf you want to shift to the past, enter a negative number.'));
+    const inputValue = prompt('How many seconds do you want to shift?\nIf you want to shift to the past, enter a negative number.');
+    if (inputValue) {
 
-    if (shiftSeconds) {
+      const shiftSeconds = Number(inputValue);
 
-      document.querySelectorAll('#data-table tbody tr').forEach(trElm => {
+      if (shiftSeconds) {
 
-        const dtInputElm = trElm.querySelector('td.datetime input');
-        const dtValue = dtInputElm.value; // UTC (not JST)
-    
-        // Exec only when dtValue has a valid value.
-        if (dtValue) {
-          // Convert the datetime string to a Date object in local time.
-          const curDate = new Date(dtValue + 'Z'); // 'Z' indicates UTC
-    
-          // Shift the datetime.
-          curDate.setSeconds(curDate.getSeconds() + shiftSeconds);
-    
-          // Convert the shifted datetime back to the local time and put it into the input element.
-          const newDate = curDate.toISOString().slice(0, 19);
-          dtInputElm.value = newDate;
-        }
+        document.querySelectorAll('#data-table tbody tr').forEach(trElm => {
 
-      });
+          const dtInputElm = trElm.querySelector('td.datetime input');
+          const dtValue = dtInputElm.value; // UTC (not JST)
+      
+          // Exec only when dtValue has a valid value.
+          if (dtValue) {
+            // Convert the datetime string to a Date object in local time.
+            const curDate = new Date(dtValue + 'Z'); // 'Z' indicates UTC
+      
+            // Shift the datetime.
+            curDate.setSeconds(curDate.getSeconds() + shiftSeconds);
+      
+            // Convert the shifted datetime back to the local time and put it into the input element.
+            const newDate = curDate.toISOString().slice(0, 19);
+            dtInputElm.value = newDate;
+          }
+
+        });
+      } else {
+        console.log('The value that you input didn\'t make sense. value = ' + inputValue);
+      }
 
     } else {
-      alert('Oops! The value you entered didn\'t make sense.');
+      // Canceled
     }
 
   },
