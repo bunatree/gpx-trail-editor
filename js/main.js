@@ -329,6 +329,8 @@ const GpxTrailEditor = {
       
       // イベントリスナーを一旦削除
       targetMarker.off('click');
+      targetMarker.off('dragend');
+      targetMarker.off('dragstart');
       // マーカークリック時の吹き出し表示を更新
       GpxTrailEditor.bindMarkerEvents(targetMarker,index,[latitude,longitude],datetime);
 
@@ -347,65 +349,6 @@ const GpxTrailEditor = {
         targetMarker.setLatLng([latitude, longitude]);
         GpxTrailEditor.updateMarkersAndPolylines();
       }
-
-      return true;
-
-    } else {
-      console.error(`Oops! Could not find the target marker and/or point at ${index}.`);
-      return false;
-    }
-  },
-
-  onApplyButtonClick: function(btnElm) {
-
-    const trElm = btnElm.closest('tr');
-
-    const latitude = parseFloat(trElm.querySelector('.latitude input').value);
-    const longitude = parseFloat(trElm.querySelector('.longitude input').value);
-    const elevation = parseFloat(trElm.querySelector('.elevation input').value);
-    if (!latitude || !longitude || !elevation) {
-      alert('緯度、経度、標高を正しく入力してください。');
-      return false;
-    }
-
-    const curDateTime = trElm.querySelector('.datetime input').value;
-    const prevDateTime = (trElm.previousElementSibling) ? trElm.previousElementSibling.querySelector('.datetime input').value : null;
-    const nextDateTime = (trElm.nextElementSibling) ? trElm.nextElementSibling.querySelector('.datetime input').value : null;
-
-    const isDateTimeOrderValid = GpxTrailEditor.isDateTimeOrderValid(prevDateTime,curDateTime,nextDateTime);
-    if (!isDateTimeOrderValid) {
-      const curIndex = trElm.querySelector('td.idx').innerText;
-      const prevIndex = (trElm.previousElementSibling) ? trElm.previousElementSibling.querySelector('td.idx').innerText : '';
-      const nextIndex = (trElm.nextElementSibling) ? trElm.nextElementSibling.querySelector('td.idx').innerText : '';
-      const invalidIndices = [prevIndex, curIndex, nextIndex].filter(index => index !== '');
-      const datetimeRows = invalidIndices.map(index => {
-        const datetime = trElm.closest('table').querySelector(`tr:nth-child(${index}) .datetime input`).value;
-        return `行番号 ${index}: ${datetime.replace('T',' ')}`;
-      });
-      alert(`日付の順序が正しくありません。\n${datetimeRows.join('\n')}`);
-      return false;
-    }
-
-    const index = Number(trElm.querySelector('.idx').innerText) - 1;
-    const targetMarker = GpxTrailEditor.markers[index];
-    const targetPoint = GpxTrailEditor.points[index];
-
-    if (targetMarker && targetPoint) {
-      
-      // マーカーの座標や標高を更新
-      targetMarker.setLatLng([latitude, longitude]);
-      targetMarker.options.elevation = elevation;
-
-      // マーカーやポリラインを更新
-      GpxTrailEditor.updateMarkersAndPolylines();
-
-      // ポイント情報を更新
-      GpxTrailEditor.points[index].latitude = latitude;
-      GpxTrailEditor.points[index].longitude = longitude;
-      GpxTrailEditor.points[index].elevation = elevation;
-
-      targetMarker.off('click'); // イベントリスナーを一旦削除
-      GpxTrailEditor.bindMarkerEvents(targetMarker,index,[latitude,longitude],curDateTime);
 
       return true;
 
@@ -701,9 +644,25 @@ const GpxTrailEditor = {
     });
 
     // Remove existing Popup (if any)
-    marker.unbindPopup();
+    // marker.unbindPopup();
 
     // Add popup balloon to the marker
+
+    GpxTrailEditor.setPopupBalloon(i,marker,latLng,dateTime);
+    // const popupContent = `<ul class="marker-info m-0 p-0 list-unstyled">
+    // <li>マーカー番号: ${i+1} <a href="javascript:void(0);" class="move-to-row link-primary bi bi-arrow-right-circle-fill" onclick="GpxTrailEditor.scrollToTableRow(${i})" title="行番号 ${i+1} へ移動"></a></li>
+    // <li>日時: ${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTime)}</li>
+    // <li>緯度: ${latLng[0]}</li>
+    // <li>経度: ${latLng[1]}</li>
+    // </ul>
+    // <ul class="marker-op mt-2 p-0 list-unstyled">
+    // <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li></ul>`;
+    // marker.bindPopup(popupContent);
+    
+  },
+
+  setPopupBalloon(i,marker,latLng,dateTime) {
+    marker.unbindPopup();
     const popupContent = `<ul class="marker-info m-0 p-0 list-unstyled">
     <li>マーカー番号: ${i+1} <a href="javascript:void(0);" class="move-to-row link-primary bi bi-arrow-right-circle-fill" onclick="GpxTrailEditor.scrollToTableRow(${i})" title="行番号 ${i+1} へ移動"></a></li>
     <li>日時: ${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTime)}</li>
@@ -713,26 +672,11 @@ const GpxTrailEditor = {
     <ul class="marker-op mt-2 p-0 list-unstyled">
     <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li></ul>`;
     marker.bindPopup(popupContent);
-    
-  },
-
-  setPopupBalloon(i,latLng,dateTime) {
-    GpxTrailEditor.markers[i].unbindPopup();
-    const popupContent = `<ul class="marker-info m-0 p-0 list-unstyled">
-    <li>マーカー番号: ${i+1} <a href="javascript:void(0);" class="move-to-row link-primary bi bi-arrow-right-circle-fill" onclick="GpxTrailEditor.scrollToTableRow(${i})" title="行番号 ${i+1} へ移動"></a></li>
-    <li>日時: ${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTime)}</li>
-    <li>緯度: ${latLng[0]}</li>
-    <li>経度: ${latLng[1]}</li>
-    </ul>
-    <ul class="marker-op mt-2 p-0 list-unstyled">
-    <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li></ul>`;
-    GpxTrailEditor.markers[i].bindPopup(popupContent);
   },
 
   resetPopupBalloonAll: function() {
-    console.dir(GpxTrailEditor.markers);
     GpxTrailEditor.markers.forEach((marker,index) => {
-      GpxTrailEditor.setPopupBalloon(index,[GpxTrailEditor.points[index].latitude,GpxTrailEditor.points[index].longitude],GpxTrailEditor.points[index].datetime);
+      GpxTrailEditor.setPopupBalloon(index,marker,[GpxTrailEditor.points[index].latitude,GpxTrailEditor.points[index].longitude],GpxTrailEditor.points[index].datetime);
     });
   },
 
@@ -1756,6 +1700,17 @@ const GpxTrailEditor = {
     GpxTrailEditor.updateMarkersAndPolylines();
     GpxTrailEditor.resetPopupBalloonAll();
 
+    GpxTrailEditor.markers.forEach((targetMarker,index) => {
+      targetMarker.off('click');
+      targetMarker.off('dragend');
+      targetMarker.off('dragstart');
+      // マーカークリック時の吹き出し表示を更新
+      const latitude = targetMarker._latlng.lat;
+      const longitude = targetMarker._latlng.lng;
+      const datetime = GpxTrailEditor.points[index].datetime;
+      GpxTrailEditor.bindMarkerEvents(targetMarker,index,[latitude,longitude],datetime);
+    });
+
   },
 
   reverseTableRows: function() {
@@ -2081,6 +2036,7 @@ const GpxTrailEditor = {
         'clear-unchecked': GpxTrailEditor.clearDateTimeUnchecked,
         'shift-datetime': GpxTrailEditor.shiftDateTime,
         'fill-datetime': GpxTrailEditor.fillEmptyDateTime,
+        'reverse-datetime': GpxTrailEditor.reverseDateTime,
       },
       latitude: {
         'clear-all': GpxTrailEditor.clearLatitudeAll,
