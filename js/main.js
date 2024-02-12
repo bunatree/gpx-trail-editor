@@ -2079,6 +2079,7 @@ updateElevationText: function(routeId) {
         'clear-all': GpxTrailEditor.clearDateTimeAll,
         'clear-checked': GpxTrailEditor.clearDateTimeChecked,
         'clear-unchecked': GpxTrailEditor.clearDateTimeUnchecked,
+        'shift-datetime': GpxTrailEditor.shiftDateTime,
       },
       latitude: {
         'clear-all': GpxTrailEditor.clearLatitudeAll,
@@ -2114,7 +2115,6 @@ updateElevationText: function(routeId) {
     const buttonFill = document.getElementById('btn-fill');
     const buttonExport = document.getElementById('btn-export');
     const buttonStartOver = document.getElementById('btn-startover');
-
 
     buttonShift.addEventListener('click', GpxTrailEditor.shiftDateTime);
     buttonFill.addEventListener('click', GpxTrailEditor.fillEmptyDateTime);
