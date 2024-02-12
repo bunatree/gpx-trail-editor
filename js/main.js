@@ -339,7 +339,7 @@ const GpxTrailEditor = {
       // GpxTrailEditor.points[index].latitude = latitude;
       // GpxTrailEditor.points[index].longitude = longitude;
       // GpxTrailEditor.points[index].elevation = elevation;
-      GpxTrailEditor.updatePointInfo(index,{"lat":latitude,"lng":longitude},elevation)
+      GpxTrailEditor.updatePointInfo(index,{"lat":latitude,"lng":longitude},elevation);
 
       targetMarker.options.elevation = elevation;  
 
@@ -717,6 +717,26 @@ const GpxTrailEditor = {
     
   },
 
+  setPopupBalloon(i,latLng,dateTime) {
+    GpxTrailEditor.markers[i].unbindPopup();
+    const popupContent = `<ul class="marker-info m-0 p-0 list-unstyled">
+    <li>マーカー番号: ${i+1} <a href="javascript:void(0);" class="move-to-row link-primary bi bi-arrow-right-circle-fill" onclick="GpxTrailEditor.scrollToTableRow(${i})" title="行番号 ${i+1} へ移動"></a></li>
+    <li>日時: ${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTime)}</li>
+    <li>緯度: ${latLng[0]}</li>
+    <li>経度: ${latLng[1]}</li>
+    </ul>
+    <ul class="marker-op mt-2 p-0 list-unstyled">
+    <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li></ul>`;
+    GpxTrailEditor.markers[i].bindPopup(popupContent);
+  },
+
+  resetPopupBalloonAll: function() {
+    console.dir(GpxTrailEditor.markers);
+    GpxTrailEditor.markers.forEach((marker,index) => {
+      GpxTrailEditor.setPopupBalloon(index,[GpxTrailEditor.points[index].latitude,GpxTrailEditor.points[index].longitude],GpxTrailEditor.points[index].datetime);
+    });
+  },
+
   onMarkerClick: function(i) {
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     if (i < tableRows.length) {
@@ -749,7 +769,7 @@ const GpxTrailEditor = {
     const newElevation = await GpxTrailEditor.getElevationData(newLatLng.lat,newLatLng.lng);
     GpxTrailEditor.updatePointInfo(i,newLatLng,newElevation);
 
-    GpxTrailEditor.updateMarkersAndPolylines(GpxTrailEditor.markers[i]);
+    GpxTrailEditor.updateMarkersAndPolylines();
 
   },
 
@@ -1960,7 +1980,7 @@ updateElevationText: function(routeId) {
   },
 
   removeThisMarker: function(index) {
-    console.log('#### removeThisMarker');
+    console.log('#### removeThisMarker index = ' + index);
 
     // GpxTrailEditor.pointsから要素を削除
     GpxTrailEditor.points.splice(index, 1);
@@ -1974,12 +1994,18 @@ updateElevationText: function(routeId) {
       targetRow.remove();
     }
     GpxTrailEditor.resetTableRowIndices();
-    
-    // GpxTrailEditor.markersから要素を削除
-    GpxTrailEditor.markers.splice(index, 1);
+
     // マーカーをレイヤーグループから削除
     GpxTrailEditor.layerGroup.removeLayer(GpxTrailEditor.markers[index]);
+
+    // GpxTrailEditor.markersから要素を削除
+    GpxTrailEditor.markers.splice(index, 1);
+
+    // マーカーとポリラインを更新
     GpxTrailEditor.updateMarkersAndPolylines();
+
+    // すべてのmarkerの吹き出し用データを更新
+    GpxTrailEditor.resetPopupBalloonAll();
 
   },
 
