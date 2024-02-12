@@ -82,11 +82,6 @@ const GpxTrailEditor = {
     btnElm.classList.remove('d-none');
   },
 
-  // showBtnExportGPX: function() {
-  //   const btnElm = document.getElementById('btn-export-gpx');
-  //   btnElm.classList.remove('d-none');
-  // },
-
   initMap: function() {
     if (!this.map) {
       this.map = L.map('map').setView([35.6895, 139.6917], 10);
@@ -761,8 +756,6 @@ const GpxTrailEditor = {
   // Update the latitude and longitude values in the row associated with the dragged marker.
   onMarkerDragEnd: async function (i,newLatLng) {
 
-    console.log('#### onMarkerDragEnd');
-
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     if (i < tableRows.length) {
       tableRows[i].classList.remove('dragged-marker','table-primary');
@@ -929,6 +922,7 @@ const GpxTrailEditor = {
       moveButton.title = '有効にすると、ドラッグで各ポイントを移動できるようになります。';
       moveButton.innerHTML = '<i class="bi bi-arrows-move"></i>';
       moveButton.dataset.draggable = 'false';
+      moveButton.dataset.bsToggle = 'tooltip';
       moveButton.addEventListener('click', function () {
         GpxTrailEditor.toggleMarkerDraggability(moveButton);
       });
@@ -1149,7 +1143,6 @@ const GpxTrailEditor = {
 
   // 国土地理院の標高タイルから標高を取り出して更新
   replaceElevationChecked: async function() {
-    console.log('#### replaceElevationChecked');
  
     let shouldAlert = false;
     let invalidRows = [];
@@ -1215,8 +1208,6 @@ const GpxTrailEditor = {
   // ダウンロードされていない場合はfetchTile関数を実行して国土地理院から取得する
   // 戻り値は標高（数値）
   latLngToEle: async function(latitude, longitude) {
-
-    console.log('#### latLngToEle');
 
     let tileInfoObj = GpxTrailEditor.latLngToTile(latitude, longitude, 15);
     let tileKey = `${15}/${tileInfoObj.tileX}/${tileInfoObj.tileY}`;
@@ -1752,6 +1743,60 @@ const GpxTrailEditor = {
 
   },
 
+  reverseRoute: function() {
+
+    GpxTrailEditor.reverseTableRows();
+    GpxTrailEditor.points.reverse();
+    GpxTrailEditor.markers.reverse();
+
+    if (!confirm('日時も反転させますか？')) {
+      GpxTrailEditor.reverseDateTime();
+    }
+
+    GpxTrailEditor.updateMarkersAndPolylines();
+    GpxTrailEditor.resetPopupBalloonAll();
+
+  },
+
+  reverseTableRows: function() {
+    const tableBody = document.querySelector('#data-table tbody');
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
+    rows.reverse();
+    tableBody.innerHTML = '';
+    rows.forEach(row => tableBody.appendChild(row));
+    GpxTrailEditor.resetTableRowIndices(tableBody);
+  },
+
+  resetTableRowIndices: function(tableBody) {
+    const rows = Array.from(tableBody.querySelectorAll('tr'));
+    rows.forEach((row, index) => {
+      const idxCell = row.querySelector('.idx');
+      if (idxCell) {
+        idxCell.textContent = index + 1;
+      }
+    });
+  },
+
+  reverseDateTime: function() {
+
+    const points = GpxTrailEditor.points;
+    const lastIndex = points.length - 1;
+
+    const tableRows = document.querySelectorAll('#data-table tbody tr');
+    
+    for (let i = 0; i < Math.floor(points.length / 2); i++) {
+      // The points array
+      const tempPointDateTime = points[i].datetime;
+      points[i].datetime = points[lastIndex - i].datetime;
+      points[lastIndex - i].datetime = tempPointDateTime;
+      // The table rows
+      const tempTableDateTime = tableRows[i].querySelector('td.datetime input').value;
+      tableRows[i].querySelector('td.datetime input').value = tableRows[lastIndex - i].querySelector('td.datetime input').value;
+      tableRows[lastIndex - i].querySelector('td.datetime input').value = tempPointDateTime;
+    }
+    
+  },
+
   shiftDateTime: function() {
 
     const inputValue = prompt('How many seconds do you want to shift?\nIf you want to shift to the past, enter a negative number.');
@@ -1791,8 +1836,6 @@ const GpxTrailEditor = {
   },
 
   onExportGPXBtnClicked: function() {
-
-    console.log('#### onExportGPXBtnClicked');
 
     if (GpxTrailEditor.points.length > 0) {
 
@@ -1923,7 +1966,8 @@ const GpxTrailEditor = {
 
   scrollToTableRow: function(rowIndex) {
     const tableElm = document.getElementById('data-table');
-    const trElms = tableElm.getElementsByTagName('tr');
+    const tbodyElm = tableElm.querySelector('tbody');
+    const trElms = tbodyElm.getElementsByTagName('tr');
 
     if (rowIndex >= 0 && rowIndex < trElms.length) {
         const targetRow = trElms[rowIndex];
@@ -1943,7 +1987,6 @@ const GpxTrailEditor = {
   },
 
   removeThisMarker: function(index) {
-    console.log('#### removeThisMarker index = ' + index);
 
     // GpxTrailEditor.pointsから要素を削除
     GpxTrailEditor.points.splice(index, 1);
@@ -2074,6 +2117,7 @@ const GpxTrailEditor = {
     const buttonExport = document.getElementById('btn-export');
     const buttonStartOver = document.getElementById('btn-startover');
 
+    buttonReverse.addEventListener('click', GpxTrailEditor.reverseRoute);
     buttonShift.addEventListener('click', GpxTrailEditor.shiftDateTime);
     buttonFill.addEventListener('click', GpxTrailEditor.fillEmptyDateTime);
     buttonExport.addEventListener('click', GpxTrailEditor.onExportGPXBtnClicked);

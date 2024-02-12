@@ -17,6 +17,12 @@ body {
   }
 }
 
+#op-btn-toolbar {
+  #btn-shift, #btn-fill {
+    display: none;
+  }
+}
+
 #data-summary {
   display: flex;
   justify-content: center;
