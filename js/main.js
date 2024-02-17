@@ -1972,11 +1972,21 @@ const GpxTrailEditor = {
     // すべてのmarkerの吹き出し用データを更新
     GpxTrailEditor.resetPopupBalloonAll();
 
+    console.log('#### RemoveThisMarker');
+    console.log('markers')
+    GpxTrailEditor.markers.forEach((marker,i) => {
+      console.log(i + ' ' + marker._latlng.lat + ' ' + marker._latlng.lng);
+    });
+    console.log('points')
+    GpxTrailEditor.points.forEach(point => {
+      console.log(point.index + ' ' + point.latitude + ' ' + point.longitude);
+    });
+
   },
 
   resetPointIndices: function() {
-    for (let i = 0; i < GpxTrailEditor.points.length - 1; i++) {
-      GpxTrailEditor.points[i].index = i + 1;
+    for (let i = 0; i < GpxTrailEditor.points.length; i++) {
+      GpxTrailEditor.points[i].index = i;
     }
   },
 
