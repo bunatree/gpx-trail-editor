@@ -1476,28 +1476,27 @@ const GpxTrailEditor = {
     const rowCount = rows.length;
 
     // 緯度、経度、標高がvalidかどうかをチェック
-    // 返り値: [{index:i, valid:true/false, reason:"valid"/"empty"},...]
-    const isRowDateTimeValid = GpxTrailEditor.isRowDateTimeValid(rows);
+    // 返り値: {result: true/false, index:[0,1,2,...], row:[1,2,3,...]}
+    const invalidDatetime = GpxTrailEditor.checkRowDateTimeValid(rows);
 
     // スタート地点の日時に問題がある場合に警告
-    if (!isRowDateTimeValid[0].valid) {
+    if (!invalidDatetime.result && invalidDatetime.index[0] === 0) {
       GpxTrailEditor.showAlert('warning','スタート地点の日時を設定してください。');
       return false;
     }
 
     // ゴール地点の日時に問題がある場合に警告
-    if (!isRowDateTimeValid[rowCount - 1].valid) {
+    if (!invalidDatetime.result && invalidDatetime.index[invalidDatetime.index.length - 1] === rowCount - 1) {
       GpxTrailEditor.showAlert('warning','ゴール地点の日時を設定してください。');
       return false;
     }
 
     // 緯度、経度、標高がvalidかどうかをチェック
-    // Returns: [{index:i, valid: true/false},...]
-    const isRowLatLngEleValid = GpxTrailEditor.isRowLatLngEleValid(rows);
-    const invalidRowIndices = isRowLatLngEleValid.filter(obj => !obj.valid).map(obj => obj.index + 1);
+    const invalidLatLngEle = GpxTrailEditor.checkRowLatLngEleValid(rows);
 
-    if (invalidRowIndices.length > 0) {
-      GpxTrailEditor.showAlert('warning','<div>緯度、経度、標高のいずれかに問題があります。</div><div>行番号: ' + invalidRowIndices.join(', ') + '</div>');
+    if (!invalidLatLngEle.result) {
+      GpxTrailEditor.showAlert('warning','<div>緯度、経度、標高のいずれかに問題があります。</div><div>行番号: ' + invalidLatLngEle.row.join(', ') + '</div>');
+      GpxTrailEditor.alertTableCell([],invalidLatLngEle.latitude,invalidLatLngEle.longitude,invalidLatLngEle.elevation);
       return false;
     }
 
@@ -1508,47 +1507,54 @@ const GpxTrailEditor = {
   },
 
   // Check if any date/time in the data-table is invalid.
-  // Returns: [{index:i, valid: true/false, reason:"empty"/"invalid"},{...},...]
-  isRowDateTimeValid: function(rows) {
+  // Returns: {result: true/false, index:[0,1,2,...], row:[1,2,3,...]}
+  checkRowDateTimeValid: function(rows) {
 
-    const result = [];
+    const invalidIndices = [];
+    const invalidRows = [];
 
     rows.forEach((row,i) => {
-      const datetime = parseFloat(row.querySelector('.datetime input').value);
+      const datetime = row.querySelector('.datetime input').value;
       if (datetime) {
         const date = new Date(datetime);
-        if (!isNaN(date.getTime())) {
-          result.push({
-            index: i,
-            valid: true,
-            reason: 'valid'
-          }); // Valid
+        if (date) {
+          // Valid
         } else {
-          result.push({
-            index: i,
-            valid: false,
-            reason: 'invalid'
-          }); // Invalid
+          // Invalid
+          invalidIndices.push(i);
+          invalidRows.push(i + 1);
         }
       } else {
         // The datetime is empty
-        result.push({
-          index: i,
-          valid: false,
-          reason: 'empty'
-        }); // Empty
+        invalidIndices.push(i);
+        invalidRows.push(i + 1);
       }
     });
 
-    return result;
+    return {
+      "result": (invalidIndices.length === 0),
+      "index": invalidIndices,
+      "row": invalidRows
+    };
 
   },
 
   // Check if any latitude, longitude, or elevation in the data-table is invalid.
-  // Returns: [{index:i, valid: true/false},...]
-  isRowLatLngEleValid: function(rows) {
+  // Returns: {
+  //            result: true/false,
+  //            index: [0,1,2,...],
+  //            row: [1,2,3,...],
+  //            latitude: [1,2,...],
+  //            longitude: [1,2,...],
+  //            elevation: [1,2,...]
+  //          }
+  checkRowLatLngEleValid: function(rows) {
 
-    const result = [];
+    const invalidIndices = new Set();
+    const invalidLatitudes = new Set();
+    const invalidLongitudes = new Set();
+    const invalidElevations = new Set();
+    const invalidRows = new Set();
 
     rows.forEach((row,i) => {
 
@@ -1556,20 +1562,36 @@ const GpxTrailEditor = {
       const longitude = parseFloat(row.querySelector('.longitude input').value);
       const elevation = parseFloat(row.querySelector('.elevation input').value);
 
-      if (latitude && longitude && elevation) {
-        result.push({
-          index: i,
-          valid: true
-        })
-      } else {
-        result.push({
-          index: i,
-          valid: false
-        })
+      const isValid = (value) => value !== null && !isNaN(value);
+
+      if (!isValid(latitude)) {
+        invalidLatitudes.add(i);
+        invalidIndices.add(i);
+        invalidRows.add(i + 1);
       }
+
+      if (!isValid(longitude)) {
+        invalidLongitudes.add(i);
+        invalidIndices.add(i);
+        invalidRows.add(i + 1);
+      }
+
+      if (!isValid(elevation)) {
+        invalidElevations.add(i);
+        invalidIndices.add(i);
+        invalidRows.add(i + 1);
+      }
+
     });
 
-    return result;
+    return {
+      "result": (invalidIndices.size === 0),
+      "index": Array.from(invalidIndices),
+      "latitude": Array.from(invalidLatitudes),
+      "longitude": Array.from(invalidLongitudes),
+      "elevation": Array.from(invalidElevations),
+      "row": Array.from(invalidRows)
+    };
 
   },
 
@@ -1863,45 +1885,47 @@ const GpxTrailEditor = {
 
     if (GpxTrailEditor.points.length > 0) {
 
-      // isDateTimeLatLngValid (object)
+      // invalidDateTime (object)
       // result: true = valid, false = invalid (boolean)
       // index: an array that contains invalid indices
       // datetime: an array that contains invalid datetimes
+      // row: an array that contains invalid rows
+      const invalidDateTime = GpxTrailEditor.checkPointDatetimeValid();
+
+      // invalidPointLatLng (object)
+      // result: true = valid, false = invalid (boolean)
+      // index: an array that contains invalid indices
       // latitude: an array that contains invalid latitudes
       // longitude: an array that contains invalid longitudes
       // row: an array that contains invalid rows
-      const isDateTimeLatLngValid = GpxTrailEditor.isDateTimeLatLngValid();
+      const invalidPointLatLng = GpxTrailEditor.checkPointLatLngValid();
 
-      if (isDateTimeLatLngValid.result) {
+      if (invalidDateTime.result && invalidPointLatLng.result) {
         const gpxContent = GpxTrailEditor.generateGPXContent(GpxTrailEditor.points);
         GpxTrailEditor.downloadGPXFile(gpxContent);
       } else {
-        GpxTrailEditor.alertDateTimeLatLngInvalid(isDateTimeLatLngValid);
+        GpxTrailEditor.alertTableCell(invalidDateTime.datetime,invalidPointLatLng.latitude,invalidPointLatLng.longitude,[]);
+
+        const invalidIndices = Array.from(new Set([...invalidDateTime.datetime, ...invalidPointLatLng.latitude, ...invalidPointLatLng.longitude]));
+        const sortedIndices = invalidIndices.sort((a, b) => a - b);
+        const invalidRows = sortedIndices.map(item => item + 1).join(', ');
+
+        const errorMsg = `Missing or invalid data<div>Row: ${invalidRows}</div>`;
+        GpxTrailEditor.showAlert('warning',errorMsg);
+
         return;
       }
 
     }
   },
 
-  isDateTimeLatLngValid: function() {
+  checkPointDatetimeValid: function() {
     const invalidIndices = [];
     const invalidDateTimes = [];
-    const invalidLatitudes = [];
-    const invalidLongitude = [];
     const invalidRows = [];
     for (const [index, point] of GpxTrailEditor.points.entries()) {
       if (!point.datetime) {
         invalidDateTimes.push(index);
-        invalidIndices.push(index);
-        invalidRows.push(index + 1);
-      }
-      if (!point.latitude) {
-        invalidLatitudes.push(index);
-        invalidIndices.push(index);
-        invalidRows.push(index + 1);
-      }
-      if (!point.longitude) {
-        invalidLongitude.push(index);
         invalidIndices.push(index);
         invalidRows.push(index + 1);
       }
@@ -1910,39 +1934,57 @@ const GpxTrailEditor = {
       "result": (invalidIndices.length === 0),
       "index": invalidIndices,
       "datetime": invalidDateTimes,
-      "latitude": invalidLatitudes,
-      "longitude": invalidLongitude,
       "row": invalidRows
     };
   },
 
-  // boolean, invalidIndices, invalidDateTimes, invalidLatitudes, invalidLongitude, invalidRows
-  alertDateTimeLatLngInvalid: function(isDateTimeLatLngValid) {
+  checkPointLatLngValid: function() {
+    const invalidIndices = [];
+    const invalidLatitudes = [];
+    const invalidLongitudes = [];
+    const invalidRows = [];
+    for (const [index, point] of GpxTrailEditor.points.entries()) {
+      if (!point.latitude) {
+        invalidLatitudes.push(index);
+        invalidIndices.push(index);
+        invalidRows.push(index + 1);
+      }
+      if (!point.longitude) {
+        invalidLongitudes.push(index);
+        invalidIndices.push(index);
+        invalidRows.push(index + 1);
+      }
+    }
+    return {
+      "result": (invalidIndices.length === 0),
+      "index": invalidIndices,
+      "latitude": invalidLatitudes,
+      "longitude": invalidLongitudes,
+      "row": invalidRows
+    };
+  },
 
+  alertTableCell: function(invalidDateTimeIndices,invalidLatIndices,invalidLngIndices,invalidEleIndices) {
     const tableRows = document.querySelectorAll('#data-table tbody tr');
     tableRows.forEach((row,i) => {
-      if (isDateTimeLatLngValid.index.includes(i)) {
-        if (isDateTimeLatLngValid.datetime.includes(i)) {
-          const dtCell = row.querySelector('td.datetime');
-          dtCell.classList.add('table-warning');
-        }
-        if (isDateTimeLatLngValid.latitude.includes(i)) {
-          const latCell = row.querySelector('td.latitude');
-          latCell.classList.add('table-warning');
-        }
-        if (isDateTimeLatLngValid.longitude.includes(i)) {
-          const lngCell = row.querySelector('td.longitude');
-          lngCell.classList.add('table-warning');
-        }
+      if (invalidDateTimeIndices.length > 0 && invalidDateTimeIndices.includes(i)) {
+        const dtCell = row.querySelector('td.datetime');
+        dtCell.classList.add('table-warning');
+      }
+      if (invalidLatIndices.length > 0 && invalidLatIndices.includes(i)) {
+        const latCell = row.querySelector('td.latitude');
+        latCell.classList.add('table-warning');
+      }
+      if (invalidLngIndices.length > 0 && invalidLngIndices.includes(i)) {
+        const lngCell = row.querySelector('td.longitude');
+        lngCell.classList.add('table-warning');
+      }
+      if (invalidEleIndices.length > 0 && invalidEleIndices.includes(i)) {
+        const lngCell = row.querySelector('td.elevation');
+        lngCell.classList.add('table-warning');
       }
     });
 
-    const indicesString = isDateTimeLatLngValid.index.join(', ');
-    const rowsString = isDateTimeLatLngValid.row.join(', ');
-    console.error('Invalid point data for GPX export at index', indicesString, ':', rowsString);
-  
-    const errorMsg = `<div class="fw-bold">Missing or invalid data</div><div>Row: ${rowsString}</div><div>Please check and correct them before exporting.</div>`;
-    GpxTrailEditor.showAlert('warning',errorMsg);
     return;
 
   },
