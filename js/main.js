@@ -1475,8 +1475,7 @@ const GpxTrailEditor = {
     const rows = document.querySelectorAll('#data-table tbody tr');
     const rowCount = rows.length;
 
-    // 緯度、経度、標高がvalidかどうかをチェック
-    // 返り値: {result: true/false, index:[0,1,2,...], row:[1,2,3,...]}
+    // Check dates
     const invalidDatetime = GpxTrailEditor.checkRowDateTimeValid(rows);
 
     // スタート地点の日時に問題がある場合に警告
@@ -1491,7 +1490,7 @@ const GpxTrailEditor = {
       return false;
     }
 
-    // 緯度、経度、標高がvalidかどうかをチェック
+    // Check latitudes, longitudes, and elevations
     const invalidLatLngEle = GpxTrailEditor.checkRowLatLngEleValid(rows);
 
     if (!invalidLatLngEle.result) {
@@ -1901,6 +1900,7 @@ const GpxTrailEditor = {
       const invalidPointLatLng = GpxTrailEditor.checkPointLatLngValid();
 
       if (invalidDateTime.result && invalidPointLatLng.result) {
+        GpxTrailEditor.clearAlert();
         const gpxContent = GpxTrailEditor.generateGPXContent(GpxTrailEditor.points);
         GpxTrailEditor.downloadGPXFile(gpxContent);
       } else {
@@ -1920,22 +1920,36 @@ const GpxTrailEditor = {
   },
 
   checkPointDatetimeValid: function() {
-    const invalidIndices = [];
-    const invalidDateTimes = [];
-    const invalidRows = [];
-    for (const [index, point] of GpxTrailEditor.points.entries()) {
-      if (!point.datetime) {
-        invalidDateTimes.push(index);
-        invalidIndices.push(index);
-        invalidRows.push(index + 1);
-      }
-    }
-    return {
-      "result": (invalidIndices.length === 0),
-      "index": invalidIndices,
-      "datetime": invalidDateTimes,
-      "row": invalidRows
+
+    const invalidIndices = new Set();
+    const invalidDateTimes = new Set();
+    const invalidRows = new Set();
+
+    const isDateTimeValid = (dateTimeString) => {
+      const date = new Date(dateTimeString);
+      return !isNaN(date.getTime());
     };
+
+    for (let i = 0; i < GpxTrailEditor.points.length - 1; i++) {
+
+      const currentDateTime = GpxTrailEditor.points[i].datetime;
+      const nextDateTime = GpxTrailEditor.points[i + 1].datetime;
+
+      if (!isDateTimeValid(currentDateTime) || new Date(currentDateTime) > new Date(nextDateTime)) {
+        invalidDateTimes.add(i);
+        invalidIndices.add(i);
+        invalidRows.add(i + 1);
+      }
+
+    }
+
+    return {
+      "result": (invalidIndices.size === 0),
+      "index": Array.from(invalidIndices),
+      "datetime": Array.from(invalidDateTimes),
+      "row": Array.from(invalidRows)
+    };
+
   },
 
   checkPointLatLngValid: function() {
