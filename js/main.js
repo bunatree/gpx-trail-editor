@@ -1475,45 +1475,102 @@ const GpxTrailEditor = {
     const rows = document.querySelectorAll('#data-table tbody tr');
     const rowCount = rows.length;
 
-    const startDateTime = rows[0].querySelector('.datetime input').value;
-    const endDateTime = rows[rowCount - 1].querySelector('.datetime input').value;
+    // 緯度、経度、標高がvalidかどうかをチェック
+    // 返り値: [{index:i, valid:true/false, reason:"valid"/"empty"},...]
+    const isRowDateTimeValid = GpxTrailEditor.isRowDateTimeValid(rows);
 
-    // スタート地点とゴール地点の日時が設定されていない場合は警告
-    if (startDateTime && endDateTime) {
-
-      // 緯度、経度、標高がvalidかどうかをチェック
-      // 返り値: [true/false, rowIndex]
-      const isRowLatLngEleValid = GpxTrailEditor.isRowLatLngEleValid(rows);
-      console.log({isRowLatLngEleValid})
-      if (!isRowLatLngEleValid[0]) {
-        alert(`緯度、経度、標高のいずれかが空または誤っています。\n行番号: ${isRowLatLngEleValid[1]+1}`);
-        return false;
-      } else {
-        const points = GpxTrailEditor.createPointData();
-
-        GpxTrailEditor.interpolateIntermediatePointTimes(points);
-  
-      }
-
-    } else {
-      alert('スタート地点とゴール地点の日時を設定してください。');
+    // スタート地点の日時に問題がある場合に警告
+    if (!isRowDateTimeValid[0].valid) {
+      GpxTrailEditor.showAlert('warning','スタート地点の日時を設定してください。');
       return false;
     }
 
+    // ゴール地点の日時に問題がある場合に警告
+    if (!isRowDateTimeValid[rowCount - 1].valid) {
+      GpxTrailEditor.showAlert('warning','ゴール地点の日時を設定してください。');
+      return false;
+    }
+
+    // 緯度、経度、標高がvalidかどうかをチェック
+    // Returns: [{index:i, valid: true/false},...]
+    const isRowLatLngEleValid = GpxTrailEditor.isRowLatLngEleValid(rows);
+    const invalidRowIndices = isRowLatLngEleValid.filter(obj => !obj.valid).map(obj => obj.index + 1);
+
+    if (invalidRowIndices.length > 0) {
+      GpxTrailEditor.showAlert('warning','<div>緯度、経度、標高のいずれかに問題があります。</div><div>行番号: ' + invalidRowIndices.join(', ') + '</div>');
+      return false;
+    }
+
+    const points = GpxTrailEditor.createPointData();
+    const interpolatedIndices = GpxTrailEditor.interpolateIntermediatePointTimes(points);
+    GpxTrailEditor.clearAlert();
+
   },
 
-  isRowLatLngEleValid: function(rows) {
-    let result = [true,0];
+  // Check if any date/time in the data-table is invalid.
+  // Returns: [{index:i, valid: true/false, reason:"empty"/"invalid"},{...},...]
+  isRowDateTimeValid: function(rows) {
+
+    const result = [];
+
     rows.forEach((row,i) => {
+      const datetime = parseFloat(row.querySelector('.datetime input').value);
+      if (datetime) {
+        const date = new Date(datetime);
+        if (!isNaN(date.getTime())) {
+          result.push({
+            index: i,
+            valid: true,
+            reason: 'valid'
+          }); // Valid
+        } else {
+          result.push({
+            index: i,
+            valid: false,
+            reason: 'invalid'
+          }); // Invalid
+        }
+      } else {
+        // The datetime is empty
+        result.push({
+          index: i,
+          valid: false,
+          reason: 'empty'
+        }); // Empty
+      }
+    });
+
+    return result;
+
+  },
+
+  // Check if any latitude, longitude, or elevation in the data-table is invalid.
+  // Returns: [{index:i, valid: true/false},...]
+  isRowLatLngEleValid: function(rows) {
+
+    const result = [];
+
+    rows.forEach((row,i) => {
+
       const latitude = parseFloat(row.querySelector('.latitude input').value);
       const longitude = parseFloat(row.querySelector('.longitude input').value);
       const elevation = parseFloat(row.querySelector('.elevation input').value);
-      if (!latitude || !longitude || !elevation) {
-        result[0] = false;
-        result[1] = i;
+
+      if (latitude && longitude && elevation) {
+        result.push({
+          index: i,
+          valid: true
+        })
+      } else {
+        result.push({
+          index: i,
+          valid: false
+        })
       }
     });
+
     return result;
+
   },
 
   // 各ポイント（= テーブルの行）の緯度、経度、標高、次ポイントまでの距離などの
@@ -1567,12 +1624,13 @@ const GpxTrailEditor = {
   // points: data-tableの各行によって表されている地図上のポイントすべて
   interpolateIntermediatePointTimes: function(points) {
 
-    // const rowElms = document.getElementById('data-table').tBodies[0].rows;
     const rowElms = document.querySelectorAll('#data-table tbody tr');
 
     const dateTimeIndices = points
     .filter(point => point.datetime !== '') // datetime 属性が空でないオブジェクトのみ抽出
     .map(point => point.index); // 抽出したオブジェクトから index 要素の値だけを取り出す
+
+    const interpolatedIndices = [];
 
     for (let i = 0; i < dateTimeIndices.length; i++) {
       const currentIndex = dateTimeIndices[i];
@@ -1605,12 +1663,19 @@ const GpxTrailEditor = {
             GpxTrailEditor.points[rowIndex].datetime = localDatetime;
           });
 
+          // 補間されたインデックス番号を記録
+          interpolatedIndices.push(...noDateTimeIndices);
+
         } else {
           // currentIndex と nextIndex の値の差が 1 なので、
           // currentIndex と nextIndex の間に日付が入力されていない行は存在しない。
         }
       }
     }
+
+    // 補間されたインデックス番号を返す
+    return interpolatedIndices;
+
   },
 
   // datetime1 と datetime2 の差を秒で返す
@@ -1972,6 +2037,7 @@ const GpxTrailEditor = {
     // すべてのmarkerの吹き出し用データを更新
     GpxTrailEditor.resetPopupBalloonAll();
 
+    // DEBUG
     console.log('#### RemoveThisMarker');
     console.log('markers')
     GpxTrailEditor.markers.forEach((marker,i) => {
