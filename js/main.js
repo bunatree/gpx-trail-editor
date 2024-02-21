@@ -1888,6 +1888,8 @@ const GpxTrailEditor = {
       // result: true = valid, false = invalid (boolean)
       // index: an array that contains invalid indices
       // datetime: an array that contains invalid datetimes
+      // datetimeOrder: an array that contains invalid datetime order indices
+      // datetimeValue: an array that contains invalid datetime value indices
       // row: an array that contains invalid rows
       const invalidDateTime = GpxTrailEditor.checkPointDatetimeValid();
 
@@ -1904,13 +1906,32 @@ const GpxTrailEditor = {
         const gpxContent = GpxTrailEditor.generateGPXContent(GpxTrailEditor.points);
         GpxTrailEditor.downloadGPXFile(gpxContent);
       } else {
+        // There is at least one invalid date/time.
         GpxTrailEditor.alertTableCell(invalidDateTime.datetime,invalidPointLatLng.latitude,invalidPointLatLng.longitude,[]);
 
-        const invalidIndices = Array.from(new Set([...invalidDateTime.datetime, ...invalidPointLatLng.latitude, ...invalidPointLatLng.longitude]));
-        const sortedIndices = invalidIndices.sort((a, b) => a - b);
-        const invalidRows = sortedIndices.map(item => item + 1).join(', ');
+        const arrayToString = (array) => {
+          const sortedArray = array.sort((a, b) => a - b);
+          return sortedArray.map(item => item + 1).join(', ');
+        };
 
-        const errorMsg = `Missing or invalid data<div>Row: ${invalidRows}</div>`;
+        // const invalidLatLng = arrayToString(Array.from(new Set([...invalidPointLatLng.latitude, ...invalidPointLatLng.longitude])));
+        // const invalidDateTimeValue = arrayToString(Array.from(new Set([...invalidDateTime.datetimeValue])));
+        // const invalidDateTimeOrder = arrayToString(Array.from(new Set([...invalidDateTime.datetimeOrder])));
+
+        const invalidRowHtml = function(array) {
+          if (Array.isArray(array) && array.length > 0) {
+            return array.map(rowIndex => {
+              return '<a href="javascript:void(0);" onclick="GpxTrailEditor.scrollToTableRow(' + rowIndex + ')">' + (rowIndex + 1) + '</a>';
+            }).join(' ');
+          } 
+          return '';
+        };
+
+        let errorMsg = (invalidPointLatLng.latitude.length > 0) ? '<div class="error-message">緯度エラー (行番号: ' + invalidRowHtml(invalidPointLatLng.latitude) + ')</div>' : '';
+        errorMsg += (invalidPointLatLng.longitude.length > 0) ? '<div class="error-message">経度エラー (行番号: ' + invalidRowHtml(invalidPointLatLng.longitude) + ')</div>' : '';
+        errorMsg += (invalidDateTime.datetimeValue.length) ? '<div class="error-message">日時エラー (行番号: ' + invalidRowHtml(invalidDateTime.datetimeValue) + ')</div>' : '';
+        errorMsg += (invalidDateTime.datetimeOrder.length > 0) ? '<div class="error-message">日時順序エラー (行番号: ' + invalidRowHtml(invalidDateTime.datetimeOrder) + ')</div>' : '';
+
         GpxTrailEditor.showAlert('warning',errorMsg);
 
         return;
@@ -1922,7 +1943,9 @@ const GpxTrailEditor = {
   checkPointDatetimeValid: function() {
 
     const invalidIndices = new Set();
-    const invalidDateTimes = new Set();
+    const invalidDateTime = new Set();
+    const invalidDateTimeValues = new Set();
+    const invalidDateTimeOrders = new Set();
     const invalidRows = new Set();
 
     const isDateTimeValid = (dateTimeString) => {
@@ -1935,8 +1958,19 @@ const GpxTrailEditor = {
       const currentDateTime = GpxTrailEditor.points[i].datetime;
       const nextDateTime = GpxTrailEditor.points[i + 1].datetime;
 
-      if (!isDateTimeValid(currentDateTime) || new Date(currentDateTime) > new Date(nextDateTime)) {
-        invalidDateTimes.add(i);
+      if (!isDateTimeValid(currentDateTime)) {
+        // console.log({i,currentDateTime,nextDateTime}); // ####
+        // console.log('!isDateTimeValid = ' + !isDateTimeValid(currentDateTime))
+        // console.log(new Date(currentDateTime) > new Date(nextDateTime))
+        invalidDateTime.add(i);
+        invalidDateTimeValues.add(i);
+        invalidIndices.add(i);
+        invalidRows.add(i + 1);
+      }
+
+      if (new Date(currentDateTime) > new Date(nextDateTime)) {
+        invalidDateTime.add(i);
+        invalidDateTimeOrders.add(i);
         invalidIndices.add(i);
         invalidRows.add(i + 1);
       }
@@ -1946,7 +1980,9 @@ const GpxTrailEditor = {
     return {
       "result": (invalidIndices.size === 0),
       "index": Array.from(invalidIndices),
-      "datetime": Array.from(invalidDateTimes),
+      "datetime": Array.from(invalidDateTime),
+      "datetimeValue": Array.from(invalidDateTimeValues),
+      "datetimeOrder": Array.from(invalidDateTimeOrders),
       "row": Array.from(invalidRows)
     };
 
