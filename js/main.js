@@ -331,11 +331,13 @@ const GpxTrailEditor = {
       targetMarker.off('click');
       targetMarker.off('dragend');
       targetMarker.off('dragstart');
+      
       // マーカークリック時の吹き出し表示を更新
       GpxTrailEditor.bindMarkerEvents(targetMarker,index,[latitude,longitude],datetime);
+      // マーカー情報を更新
+      GpxTrailEditor.updateMarkerLatLng(index,[latitude,longitude]);
 
       // ポイント情報を更新
-
       GpxTrailEditor.points[index].datetime = datetime;
       // GpxTrailEditor.points[index].latitude = latitude;
       // GpxTrailEditor.points[index].longitude = longitude;
@@ -638,6 +640,9 @@ const GpxTrailEditor = {
 
   bindMarkerEvents: function(marker,i,latLng,dateTime) {
 
+    // Clear existing event listeners
+    marker.off('click').off('dragend').off('dragstart');
+
     // Add a click event listener to this marker
     marker.on('click', function() {
       GpxTrailEditor.onMarkerClick(i);
@@ -674,7 +679,7 @@ const GpxTrailEditor = {
     <li>経度: ${latLng[1]}</li>
     </ul>
     <ul class="marker-op mt-2 p-0 list-unstyled">
-    <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li></ul>`;
+    <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除 index ${i}</button></li></ul>`;
     marker.bindPopup(popupContent);
   },
 
@@ -704,21 +709,29 @@ const GpxTrailEditor = {
   // Update the latitude and longitude values in the row associated with the dragged marker.
   onMarkerDragEnd: async function (i,newLatLng) {
 
+    console.log('#### onMarkerDragEnd');
+    console.log('index ' + i + ' lat ' + newLatLng.lat + ' lng ' + newLatLng.lng);
+
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     if (i < tableRows.length) {
       tableRows[i].classList.remove('dragged-marker','table-primary');
     }
 
-    GpxTrailEditor.updateTableRow(i,newLatLng);
+    // マーカー情報を更新 ##### ?????
+    // GpxTrailEditor.updateMarkerLatLng(i,newLatLng);
+    GpxTrailEditor.markers[i].setLatLng(newLatLng);
 
     const newElevation = await GpxTrailEditor.getElevationData(newLatLng.lat,newLatLng.lng);
     GpxTrailEditor.updatePointInfo(i,newLatLng,newElevation);
+
+    // テーブル情報を更新
+    GpxTrailEditor.updateTableRow(i,newLatLng,newElevation);
 
     GpxTrailEditor.updateMarkersAndPolylines();
 
   },
 
-  updateTableRow: async function(i,newLatLng) {
+  updateTableRow: async function(i,newLatLng,newElevation) {
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     if (i < tableRows.length) {
 
@@ -730,12 +743,20 @@ const GpxTrailEditor = {
       // Save the current existing elevation.
       const eleInput = tableRows[i].querySelector('td.elevation input');
 
-      // Get the elevation of the marker's new location.
-      const newEle = await GpxTrailEditor.getElevationData(newLatLng.lat,newLatLng.lng);
-      if (newEle !== null) {
-        eleInput.value = newEle;
+      if (eleInput && newElevation !== null) {
+        eleInput.value = newElevation;
       }
 
+    }
+  },
+
+  updateMarkerLatLng: function(i,newLatLng) {
+    console.log('#### updateMarkerLatLng');
+    const marker = GpxTrailEditor.markers[i];
+    console.log(marker._latlng)
+    if (marker) {
+      marker._latlng.lat = newLatLng[0];
+      marker._latlng.lng = newLatLng[1];
     }
   },
 
@@ -980,15 +1001,8 @@ const GpxTrailEditor = {
         const datetimeInput = row.querySelector('td.datetime input');
         GpxTrailEditor.clearDateTime(datetimeInput);
       });
-    } else {
-      shouldAlert = true;
-      alertMsg = '消去したい行のチェックボックスを ON にしてください。';
     }
-    if (shouldAlert) {
-      GpxTrailEditor.showAlert('warning',alertMsg);
-    } else {
-      GpxTrailEditor.clearAlert();
-    }
+    GpxTrailEditor.clearAlert();
   },
   
   clearDateTimeUnchecked: function() {
@@ -2104,6 +2118,11 @@ const GpxTrailEditor = {
 
   removeThisMarker: function(index) {
 
+    console.log('#### removeThisMarker');
+    console.log('index = ' + index);
+    console.log('Point ' + GpxTrailEditor.points[index].latitude + ' ' + GpxTrailEditor.points[index].longitude);
+    console.log('Marker ' + GpxTrailEditor.markers[index]._latlng);
+
     // GpxTrailEditor.pointsから要素を削除
     GpxTrailEditor.points.splice(index, 1);
     // すべてのpoints[i]のindex要素の値を更新
@@ -2126,20 +2145,31 @@ const GpxTrailEditor = {
     // マーカーとポリラインを更新
     GpxTrailEditor.updateMarkersAndPolylines();
 
-    // すべてのmarkerの吹き出し用データを更新
-    GpxTrailEditor.resetPopupBalloonAll();
+    // 削除されたindexより後ろのmarkerのイベントや吹き出し用データを更新
+    // GpxTrailEditor.resetPopupBalloonAll();//%%%%%%
+    for (let i = index; i < GpxTrailEditor.markers.length; i++) {
+      const marker = GpxTrailEditor.markers[i];
+      GpxTrailEditor.bindMarkerEvents(marker,i,[marker._latlng.lat,marker._latlng.lng],GpxTrailEditor.points[i].datetime);
+    }
 
-    // DEBUG
-    console.log('#### RemoveThisMarker');
-    console.log('markers')
-    GpxTrailEditor.markers.forEach((marker,i) => {
-      console.log(i + ' ' + marker._latlng.lat + ' ' + marker._latlng.lng);
-    });
-    console.log('points')
-    GpxTrailEditor.points.forEach(point => {
-      console.log(point.index + ' ' + point.latitude + ' ' + point.longitude);
-    });
+    // DEBUG ####
+    GpxTrailEditor.reportLatLngError();
 
+  },
+
+  reportLatLngError: function() {
+    if (GpxTrailEditor.markers.length !== GpxTrailEditor.points.length) {
+      console.error('Length match error markers.length = ' + GpxTrailEditor.markers.length + ' points.length = ' + GpxTrailEditor.points.length);
+    } else {
+      for (let i = 0; i < GpxTrailEditor.markers.length; i++) {
+        const marker = GpxTrailEditor.markers[i];
+        const point = GpxTrailEditor.points[i];
+        if (marker._latlng.lat !== point.latitude || marker._latlng.lng !== point.longitude) {
+          console.error('Marker (' + i + ') lat ' + marker._latlng.lat + ' lng ' + marker._latlng.lng);
+          console.error('Point  (' + i + ') lat ' + point.latitude +     ' lng ' + point.longitude);
+        }
+      }
+    }
   },
 
   resetPointIndices: function() {
@@ -2155,31 +2185,33 @@ const GpxTrailEditor = {
     });
   },
 
+  // NOT IN USE
   // テーブルの行を削除するためのヘルパー関数
-  removeTableRow: function(index) {
-    const tableRow = document.getElementById(`row-${index}`);
-    if (tableRow) {
-      tableRow.remove();
-    }
-  },
+  // removeTableRow: function(index) {
+  //   const tableRow = document.getElementById(`row-${index}`);
+  //   if (tableRow) {
+  //     tableRow.remove();
+  //   }
+  // },
 
+  // NOT IN USE
   // テーブルに行を追加するためのヘルパー関数
-  addTableRow: function(index, dateTime, lat, lng) {
-    const newRow = document.createElement('tr');
-    newRow.id = `row-${index}`;
-    newRow.innerHTML = `
-      <td>${index + 1}</td>
-      <td>${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTime)}</td>
-      <td>${lat}</td>
-      <td>${lng}</td>
-      <td>
-        <button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${index})">このポイントを削除</button>
-      </td>
-    `;
-    // テーブルに行を追加
-    const tableBody = document.getElementById('your-table-body-id');
-    tableBody.appendChild(newRow);
-  },
+  // addTableRow: function(index, dateTime, lat, lng) {
+  //   const newRow = document.createElement('tr');
+  //   newRow.id = `row-${index}`;
+  //   newRow.innerHTML = `
+  //     <td>${index + 1}</td>
+  //     <td>${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTime)}</td>
+  //     <td>${lat}</td>
+  //     <td>${lng}</td>
+  //     <td>
+  //       <button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${index})">このポイントを削除</button>
+  //     </td>
+  //   `;
+  //   // テーブルに行を追加
+  //   const tableBody = document.getElementById('your-table-body-id');
+  //   tableBody.appendChild(newRow);
+  // },
 
   setupTableHeaderOps: function() {
     ['chkbox','datetime','latitude','longitude','elevation'].forEach(className => {
