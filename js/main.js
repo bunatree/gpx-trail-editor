@@ -679,7 +679,7 @@ const GpxTrailEditor = {
     <li>経度: ${latLng[1]}</li>
     </ul>
     <ul class="marker-op mt-2 p-0 list-unstyled">
-    <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除 index ${i}</button></li></ul>`;
+    <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li></ul>`;
     marker.bindPopup(popupContent);
   },
 
@@ -709,16 +709,12 @@ const GpxTrailEditor = {
   // Update the latitude and longitude values in the row associated with the dragged marker.
   onMarkerDragEnd: async function (i,newLatLng) {
 
-    console.log('#### onMarkerDragEnd');
-    console.log('index ' + i + ' lat ' + newLatLng.lat + ' lng ' + newLatLng.lng);
-
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     if (i < tableRows.length) {
       tableRows[i].classList.remove('dragged-marker','table-primary');
     }
 
-    // マーカー情報を更新 ##### ?????
-    // GpxTrailEditor.updateMarkerLatLng(i,newLatLng);
+    // マーカー情報を更新
     GpxTrailEditor.markers[i].setLatLng(newLatLng);
 
     const newElevation = await GpxTrailEditor.getElevationData(newLatLng.lat,newLatLng.lng);
@@ -751,9 +747,7 @@ const GpxTrailEditor = {
   },
 
   updateMarkerLatLng: function(i,newLatLng) {
-    console.log('#### updateMarkerLatLng');
     const marker = GpxTrailEditor.markers[i];
-    console.log(marker._latlng)
     if (marker) {
       marker._latlng.lat = newLatLng[0];
       marker._latlng.lng = newLatLng[1];
@@ -1235,14 +1229,10 @@ const GpxTrailEditor = {
     };
   },
 
-
   // 標高タイル内ピクセル座標の値を取り出す関数
   // 引数：タイル内ピクセル座標X, タイル内ピクセル座標Y, tileTxtデータ
   // 戻り値：標高値（ストリング）または"e"
   findElevationInTileText: function (tilePixelX, tilePixelY, tileText) {
-
-    console.log('#### findElevationInTileText');
-    console.log({tilePixelX, tilePixelY, tileText});
 
     // 初期化
     let startIndex = 0;
@@ -1750,9 +1740,6 @@ const GpxTrailEditor = {
   // points: [{開始ポイント},{中間ポイント}(複数),{終了ポイント}]
   calcPassingDatetimes: function(points) {
 
-    console.log('#### calcPassingDatetimes')
-    console.log({points})
-
     // ポイントの数
     const pointCount = points.length;
 
@@ -1928,10 +1915,6 @@ const GpxTrailEditor = {
           return sortedArray.map(item => item + 1).join(', ');
         };
 
-        // const invalidLatLng = arrayToString(Array.from(new Set([...invalidPointLatLng.latitude, ...invalidPointLatLng.longitude])));
-        // const invalidDateTimeValue = arrayToString(Array.from(new Set([...invalidDateTime.datetimeValue])));
-        // const invalidDateTimeOrder = arrayToString(Array.from(new Set([...invalidDateTime.datetimeOrder])));
-
         const invalidRowHtml = function(array) {
           if (Array.isArray(array) && array.length > 0) {
             return array.map(rowIndex => {
@@ -1973,9 +1956,6 @@ const GpxTrailEditor = {
       const nextDateTime = GpxTrailEditor.points[i + 1].datetime;
 
       if (!isDateTimeValid(currentDateTime)) {
-        // console.log({i,currentDateTime,nextDateTime}); // ####
-        // console.log('!isDateTimeValid = ' + !isDateTimeValid(currentDateTime))
-        // console.log(new Date(currentDateTime) > new Date(nextDateTime))
         invalidDateTime.add(i);
         invalidDateTimeValues.add(i);
         invalidIndices.add(i);
@@ -2118,11 +2098,6 @@ const GpxTrailEditor = {
 
   removeThisMarker: function(index) {
 
-    console.log('#### removeThisMarker');
-    console.log('index = ' + index);
-    console.log('Point ' + GpxTrailEditor.points[index].latitude + ' ' + GpxTrailEditor.points[index].longitude);
-    console.log('Marker ' + GpxTrailEditor.markers[index]._latlng);
-
     // GpxTrailEditor.pointsから要素を削除
     GpxTrailEditor.points.splice(index, 1);
     // すべてのpoints[i]のindex要素の値を更新
@@ -2152,8 +2127,8 @@ const GpxTrailEditor = {
       GpxTrailEditor.bindMarkerEvents(marker,i,[marker._latlng.lat,marker._latlng.lng],GpxTrailEditor.points[i].datetime);
     }
 
-    // DEBUG ####
-    GpxTrailEditor.reportLatLngError();
+    // DEBUG
+    // GpxTrailEditor.reportLatLngError();
 
   },
 
@@ -2285,9 +2260,7 @@ const GpxTrailEditor = {
 
   },
 
-  // ###### Edit later #######
   getElevationTile: async function(tileX, tileY) {
-    console.log({ tileX, tileY }); // ####
     
     // DEM5AのURLを構築
     const urlDEM5A = `https://cyberjapandata.gsi.go.jp/xyz/dem5a/15/${tileX}/${tileY}.txt`;
