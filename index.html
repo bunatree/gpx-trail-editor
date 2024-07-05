@@ -25,8 +25,9 @@
       <div class="container-fluid">
         <div class="navbar-brand fw-bold" href="#">GPX Trail Editor</div>
         <div class="justify-content-end" id="nav-buttons">
-          <button id="btn-create-new" class="btn btn-sm btn-light">Create New</button>
-          <button id="btn-start-over" class="btn btn-sm btn-danger d-none">Start Over</button>
+          <button id="btn-nav-create-new" class="btn btn-sm btn-light d-none">新規作成</button>
+          <button id="btn-nav-export" class="btn btn-sm btn-primary d-none"><i class="bi bi-download me-2"></i>エクスポート</button>
+          <button id="btn-nav-start-over" class="btn btn-sm btn-danger d-none"><i class="bi bi-trash me-2"></i>破棄</button>
           <a id="goto-github" class="btn btn-link" href="https://github.com/bunatree/gpx-trail-editor" title="GitHubレポジトリを開く"><i class="bi bi-github"></i></a>
         </div>
       </div>
@@ -139,9 +140,21 @@
       <table id="data-table" class="table table-sm table-borderless table-hover w-100 d-none">
         <thead>
           <tr>
-            <th class="idx align-middle"></th>
+            <th class="idx align-middle">
+              <div class="th-content d-flex justify-content-center align-items-center">
+                <span class="label d-none">Index</span>
+                <div class="op dropdown fw-light">
+                  <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-three-dots-vertical"></i>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" data-target-name="idx" data-op-name="reverse" title="スタートからゴールへのルート順序を反転させます。" data-bs-toggle="tooltip" data-bs-placement="right"><i class="bi bi-arrow-down-up me-2"></i>ルート反転
+                    </a></li>
+                  </ul>
+                </div>
+              </div>
+            </th>
             <th class="chkbox align-middle text-center">
-              <!-- <input type="checkbox" id="chk-all" class="form-check-input" title="すべての行のチェックボックスの ON と OFF を切り替えます。" /> -->
               <div class="th-content d-flex justify-content-center align-items-center">
                 <span class="label d-none">チェック</span>
                 <div class="op dropdown fw-light">
@@ -237,6 +250,23 @@
   <button type="button" id="scroll-to-top" class="btn btn-secondary btn-floating btn-lg opacity-75" onclick="GpxTrailEditor.scrollToTop()">
     <i class="bi bi-arrow-up"></i>
   </button>
+
+  <!-- Modal Dialog with the Cancel and OK buttons -->
+  <div class="modal fade" id="modal-cancel-confirm" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Modal title</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">The modal body goes here...</div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-cancel" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary btn-confirm">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="./js/main.js"></script>

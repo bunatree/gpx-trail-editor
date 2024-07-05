@@ -71,15 +71,32 @@ const GpxTrailEditor = {
   },
 
   confirmStartOver: function() {
-    const isOkay = confirm("読み込み済みのデータを破棄して最初からやり直します。よろしいですか？");
-    if (isOkay) {
-      location.reload();
-    }
-  },
 
-  showBtnStartOver: function() {
-    const btnElm = document.getElementById('btn-start-over');
-    btnElm.classList.remove('d-none');
+    const modalDialogElm = document.getElementById('modal-cancel-confirm');
+    const modalTitleElm = modalDialogElm.querySelector('.modal-title');
+    const modalBodyElm = modalDialogElm.querySelector('.modal-body');
+    const cancelButtonElm = modalDialogElm.querySelector('.btn-cancel');
+    const confirmButtonElm = modalDialogElm.querySelector('.btn-confirm');
+
+    modalTitleElm.textContent = '破棄の確認';
+    modalBodyElm.textContent = '読み込み済みのデータを破棄して最初からやり直します。よろしいですか？';
+    cancelButtonElm.textContent = 'キャンセル';
+    confirmButtonElm.textContent = 'OK';
+
+    // Remove the existing event listener.
+    confirmButtonElm.replaceWith(confirmButtonElm.cloneNode(true));
+    const newConfirmButtonElm = modalDialogElm.querySelector('.btn-confirm');
+
+    // When the OK button is clicked
+    newConfirmButtonElm.addEventListener('click', () => {
+      const dynamicModal = new bootstrap.Modal(modalDialogElm); // Create a modal instance.
+      dynamicModal.hide();
+      location.reload(); // Reload the page
+    });
+
+    const dynamicModal = new bootstrap.Modal(modalDialogElm); // Create a modal instance.
+    dynamicModal.show();
+
   },
 
   initMap: function() {
@@ -118,13 +135,10 @@ const GpxTrailEditor = {
     if (file) {
       GpxTrailEditor.parseAndDisplayGPX(file);
       GpxTrailEditor.hideDropZoneForm();
-      GpxTrailEditor.showButtonToolbar();
-      // 操作フォームを表示
-      // GpxTrailEditor.showOperationForm();
-      // 「やり直す」ボタンを表示
-      // GpxTrailEditor.showBtnStartOver();
-      // 「エクスポート」ボタンを表示
-      // GpxTrailEditor.showBtnExportGPX();
+      // ナビゲーションバーのボタンでエクスポートなどの操作を行うことにしたので、
+      // ボタンツールバーは非表示のままで良い。
+      // GpxTrailEditor.showButtonToolbar();
+      GpxTrailEditor.showNavbarButtons();
     }
   },
 
@@ -235,7 +249,7 @@ const GpxTrailEditor = {
       // Index (Starts from 1)
       const idxCell = row.insertCell(0);
       idxCell.innerText = i + 1;
-      idxCell.classList.add('idx','align-middle','text-end');
+      idxCell.classList.add('idx','align-middle','text-center');
 
       // Checkbox
       const checkboxCell = row.insertCell(1);
@@ -932,6 +946,10 @@ const GpxTrailEditor = {
     }
   },
 
+  showNavbarButtons: function() {
+    document.getElementById('btn-nav-export').classList.remove('d-none');
+    document.getElementById('btn-nav-start-over').classList.remove('d-none');
+  },
 
   showButtonToolbar: function() {
     document.getElementById('op-btn-toolbar').classList.remove('d-none');
@@ -2189,7 +2207,7 @@ const GpxTrailEditor = {
   // },
 
   setupTableHeaderOps: function() {
-    ['chkbox','datetime','latitude','longitude','elevation'].forEach(className => {
+    ['idx','chkbox','datetime','latitude','longitude','elevation'].forEach(className => {
       const tableCell = document.querySelector('#data-table thead th.' + className);
       tableCell.querySelectorAll('.op ul.dropdown-menu > li > a').forEach(menuLink => {
         menuLink.addEventListener('click', (event) => {
@@ -2204,6 +2222,9 @@ const GpxTrailEditor = {
   onTableHeaderOpMenuItemClicked: function(opName,targetName) {
 
     const operationMap = {
+      idx: {
+        "reverse": GpxTrailEditor.reverseRoute,
+      },
       check: {
         "turn-on": GpxTrailEditor.turnOnCheckboxAll,
         "turn-off": GpxTrailEditor.turnOffCheckboxAll,
@@ -2240,6 +2261,18 @@ const GpxTrailEditor = {
     if (operationFunction) {
       operationFunction();
     }
+
+  },
+
+  setupOpButtonNavbar: function() {
+
+    const buttonNew = document.getElementById('btn-nav-create-new');
+    const buttonExport = document.getElementById('btn-nav-export');
+    const buttonStartOver = document.getElementById('btn-nav-start-over');
+
+    buttonNew.addEventListener('click', GpxTrailEditor.onCreateNewBtnClicked);
+    buttonExport.addEventListener('click', GpxTrailEditor.onExportGPXBtnClicked);
+    buttonStartOver.addEventListener('click', GpxTrailEditor.confirmStartOver);
 
   },
 
@@ -2410,6 +2443,7 @@ document.addEventListener('DOMContentLoaded', function () {
   GpxTrailEditor.setupLogNameForm();
   GpxTrailEditor.setupSummary();
   GpxTrailEditor.setupOpButtonToolbar();
+  GpxTrailEditor.setupOpButtonNavbar();
   GpxTrailEditor.setupTableHeaderOps();
   GpxTrailEditor.applyI18n();
 
