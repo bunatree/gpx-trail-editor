@@ -2082,6 +2082,8 @@ const GpxTrailEditor = {
       const currentDateTime = GpxTrailEditor.points[i].datetime;
       const nextDateTime = (i < GpxTrailEditor.points.length - 1) ? GpxTrailEditor.points[i + 1].datetime : null;
 
+      console.log('dateTime ' + i + ' current = ' + currentDateTime + ' next = ' + nextDateTime)
+
       if (!isDateTimeValid(currentDateTime)) {
         invalidDateTime.add(i);
         invalidDateTimeValues.add(i);
@@ -2339,6 +2341,11 @@ const GpxTrailEditor = {
       // 末尾に追加
       tableBody.appendChild(newRow);
     }
+
+    // イベントリスナー設定
+    newRow.querySelectorAll('input').forEach(inputElm => {
+      inputElm.addEventListener('blur', GpxTrailEditor.onDataTableInputLostFocus);
+    });
   },  
 
   setupTableHeaderOps: function() {
