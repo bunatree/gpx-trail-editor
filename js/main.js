@@ -4,6 +4,7 @@ const GpxTrailEditor = {
   layerGroup: null,
 
   isInsertionModeActive: false, // represents the "marker insertion mode"
+  insertionStartIndex: 0, // represents the index where the insertion starts
 
   logName: '', // the name of the trail log
   points: [], // an array for the points in the table
@@ -158,7 +159,6 @@ const GpxTrailEditor = {
 
       // Add click event listener for marker insertion mode
       this.map.on('click', (e) => {
-        console.log('#### The map was clicked!');
         if (this.isInsertionModeActive) {
           this.handleMapClick(e);
         }
@@ -714,7 +714,9 @@ const GpxTrailEditor = {
     <li>経度: ${latLng[1]}</li>
     </ul>
     <ul class="marker-op mt-2 p-0 list-unstyled">
-    <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li></ul>`;
+      <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li>
+      <li><button class="remove-this-point btn btn-info" onclick="GpxTrailEditor.addNewMarker(${i})">後に新規ポイント挿入</button></li>
+    </ul>`;
     marker.bindPopup(popupContent);
   },
 
@@ -920,6 +922,8 @@ const GpxTrailEditor = {
       insertButton.dataset.insertionMode = 'false';
       insertButton.dataset.bsToggle = 'tooltip';
       insertButton.addEventListener('click', function (event) {
+        // ボタンがクリックされた場合は、最後のポイントのindexを開始基準にする
+        GpxTrailEditor.insertionStartIndex = GpxTrailEditor.points.length - 1;
         GpxTrailEditor.toggleMarkerInsertion(insertButton,event);
       });
 
@@ -996,6 +1000,12 @@ const GpxTrailEditor = {
 
     // マーカー追加モードでない場合は即時終了
     if (!GpxTrailEditor.isInsertionModeActive) return;
+
+    GpxTrailEditor.addNewMarkerAndPolyline(e);
+
+  },
+
+  addNewMarkerAndPolyline: async function(e) {
 
     const latlng = e.latlng;
     const lat = latlng.lat;
