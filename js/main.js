@@ -715,7 +715,7 @@ const GpxTrailEditor = {
     </ul>
     <ul class="marker-op mt-2 p-0 list-unstyled">
       <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li>
-      <li><button class="remove-this-point btn btn-info" onclick="GpxTrailEditor.addNewMarker(${i})">後に新規ポイント挿入</button></li>
+      <li><button class="remove-this-point btn btn-info" onclick="GpxTrailEditor.insertPostMarkerPolyline(${i})">後に新規ポイント挿入</button></li>
     </ul>`;
     marker.bindPopup(popupContent);
   },
@@ -995,14 +995,17 @@ const GpxTrailEditor = {
 
   },
 
+  insertPostMarkerPolyline: async function(index) {
+    GpxTrailEditor.isInsertionModeActive = true;
+    GpxTrailEditor.insertionStartIndex = index;
+    console.log(`マーカー index ${index} の後ろに新しいマーカーを挿入します。`);
+  },
+
   // 地図がクリックされたときの処理
   handleMapClick: async function(e) {
-
     // マーカー追加モードでない場合は即時終了
     if (!GpxTrailEditor.isInsertionModeActive) return;
-
     GpxTrailEditor.addNewMarkerAndPolyline(e);
-
   },
 
   addNewMarkerAndPolyline: async function(e) {
@@ -1010,48 +1013,78 @@ const GpxTrailEditor = {
     const latlng = e.latlng;
     const lat = latlng.lat;
     const lng = latlng.lng;
-  
+
     const elevation = await GpxTrailEditor.latLngToEle(lat, lng);
-  
-    // テーブルの最後に新しい行を追加
+
+    // Insert a new table row at the insertionStartIndex + 1
     const tableBody = document.querySelector('#data-table tbody');
-    const lastRowIndex = tableBody.rows.length - 1;
-    GpxTrailEditor.addTableRow(lastRowIndex + 1, null, lat, lng, elevation);
+    const newRowIdx = GpxTrailEditor.insertionStartIndex + 1;
+    GpxTrailEditor.addTableRow(newRowIdx, null, lat, lng, elevation);
 
-    // テーブル情報を元にポイント情報を更新
-    const points =  GpxTrailEditor.convertTableToPoints();
-    GpxTrailEditor.points = points;
+    // Update points from the updated table
+    GpxTrailEditor.points = GpxTrailEditor.convertTableToPoints();
 
-    // 既存のマーカー情報をmarker変数に代入
-    const markers = GpxTrailEditor.markers;
-
-    // Update the previous last marker to use the "normal" class and options
-    if (markers.length > 0) {
-      const lastMarker = markers[markers.length - 1];
-      lastMarker.setIcon(GpxTrailEditor.normalMarkerOptions.icon); // Apply normal options
-      lastMarker.getElement().classList.remove('last-div-icon');
-      lastMarker.getElement().classList.add('normal-div-icon');
-    }
-
-    // Add the new marker with "last" class and options
-    const marker = L.marker([lat, lng], GpxTrailEditor.lastMarkerOptions).addTo(GpxTrailEditor.map);
-    GpxTrailEditor.markers.push(marker);
-
-    // ポリラインを更新 (最後のマーカーと繋げる)
-    if (GpxTrailEditor.markers.length > 1) {
-      const lastMarker = GpxTrailEditor.markers[GpxTrailEditor.markers.length - 2];
-
-      // Create a set of latLngs between the previous marker and the new one
-      const latLngs = [lastMarker.getLatLng(), latlng];
-
-      // Use drawPolylines to add both the border and the polyline
-      const [polyline, border] = GpxTrailEditor.drawPolylines(latLngs);
+    // Handle case when inserting at the end (default behavior)
+    if (GpxTrailEditor.insertionStartIndex === GpxTrailEditor.markers.length - 1) {
       
-      // Store the polylines in the GpxTrailEditor namespace
-      GpxTrailEditor.polyline = polyline;
-      GpxTrailEditor.borderPolyline = border;
+      // Update previous last marker to "normal" icon
+      if (GpxTrailEditor.markers.length > 0) {
+        const lastMarker = GpxTrailEditor.markers[GpxTrailEditor.markers.length - 1];
+        lastMarker.setIcon(GpxTrailEditor.normalMarkerOptions.icon);
+        lastMarker.getElement().classList.remove('last-div-icon');
+        lastMarker.getElement().classList.add('normal-div-icon');
+      }
+
+      // Add the new marker as the last marker
+      const newMarker = L.marker([lat, lng], GpxTrailEditor.lastMarkerOptions).addTo(GpxTrailEditor.map);
+      GpxTrailEditor.markers.push(newMarker);
+
+      // Connect the new marker with a polyline to the previous one
+      if (GpxTrailEditor.markers.length > 1) {
+        const lastMarker = GpxTrailEditor.markers[GpxTrailEditor.markers.length - 2];
+        const latLngs = [lastMarker.getLatLng(), latlng];
+        const [polyline, border] = GpxTrailEditor.drawPolylines(latLngs);
+        GpxTrailEditor.polyline = polyline;
+        GpxTrailEditor.borderPolyline = border;
+      }
+
+    } else {  // Insertion in between markers
+
+      // Insert a new marker in the middle of existing markers
+      const newMarker = L.marker([lat, lng], GpxTrailEditor.normalMarkerOptions).addTo(GpxTrailEditor.map);
+      GpxTrailEditor.markers.splice(GpxTrailEditor.insertionStartIndex + 1, 0, newMarker);
+
+      // Update polylines between the surrounding markers
+      const prevMarker = GpxTrailEditor.markers[GpxTrailEditor.insertionStartIndex];
+      const nextMarker = GpxTrailEditor.markers[GpxTrailEditor.insertionStartIndex + 2]; // original "next" marker
+
+      // Remove the old polyline between prevMarker and nextMarker
+      GpxTrailEditor.removePolylineBetween(prevMarker, nextMarker);
+
+      // Draw new polylines
+      const [polyline1, border1] = GpxTrailEditor.drawPolylines([prevMarker.getLatLng(), latlng]);
+      const [polyline2, border2] = GpxTrailEditor.drawPolylines([latlng, nextMarker.getLatLng()]);
+
+      // Store polyline updates (optional if needed for future use)
+      GpxTrailEditor.polyline = [polyline1, polyline2];
+      GpxTrailEditor.borderPolyline = [border1, border2];
     }
 
+    // Increase the starting piont index
+    GpxTrailEditor.insertionStartIndex ++;
+
+  },
+
+  removePolylineBetween: function(marker1, marker2) {
+    // Assuming you store your polylines, find and remove the one between marker1 and marker2
+    GpxTrailEditor.layerGroup.eachLayer(function(layer) {
+      if (layer instanceof L.Polyline) {
+        const latlngs = layer.getLatLngs();
+        if (latlngs[0].equals(marker1.getLatLng()) && latlngs[1].equals(marker2.getLatLng())) {
+          GpxTrailEditor.layerGroup.removeLayer(layer);
+        }
+      }
+    });
   },
 
   showNavbarButtons: function() {
