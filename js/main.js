@@ -3,6 +3,8 @@ const GpxTrailEditor = {
   map: null,
   layerGroup: null,
 
+  isInsertionModeActive: false, // represents the "marker insertion mode"
+
   logName: '', // the name of the trail log
   points: [], // an array for the points in the table
   markers: [], // an array for the markers on the map
@@ -10,12 +12,38 @@ const GpxTrailEditor = {
   borderPolyline: [], // an array for the markers on the map
   eleTiles: {}, // Elevation tile data
 
-  FIRST_MARKER_RADIUS: 8,
-  LAST_MARKER_RADIUS: 8,
-  NORMAL_MARKER_RADIUS: 6,
-
   POLYLINE_COLOR: 'rgba(192, 0, 128, 1)',
   POLYLINE_WEIGHT: 5,
+
+  normalMarkerOptions: {
+    icon: L.divIcon({
+      className: 'normal-div-icon',
+      html: '',
+      iconSize: [6*2,6*2],
+      iconAnchor: [6,6],
+    }),
+    draggable: false, // Do not allow to drag the markers by default.
+  },
+
+  firstMarkerOptions: {
+    icon: L.divIcon({
+      className: 'first-div-icon',
+      html: '<span class="label">S</span>',
+      iconSize: [8*2,8*2], // 2px larger than the normal marker
+      iconAnchor: [8,8], // 2px larger than the normal marker
+    }),
+    draggable: false, // Do not allow to drag the markers by default.
+  },
+  
+  lastMarkerOptions: {
+    icon: L.divIcon({
+      className: 'last-div-icon',
+      html: '<span class="label">G</span>',
+      iconSize: [8*2,8*2], // 2px larger than the normal marker
+      iconAnchor: [8,8], // 2px larger than the normal marker
+    }),
+    draggable: false, // Do not allow to drag the markers by default.
+  },
 
   normalPolylineOptions: {
     color: 'rgba(192, 0, 128, 1)',
@@ -127,6 +155,14 @@ const GpxTrailEditor = {
 
       // Initialize the layer group.
       this.layerGroup = L.layerGroup().addTo(this.map);
+
+      // Add click event listener for marker insertion mode
+      this.map.on('click', (e) => {
+        console.log('#### The map was clicked!');
+        if (this.isInsertionModeActive) {
+          this.handleMapClick(e);
+        }
+      });
     }
   },
 
@@ -174,7 +210,7 @@ const GpxTrailEditor = {
 
         // テーブルの表示内容からpointsデータを作成し、
         // ネームスペースGpxTrailEditorのpointsに代入
-        const points =  GpxTrailEditor.createPointData();
+        const points =  GpxTrailEditor.convertTableToPoints();
         GpxTrailEditor.points = points;
 
         GpxTrailEditor.parseSummary(points);
@@ -594,46 +630,46 @@ const GpxTrailEditor = {
 
     const markers = [];  // Array to store references to markers
 
-    const normalMarkerOptions = {
-      icon: L.divIcon({
-        className: 'normal-div-icon',
-        html: '',
-        iconSize: [GpxTrailEditor.NORMAL_MARKER_RADIUS*2,GpxTrailEditor.NORMAL_MARKER_RADIUS*2],
-        iconAnchor: [GpxTrailEditor.NORMAL_MARKER_RADIUS,GpxTrailEditor.NORMAL_MARKER_RADIUS],
-      }),
-      draggable: false, // Do not allow to drag the markers by default.
-    };
+    // const normalMarkerOptions = {
+    //   icon: L.divIcon({
+    //     className: 'normal-div-icon',
+    //     html: '',
+    //     iconSize: [GpxTrailEditor.NORMAL_MARKER_RADIUS*2,GpxTrailEditor.NORMAL_MARKER_RADIUS*2],
+    //     iconAnchor: [GpxTrailEditor.NORMAL_MARKER_RADIUS,GpxTrailEditor.NORMAL_MARKER_RADIUS],
+    //   }),
+    //   draggable: false, // Do not allow to drag the markers by default.
+    // };
 
-    const firstMarkerOptions = {
-      ...normalMarkerOptions,
-      icon: L.divIcon({
-        className: 'first-div-icon',
-        html: '<span class="label">S</span>',
-        iconSize: [GpxTrailEditor.FIRST_MARKER_RADIUS*2,GpxTrailEditor.FIRST_MARKER_RADIUS*2],
-        iconAnchor: [GpxTrailEditor.FIRST_MARKER_RADIUS,GpxTrailEditor.FIRST_MARKER_RADIUS],
-      }),
-    };
+    // const firstMarkerOptions = {
+    //   ...normalMarkerOptions,
+    //   icon: L.divIcon({
+    //     className: 'first-div-icon',
+    //     html: '<span class="label">S</span>',
+    //     iconSize: [GpxTrailEditor.FIRST_MARKER_RADIUS*2,GpxTrailEditor.FIRST_MARKER_RADIUS*2],
+    //     iconAnchor: [GpxTrailEditor.FIRST_MARKER_RADIUS,GpxTrailEditor.FIRST_MARKER_RADIUS],
+    //   }),
+    // };
     
-    const lastMarkerOptions = {
-      ...normalMarkerOptions,
-      icon: L.divIcon({
-        className: 'last-div-icon',
-        html: '<span class="label">G</span>',
-        iconSize: [GpxTrailEditor.LAST_MARKER_RADIUS*2,GpxTrailEditor.LAST_MARKER_RADIUS*2],
-        iconAnchor: [GpxTrailEditor.LAST_MARKER_RADIUS,GpxTrailEditor.LAST_MARKER_RADIUS],
-      }),
-    };
+    // const lastMarkerOptions = {
+    //   ...normalMarkerOptions,
+    //   icon: L.divIcon({
+    //     className: 'last-div-icon',
+    //     html: '<span class="label">G</span>',
+    //     iconSize: [GpxTrailEditor.LAST_MARKER_RADIUS*2,GpxTrailEditor.LAST_MARKER_RADIUS*2],
+    //     iconAnchor: [GpxTrailEditor.LAST_MARKER_RADIUS,GpxTrailEditor.LAST_MARKER_RADIUS],
+    //   }),
+    // };
 
     // Draw markers at each point.
     for (let i = 0; i < latLngs.length; i++) {
 
       const markerOptions = (function() {
         if (i === 0 ) {
-          return firstMarkerOptions;
+          return GpxTrailEditor.firstMarkerOptions;
         } else if (i === latLngs.length -1) {
-          return lastMarkerOptions;
+          return GpxTrailEditor.lastMarkerOptions;
         } else {
-          return normalMarkerOptions;
+          return GpxTrailEditor.normalMarkerOptions;
         }
       })();
 
@@ -772,23 +808,6 @@ const GpxTrailEditor = {
 
     const points = GpxTrailEditor.points;
 
-    function setPointInfo(index,curDateTime,curLatitude,curLongitude,curElevation,toNextDistance,toNextElevation,toNextSeconds,toNextSpeedInfo) {
-      if (GpxTrailEditor.points[index]) {
-        GpxTrailEditor.points[index] = {
-          "index": index,
-          "datetime": curDateTime,
-          "latitude": curLatitude,
-          "longitude": curLongitude,
-          "elevation": curElevation,
-          "toNextDistance": toNextDistance,
-          "toNextElevation": toNextElevation,
-          "toNextSeconds": toNextSeconds,
-          "toNextSpeedRatio": toNextSpeedInfo.speedRatio,
-          "toNextSpeedInfo": toNextSpeedInfo
-        };
-      }
-    }
-
     if (i < points.length) {
 
       const curDateTime = points[i].datetime;
@@ -804,7 +823,7 @@ const GpxTrailEditor = {
       const toNextSeconds = (nextDateTime) ? GpxTrailEditor.calcDateTimeDifference(nextDateTime,curDateTime) : null;
       const toNextSpeedInfo = (points[i+1]) ? GpxTrailEditor.calcDistanceSpeedRatio(curLatitude,curLongitude,nextLatitude,nextLongitude,curElevation,nextElevation) : [];
 
-      setPointInfo(i,curDateTime,curLatitude,curLongitude,curElevation,toNextDistance,toNextElevation,toNextSeconds,toNextSpeedInfo);
+      GpxTrailEditor.setPointInfo(i,curDateTime,curLatitude,curLongitude,curElevation,toNextDistance,toNextElevation,toNextSeconds,toNextSpeedInfo);
 
       if (GpxTrailEditor.points[i-1]) {
 
@@ -817,16 +836,34 @@ const GpxTrailEditor = {
         const toCurSeconds = (prevDateTime) ? GpxTrailEditor.calcDateTimeDifference(prevDateTime,curDateTime) : null;
         const toCurSpeedInfo = (points[i]) ? GpxTrailEditor.calcDistanceSpeedRatio(prevLatitude,prevLongitude,curLatitude,curLongitude,curElevation,nextElevation) : [];
 
-        setPointInfo(i-1,prevDateTime,prevLatitude,prevLongitude,prevElevation,toCurDistance,toCurElevation,toCurSeconds,toCurSpeedInfo);
+        GpxTrailEditor.setPointInfo(i-1,prevDateTime,prevLatitude,prevLongitude,prevElevation,toCurDistance,toCurElevation,toCurSeconds,toCurSpeedInfo);
 
       }
 
     }
   },
 
+  setPointInfo: function(index,curDateTime,curLatitude,curLongitude,curElevation,toNextDistance,toNextElevation,toNextSeconds,toNextSpeedInfo) {
+    if (GpxTrailEditor.points[index]) {
+      GpxTrailEditor.points[index] = {
+        "index": index,
+        "datetime": curDateTime,
+        "latitude": curLatitude,
+        "longitude": curLongitude,
+        "elevation": curElevation,
+        "toNextDistance": toNextDistance,
+        "toNextElevation": toNextElevation,
+        "toNextSeconds": toNextSeconds,
+        "toNextSpeedRatio": toNextSpeedInfo.speedRatio,
+        "toNextSpeedInfo": toNextSpeedInfo
+      };
+    }
+  },
+
   getElevationData: async function(latitude,longitude) {
 
     const apiUrl = `https://cyberjapandata2.gsi.go.jp/general/dem/scripts/getelevation.php?lon=${longitude}&lat=${latitude}&outtype=JSON`;
+
     const errorStr = '-----';
 
     try {
@@ -846,7 +883,6 @@ const GpxTrailEditor = {
       return null;
     }
 
-    
   },
 
   
@@ -900,8 +936,18 @@ const GpxTrailEditor = {
       moveButton.innerHTML = '<i class="bi bi-arrows-move"></i>';
       moveButton.dataset.draggable = 'false';
       moveButton.dataset.bsToggle = 'tooltip';
-      moveButton.addEventListener('click', function () {
-        GpxTrailEditor.toggleMarkerDraggability(moveButton);
+      moveButton.addEventListener('click', function (event) {
+        GpxTrailEditor.toggleMarkerDraggability(moveButton,event);
+      });
+
+      const insertButton = L.DomUtil.create('button', buttonClass, container);
+      insertButton.id = 'btn-toggle-insertion';
+      insertButton.title = '有効にすると、新しいポイントを追加/挿入します。';
+      insertButton.innerHTML = '<i class="bi bi-plus-circle"></i>';
+      insertButton.dataset.insertionMode = 'false';
+      insertButton.dataset.bsToggle = 'tooltip';
+      insertButton.addEventListener('click', function (event) {
+        GpxTrailEditor.toggleMarkerInsertion(insertButton,event);
       });
 
       const zoomInButton = L.DomUtil.create('button', buttonClass, container);
@@ -926,7 +972,11 @@ const GpxTrailEditor = {
     customControl.addTo(GpxTrailEditor.map);
   },
 
-  toggleMarkerDraggability: function(buttonElm) {
+  toggleMarkerDraggability: function(buttonElm,event) {
+
+    // Prevent clicking through the button.
+    event.stopPropagation();
+
     if (buttonElm.dataset.draggable === 'false' || !buttonElm.dataset.draggable) {
       GpxTrailEditor.markers.forEach(function (marker) {
         marker.dragging.enable();
@@ -944,6 +994,76 @@ const GpxTrailEditor = {
       buttonElm.classList.remove('btn-primary');
       buttonElm.classList.add('btn-white');
     }
+
+  },
+  
+  toggleMarkerInsertion: function(buttonElm,event) {
+
+    // Prevent clicking through the button.
+    event.stopPropagation();
+
+    if (!GpxTrailEditor.isInsertionModeActive) {
+      buttonElm.dataset.insertionMode = 'true';
+      buttonElm.title = 'ポイント追加 : 有効';
+      buttonElm.classList.remove('btn-white');
+      buttonElm.classList.add('btn-primary');
+      GpxTrailEditor.isInsertionModeActive = true;
+    } else {
+      buttonElm.dataset.insertionMode = 'false';
+      buttonElm.title = 'ポイント追加 : 無効';
+      buttonElm.classList.remove('btn-primary');
+      buttonElm.classList.add('btn-white');
+      GpxTrailEditor.isInsertionModeActive = false;
+    }
+
+  },
+
+  // #####
+  // 地図がクリックされたときの処理
+  handleMapClick: async function(e) {
+
+    // マーカー追加モードでない場合は即時終了
+    if (!GpxTrailEditor.isInsertionModeActive) return;
+
+    const latlng = e.latlng;
+    const lat = latlng.lat;
+    const lng = latlng.lng;
+  
+    const elevation = await GpxTrailEditor.latLngToEle(lat, lng);
+  
+    // テーブルの最後に新しい行を追加
+    const tableBody = document.querySelector('#data-table tbody');
+    const lastRowIndex = tableBody.rows.length - 1;
+    GpxTrailEditor.addTableRow(lastRowIndex + 1, null, lat, lng, elevation);
+
+    // テーブル情報を元にポイント情報を更新
+    const points =  GpxTrailEditor.convertTableToPoints();
+    GpxTrailEditor.points = points;
+
+    // 既存のマーカー情報をmarker変数に代入
+    const markers = GpxTrailEditor.markers;
+
+     // Update the previous last marker to use the "normal" class and options
+     if (markers.length > 0) {
+      const lastMarker = markers[markers.length - 1];
+      lastMarker.setIcon(GpxTrailEditor.normalMarkerOptions.icon); // Apply normal options
+      lastMarker.getElement().classList.remove('last-div-icon');
+      lastMarker.getElement().classList.add('normal-div-icon');
+    }
+
+    // Add the new marker with "last" class and options
+    const marker = L.marker([lat, lng], GpxTrailEditor.lastMarkerOptions).addTo(GpxTrailEditor.map);
+    GpxTrailEditor.markers.push(marker);
+
+    
+
+    // ポリラインを更新 (最後のマーカーと繋げる)
+    if (GpxTrailEditor.markers.length > 1) {
+      const lastMarker = GpxTrailEditor.markers[GpxTrailEditor.markers.length - 2];
+      const polyline = L.polyline([lastMarker.getLatLng(), latlng], GpxTrailEditor.normalPolylineOptions).addTo(GpxTrailEditor.layerGroup);
+      GpxTrailEditor.polyline = polyline;
+    }
+
   },
 
   showNavbarButtons: function() {
@@ -1521,7 +1641,9 @@ const GpxTrailEditor = {
       return false;
     }
 
-    const points = GpxTrailEditor.createPointData();
+    // テーブルの表示内容からpointsデータを作成し、
+    // ネームスペースGpxTrailEditorのpointsに代入
+    const points = GpxTrailEditor.convertTableToPoints();
     const interpolatedIndices = GpxTrailEditor.interpolateIntermediatePointTimes(points);
     GpxTrailEditor.clearAlert();
 
@@ -1616,9 +1738,9 @@ const GpxTrailEditor = {
 
   },
 
-  // 各ポイント（= テーブルの行）の緯度、経度、標高、次ポイントまでの距離などの
-  // 情報をオブジェクトにまとめ、それぞれのポイントの情報を points として返す。
-  createPointData: function() {
+  // テーブルの行から緯度、経度、標高、次ポイントまでの距離などをオブジェクトにまとめ、
+  // すべての情報をひとつにまとめた配列として返します。
+  convertTableToPoints: function() {
 
     const tableElm = document.getElementById('data-table');
     const rowElms = tableElm.tBodies[0].rows;
@@ -2187,24 +2309,51 @@ const GpxTrailEditor = {
   //   }
   // },
 
-  // NOT IN USE
   // テーブルに行を追加するためのヘルパー関数
-  // addTableRow: function(index, dateTime, lat, lng) {
-  //   const newRow = document.createElement('tr');
-  //   newRow.id = `row-${index}`;
-  //   newRow.innerHTML = `
-  //     <td>${index + 1}</td>
-  //     <td>${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTime)}</td>
-  //     <td>${lat}</td>
-  //     <td>${lng}</td>
-  //     <td>
-  //       <button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${index})">このポイントを削除</button>
-  //     </td>
-  //   `;
-  //   // テーブルに行を追加
-  //   const tableBody = document.getElementById('your-table-body-id');
-  //   tableBody.appendChild(newRow);
-  // },
+  addTableRow: function(index, dateTime, latitude, longitude, elevation) {
+
+    console.log('#### Inserting a new table row (addTableRow)');
+    console.log({index, dateTime, latitude, longitude, elevation});
+
+    // デフォルト値を設定（空やnullが渡された場合の処理）
+    const defaultDateTime = dateTime || '';
+    const defaultLatitude = latitude || '';
+    const defaultLongitude = longitude || '';
+    const defaultElevation = elevation !== null && elevation !== undefined ? elevation : '';
+  
+    // 新しい行を作成
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+      <td class="idx align-middle text-center">${index + 1}</td>
+      <td class="chkbox align-middle text-center">
+        <input type="checkbox" class="form-check-input text-center">
+      </td>
+      <td class="datetime">
+        <input type="datetime-local" class="form-control" step="1" value="${defaultDateTime}">
+      </td>
+      <td class="latitude">
+        <input type="text" placeholder="latitude" class="form-control" value="${defaultLatitude}">
+      </td>
+      <td class="longitude">
+        <input type="text" placeholder="longitude" class="form-control" value="${defaultLongitude}">
+      </td>
+      <td class="elevation">
+        <input type="text" placeholder="elevation" class="form-control" value="${defaultElevation}">
+      </td>
+    `;
+  
+    // テーブルに行を追加
+    const tableBody = document.querySelector('#data-table tbody');
+  
+    // 指定されたインデックスの行の後ろに追加
+    if (index < tableBody.rows.length) {
+      const targetRow = tableBody.rows[index];
+      targetRow.insertAdjacentElement('afterend', newRow);
+    } else {
+      // 末尾に追加
+      tableBody.appendChild(newRow);
+    }
+  },  
 
   setupTableHeaderOps: function() {
     ['idx','chkbox','datetime','latitude','longitude','elevation'].forEach(className => {

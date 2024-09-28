@@ -2,6 +2,10 @@ $mapHeight: 480px;
 // $bgTablePrimaryRow: #cfe2ff; // Borrowed from Bootstrap5. (table-primary)
 $fontFamily: 'M PLUS 1p', sans-serif;
 
+$normalMarkerBG: rgba(255, 0, 128, 1);
+$firstMarkerBG: rgba(255, 0, 128, 1);
+$lastMarkerBG: rgba(255, 0, 128, 1);
+
 body {
   font-family: $fontFamily;
   margin: 0;
@@ -92,16 +96,16 @@ body {
 
     &.first-div-icon {
       border: 2px solid #fff;
-      background-color: blue;
+      background-color: $firstMarkerBG;
       border-radius: 50%;
       display: flex;
       justify-content: center;
       align-items: center;
     }
-    
+
     &.last-div-icon {
       border: 2px solid #fff;
-      background-color: green;
+      background-color: $lastMarkerBG;
       border-radius: 50%;
       display: flex;
       justify-content: center;
@@ -110,7 +114,7 @@ body {
 
     &.normal-div-icon {
       border: 2px solid #fff;
-      background-color: rgba(255, 0, 128, 1);
+      background-color: $normalMarkerBG;
       border-radius: 50%;
     }
 
