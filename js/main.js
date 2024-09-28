@@ -595,29 +595,14 @@ const GpxTrailEditor = {
 
   drawPolylines: function(latLngs,drawBorder = true) {
 
-    // const polylines = [];
-    // const borders = [];
-
     let border, polyline;
     if (drawBorder) {
-
-      // Create a duplicate polyline with a larger weight for the border.
-      // const borderOptions = {
-      //   color: 'white',
-      //   weight: GpxTrailEditor.POLYLINE_WEIGHT + 4,
-      // };
-
       border = L.polyline(latLngs, GpxTrailEditor.borderPolylineOptions).addTo(GpxTrailEditor.map);
-      // borders.push(border);  // Store reference
-
-      // Add polyline to the layerGroup
       GpxTrailEditor.layerGroup.addLayer(border);
     }
 
-
     // Draw polylines with the style options above.
     polyline = L.polyline(latLngs, GpxTrailEditor.normalPolylineOptions).addTo(GpxTrailEditor.map);
-    // polylines.push(polyline);  // Store reference
 
     // Add polyline to the layerGroup
     GpxTrailEditor.layerGroup.addLayer(polyline);
@@ -885,18 +870,6 @@ const GpxTrailEditor = {
 
   },
 
-  
-
-
-  
-
-
-
-
-
-
-
-
   updateMarkersAndPolylines: function() {
 
     // Temporarily save a layer of markers
@@ -1018,7 +991,6 @@ const GpxTrailEditor = {
 
   },
 
-  // #####
   // 地図がクリックされたときの処理
   handleMapClick: async function(e) {
 
@@ -1043,8 +1015,8 @@ const GpxTrailEditor = {
     // 既存のマーカー情報をmarker変数に代入
     const markers = GpxTrailEditor.markers;
 
-     // Update the previous last marker to use the "normal" class and options
-     if (markers.length > 0) {
+    // Update the previous last marker to use the "normal" class and options
+    if (markers.length > 0) {
       const lastMarker = markers[markers.length - 1];
       lastMarker.setIcon(GpxTrailEditor.normalMarkerOptions.icon); // Apply normal options
       lastMarker.getElement().classList.remove('last-div-icon');
@@ -1055,13 +1027,19 @@ const GpxTrailEditor = {
     const marker = L.marker([lat, lng], GpxTrailEditor.lastMarkerOptions).addTo(GpxTrailEditor.map);
     GpxTrailEditor.markers.push(marker);
 
-    
-
     // ポリラインを更新 (最後のマーカーと繋げる)
     if (GpxTrailEditor.markers.length > 1) {
       const lastMarker = GpxTrailEditor.markers[GpxTrailEditor.markers.length - 2];
-      const polyline = L.polyline([lastMarker.getLatLng(), latlng], GpxTrailEditor.normalPolylineOptions).addTo(GpxTrailEditor.layerGroup);
+
+      // Create a set of latLngs between the previous marker and the new one
+      const latLngs = [lastMarker.getLatLng(), latlng];
+
+      // Use drawPolylines to add both the border and the polyline
+      const [polyline, border] = GpxTrailEditor.drawPolylines(latLngs);
+      
+      // Store the polylines in the GpxTrailEditor namespace
       GpxTrailEditor.polyline = polyline;
+      GpxTrailEditor.borderPolyline = border;
     }
 
   },
