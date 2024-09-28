@@ -1999,7 +1999,7 @@ const GpxTrailEditor = {
 
   },
 
-  onExportGPXBtnClicked: function() {
+  onGpxExportBtnClicked: function() {
 
     if (GpxTrailEditor.points.length > 0) {
 
@@ -2025,13 +2025,14 @@ const GpxTrailEditor = {
         const gpxContent = GpxTrailEditor.generateGPXContent(GpxTrailEditor.points);
         GpxTrailEditor.downloadGPXFile(gpxContent);
       } else {
+      
         // There is at least one invalid date/time.
         GpxTrailEditor.alertTableCell(invalidDateTime.datetime,invalidPointLatLng.latitude,invalidPointLatLng.longitude,[]);
 
-        const arrayToString = (array) => {
-          const sortedArray = array.sort((a, b) => a - b);
-          return sortedArray.map(item => item + 1).join(', ');
-        };
+        // const arrayToString = (array) => {
+        //   const sortedArray = array.sort((a, b) => a - b);
+        //   return sortedArray.map(item => item + 1).join(', ');
+        // };
 
         const invalidRowHtml = function(array) {
           if (Array.isArray(array) && array.length > 0) {
@@ -2048,6 +2049,14 @@ const GpxTrailEditor = {
         errorMsg += (invalidDateTime.datetimeOrder.length > 0) ? '<div class="error-message">日時順序エラー (行番号: ' + invalidRowHtml(invalidDateTime.datetimeOrder) + ')</div>' : '';
 
         GpxTrailEditor.showAlert('warning',errorMsg);
+
+        if (!invalidPointLatLng.result && !invalidDateTime.result) {
+          alert('一覧表の日時と標高に問題があるため、エクスポートできません。');
+        } else if (!invalidPointLatLng.result) {
+          alert('一覧表の標高に問題あるため、エクスポートできません。');
+        } else if (!invalidDateTime.result) {
+          alert('一覧表の日時に問題あるため、エクスポートできません。');
+        }
 
         return;
       }
@@ -2068,10 +2077,10 @@ const GpxTrailEditor = {
       return !isNaN(date.getTime());
     };
 
-    for (let i = 0; i < GpxTrailEditor.points.length - 1; i++) {
+    for (let i = 0; i < GpxTrailEditor.points.length; i++) {
 
       const currentDateTime = GpxTrailEditor.points[i].datetime;
-      const nextDateTime = GpxTrailEditor.points[i + 1].datetime;
+      const nextDateTime = (i < GpxTrailEditor.points.length - 1) ? GpxTrailEditor.points[i + 1].datetime : null;
 
       if (!isDateTimeValid(currentDateTime)) {
         invalidDateTime.add(i);
@@ -2080,13 +2089,12 @@ const GpxTrailEditor = {
         invalidRows.add(i + 1);
       }
 
-      if (new Date(currentDateTime) > new Date(nextDateTime)) {
+      if (nextDateTime && new Date(currentDateTime) > new Date(nextDateTime)) {
         invalidDateTime.add(i);
         invalidDateTimeOrders.add(i);
         invalidIndices.add(i);
         invalidRows.add(i + 1);
       }
-
     }
 
     return {
@@ -2398,7 +2406,7 @@ const GpxTrailEditor = {
     const buttonStartOver = document.getElementById('btn-nav-start-over');
 
     buttonNew.addEventListener('click', GpxTrailEditor.onCreateNewBtnClicked);
-    buttonExport.addEventListener('click', GpxTrailEditor.onExportGPXBtnClicked);
+    buttonExport.addEventListener('click', GpxTrailEditor.onGpxExportBtnClicked);
     buttonStartOver.addEventListener('click', GpxTrailEditor.confirmStartOver);
 
   },
@@ -2415,7 +2423,7 @@ const GpxTrailEditor = {
     buttonReverse.addEventListener('click', GpxTrailEditor.reverseRoute);
     buttonShift.addEventListener('click', GpxTrailEditor.shiftDateTime);
     buttonFill.addEventListener('click', GpxTrailEditor.fillEmptyDateTime);
-    buttonExport.addEventListener('click', GpxTrailEditor.onExportGPXBtnClicked);
+    buttonExport.addEventListener('click', GpxTrailEditor.onGpxExportBtnClicked);
     buttonStartOver.addEventListener('click', GpxTrailEditor.confirmStartOver);
 
   },
