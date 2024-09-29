@@ -574,6 +574,10 @@ const GpxTrailEditor = {
       // Set the markers array to the GpxTrailEditor name space.
       GpxTrailEditor.markers = GpxTrailEditor.drawMarkers(latLngs,dateTimes);
 
+      console.dir(GpxTrailEditor.polyline); // ###
+      console.dir(GpxTrailEditor.borderPolyline); // ###
+      console.dir(GpxTrailEditor.markers); // ###
+
       GpxTrailEditor.addCustomControl();
 
       // The variable "bounds" is a rectangular area calculated
@@ -715,7 +719,7 @@ const GpxTrailEditor = {
     </ul>
     <ul class="marker-op mt-2 p-0 list-unstyled">
       <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li>
-      <li><button class="remove-this-point btn btn-info" onclick="GpxTrailEditor.insertPostMarkerPolyline(${i})">後に新規ポイント挿入</button></li>
+      <li><button class="remove-this-point btn btn-info" onclick="GpxTrailEditor.insertMarkerAfter(${i})">後に新規ポイント挿入</button></li>
     </ul>`;
     marker.bindPopup(popupContent);
   },
@@ -743,7 +747,8 @@ const GpxTrailEditor = {
     }
   },
 
-  // Update the latitude and longitude values in the row associated with the dragged marker.
+  // マーカーのドラッグ終了時に、テーブル、マーカー、ポイント情報を更新し、
+  // マーカーとポリラインを再描画する
   onMarkerDragEnd: async function (i,newLatLng) {
 
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
@@ -753,13 +758,13 @@ const GpxTrailEditor = {
 
     // マーカー情報を更新
     GpxTrailEditor.markers[i].setLatLng(newLatLng);
-
-    const newElevation = await GpxTrailEditor.getElevationData(newLatLng.lat,newLatLng.lng);
+    // マーカーのドラッグ先の標高を取得
+    const newElevation = await GpxTrailEditor.latLngToEle(newLatLng.lat,newLatLng.lng);
+    // ポイント情報を更新
     GpxTrailEditor.updatePointInfo(i,newLatLng,newElevation);
-
     // テーブル情報を更新
     GpxTrailEditor.updateTableRow(i,newLatLng,newElevation);
-
+    // すべてのマーカーとポリラインを更新
     GpxTrailEditor.updateMarkersAndPolylines();
 
   },
@@ -995,7 +1000,7 @@ const GpxTrailEditor = {
 
   },
 
-  insertPostMarkerPolyline: async function(index) {
+  insertMarkerAfter: async function(index) {
     GpxTrailEditor.isInsertionModeActive = true;
     GpxTrailEditor.insertionStartIndex = index;
     console.log(`マーカー index ${index} の後ろに新しいマーカーを挿入します。`);
@@ -1005,10 +1010,10 @@ const GpxTrailEditor = {
   handleMapClick: async function(e) {
     // マーカー追加モードでない場合は即時終了
     if (!GpxTrailEditor.isInsertionModeActive) return;
-    GpxTrailEditor.addNewMarkerAndPolyline(e);
+    GpxTrailEditor.addNewMarkerPolyline(e);
   },
 
-  addNewMarkerAndPolyline: async function(e) {
+  addNewMarkerPolyline: async function(e) {
 
     const latlng = e.latlng;
     const lat = latlng.lat;
@@ -1016,15 +1021,12 @@ const GpxTrailEditor = {
 
     const elevation = await GpxTrailEditor.latLngToEle(lat, lng);
 
-    // Insert a new table row at the insertionStartIndex + 1
-    const tableBody = document.querySelector('#data-table tbody');
-    const newRowIdx = GpxTrailEditor.insertionStartIndex + 1;
-    GpxTrailEditor.addTableRow(newRowIdx, null, lat, lng, elevation);
+    // // Insert a new table row at the insertionStartIndex + 1
+    // const newRowIdx = GpxTrailEditor.insertionStartIndex + 1;
+    // GpxTrailEditor.addTableRow(newRowIdx, null, lat, lng, elevation);
 
-    // Update points from the updated table
-    GpxTrailEditor.points = GpxTrailEditor.convertTableToPoints();
 
-    // Handle case when inserting at the end (default behavior)
+    // Handle case when inserting at the end
     if (GpxTrailEditor.insertionStartIndex === GpxTrailEditor.markers.length - 1) {
       
       // Update previous last marker to "normal" icon
@@ -1044,8 +1046,21 @@ const GpxTrailEditor = {
         const lastMarker = GpxTrailEditor.markers[GpxTrailEditor.markers.length - 2];
         const latLngs = [lastMarker.getLatLng(), latlng];
         const [polyline, border] = GpxTrailEditor.drawPolylines(latLngs);
-        GpxTrailEditor.polyline = polyline;
-        GpxTrailEditor.borderPolyline = border;
+        // GpxTrailEditor.polyline = polyline;
+        // GpxTrailEditor.borderPolyline = border;
+
+        // マーカーとポリラインを更新
+        GpxTrailEditor.updateMarkersAndPolylines();
+
+        // Insert a new table row at the insertionStartIndex (+1)
+        const newRowIdx = GpxTrailEditor.insertionStartIndex + 1;
+        GpxTrailEditor.addTableRow(newRowIdx, null, lat, lng, elevation);
+
+        // Update points from the updated table
+        GpxTrailEditor.points = GpxTrailEditor.convertTableToPoints();
+
+        GpxTrailEditor.resetPopupBalloonAll();
+
       }
 
     } else {  // Insertion in between markers
@@ -1065,9 +1080,18 @@ const GpxTrailEditor = {
       const [polyline1, border1] = GpxTrailEditor.drawPolylines([prevMarker.getLatLng(), latlng]);
       const [polyline2, border2] = GpxTrailEditor.drawPolylines([latlng, nextMarker.getLatLng()]);
 
-      // Store polyline updates (optional if needed for future use)
-      GpxTrailEditor.polyline = [polyline1, polyline2];
-      GpxTrailEditor.borderPolyline = [border1, border2];
+      // マーカーとポリラインを更新
+      GpxTrailEditor.updateMarkersAndPolylines();
+
+      // Insert a new table row at the insertionStartIndex
+      const newRowIdx = GpxTrailEditor.insertionStartIndex;
+      GpxTrailEditor.addTableRow(newRowIdx, null, lat, lng, elevation);
+      
+      // Update points from the updated table
+      GpxTrailEditor.points = GpxTrailEditor.convertTableToPoints();
+
+      GpxTrailEditor.resetPopupBalloonAll();
+
     }
 
     // Increase the starting piont index
@@ -1076,7 +1100,6 @@ const GpxTrailEditor = {
   },
 
   removePolylineBetween: function(marker1, marker2) {
-    // Assuming you store your polylines, find and remove the one between marker1 and marker2
     GpxTrailEditor.layerGroup.eachLayer(function(layer) {
       if (layer instanceof L.Polyline) {
         const latlngs = layer.getLatLngs();
@@ -2342,9 +2365,6 @@ const GpxTrailEditor = {
 
   // テーブルに行を追加するためのヘルパー関数
   addTableRow: function(index, dateTime, latitude, longitude, elevation) {
-
-    console.log('#### Inserting a new table row (addTableRow)');
-    console.log({index, dateTime, latitude, longitude, elevation});
 
     // デフォルト値を設定（空やnullが渡された場合の処理）
     const defaultDateTime = dateTime || '';
