@@ -1014,10 +1014,11 @@ const GpxTrailEditor = {
     GpxTrailEditor.isInsertionModeActive = false;
   },
 
-  insertMarkerAfter: async function(index) {
-    GpxTrailEditor.isInsertionModeActive = true;
+  // 指定されたindexマーカーの後ろにマーカーを挿入
+  insertMarkerAfter: function(index) {
     GpxTrailEditor.insertionStartIndex = index;
-    console.log(`マーカー index ${index} の後ろに新しいマーカーを挿入します。`);
+    const buttonElm = document.getElementById('btn-toggle-insertion');
+    GpxTrailEditor.enableMarkerInsertion(buttonElm); // 挿入モードをONにしてボタンを青くする
   },
 
   // 地図がクリックされたときの処理
