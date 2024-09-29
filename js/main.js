@@ -719,8 +719,8 @@ const GpxTrailEditor = {
     <li>経度: ${latLng[1]}</li>
     </ul>
     <ul class="marker-op mt-2 p-0 list-unstyled">
-      <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li>
-      <li><button class="remove-this-point btn btn-info" onclick="GpxTrailEditor.insertMarkerAfter(${i})">後にポイント挿入</button></li>
+      <li class="mb-1"><button class="remove-this-point btn btn-primary" onclick="GpxTrailEditor.insertMarkerAfter(${i})"><i class="bi bi-plus-lg"></i> 後にポイント挿入</button></li>
+      <li class="mb-1"><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})"><i class="bi bi-trash"></i> このポイントを削除</button></li>
     </ul>`;
     marker.bindPopup(popupContent);
   },
@@ -989,7 +989,7 @@ const GpxTrailEditor = {
     GpxTrailEditor.isDragModeActive = false;
   },
   
-  toggleMarkerInsertion: function(buttonElm,event) {
+  toggleMarkerInsertion: function(buttonElm,event,markerIndex) {
     event.stopPropagation(); // Prevent clicking through the button.
     if (!GpxTrailEditor.isInsertionModeActive) {
       GpxTrailEditor.enableMarkerInsertion(buttonElm);
@@ -1019,6 +1019,7 @@ const GpxTrailEditor = {
     GpxTrailEditor.insertionStartIndex = index;
     const buttonElm = document.getElementById('btn-toggle-insertion');
     GpxTrailEditor.enableMarkerInsertion(buttonElm); // 挿入モードをONにしてボタンを青くする
+    GpxTrailEditor.markers[index].closePopup(); // 吹き出しを閉じる
   },
 
   // 地図がクリックされたときの処理
@@ -2162,8 +2163,6 @@ const GpxTrailEditor = {
 
       const currentDateTime = GpxTrailEditor.points[i].datetime;
       const nextDateTime = (i < GpxTrailEditor.points.length - 1) ? GpxTrailEditor.points[i + 1].datetime : null;
-
-      console.log('dateTime ' + i + ' current = ' + currentDateTime + ' next = ' + nextDateTime)
 
       if (!isDateTimeValid(currentDateTime)) {
         invalidDateTime.add(i);
