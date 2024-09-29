@@ -3,6 +3,7 @@ const GpxTrailEditor = {
   map: null,
   layerGroup: null,
 
+  isDragModeActive: false, // represents the "marker drag mode"
   isInsertionModeActive: false, // represents the "marker insertion mode"
   insertionStartIndex: 0, // represents the index where the insertion starts
 
@@ -911,6 +912,8 @@ const GpxTrailEditor = {
       const buttonClass = 'btn btn-white border';
 
       const moveButton = L.DomUtil.create('button', buttonClass, container);
+      const insertButton = L.DomUtil.create('button', buttonClass, container);
+
       moveButton.id = 'btn-toggle-draggable';
       moveButton.title = '有効にすると、ドラッグで各ポイントを移動できるようになります。';
       moveButton.innerHTML = '<i class="bi bi-arrows-move"></i>';
@@ -918,9 +921,9 @@ const GpxTrailEditor = {
       moveButton.dataset.bsToggle = 'tooltip';
       moveButton.addEventListener('click', function (event) {
         GpxTrailEditor.toggleMarkerDrag(moveButton,event);
+        GpxTrailEditor.disableMarkerInsertion(insertButton);
       });
 
-      const insertButton = L.DomUtil.create('button', buttonClass, container);
       insertButton.id = 'btn-toggle-insertion';
       insertButton.title = '有効にすると、新しいポイントを追加/挿入します。';
       insertButton.innerHTML = '<i class="bi bi-plus-circle"></i>';
@@ -930,6 +933,7 @@ const GpxTrailEditor = {
         // ボタンがクリックされた場合は、最後のポイントのindexを開始基準にする
         GpxTrailEditor.insertionStartIndex = GpxTrailEditor.points.length - 1;
         GpxTrailEditor.toggleMarkerInsertion(insertButton,event);
+        GpxTrailEditor.disableMarkerDrag(moveButton);
       });
 
       const zoomInButton = L.DomUtil.create('button', buttonClass, container);
@@ -971,6 +975,7 @@ const GpxTrailEditor = {
     buttonElm.title = 'ポイント移動 : 有効';
     buttonElm.classList.remove('btn-white');
     buttonElm.classList.add('btn-primary');
+    GpxTrailEditor.isDragModeActive = true;
   },
 
   disableMarkerDrag: function(buttonElm) {
@@ -981,6 +986,7 @@ const GpxTrailEditor = {
     buttonElm.title = 'ポイント移動 : 無効';
     buttonElm.classList.remove('btn-primary');
     buttonElm.classList.add('btn-white');
+    GpxTrailEditor.isDragModeActive = false;
   },
   
   toggleMarkerInsertion: function(buttonElm,event) {
