@@ -719,7 +719,7 @@ const GpxTrailEditor = {
     </ul>
     <ul class="marker-op mt-2 p-0 list-unstyled">
       <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li>
-      <li><button class="remove-this-point btn btn-info" onclick="GpxTrailEditor.insertMarkerAfter(${i})">後に新規ポイント挿入</button></li>
+      <li><button class="remove-this-point btn btn-info" onclick="GpxTrailEditor.insertMarkerAfter(${i})">後にポイント挿入</button></li>
     </ul>`;
     marker.bindPopup(popupContent);
   },
@@ -917,7 +917,7 @@ const GpxTrailEditor = {
       moveButton.dataset.draggable = 'false';
       moveButton.dataset.bsToggle = 'tooltip';
       moveButton.addEventListener('click', function (event) {
-        GpxTrailEditor.toggleMarkerDraggability(moveButton,event);
+        GpxTrailEditor.toggleMarkerDrag(moveButton,event);
       });
 
       const insertButton = L.DomUtil.create('button', buttonClass, container);
@@ -954,50 +954,58 @@ const GpxTrailEditor = {
     customControl.addTo(GpxTrailEditor.map);
   },
 
-  toggleMarkerDraggability: function(buttonElm,event) {
-
-    // Prevent clicking through the button.
-    event.stopPropagation();
-
+  toggleMarkerDrag: function(buttonElm,event) {
+    event.stopPropagation(); // Prevent clicking through the button.
     if (buttonElm.dataset.draggable === 'false' || !buttonElm.dataset.draggable) {
-      GpxTrailEditor.markers.forEach(function (marker) {
-        marker.dragging.enable();
-      });
-      buttonElm.dataset.draggable = 'true';
-      buttonElm.title = 'ポイント移動 : 有効';
-      buttonElm.classList.remove('btn-white');
-      buttonElm.classList.add('btn-primary');
+      GpxTrailEditor.enableMarkerDrag(buttonElm);
     } else {
-      GpxTrailEditor.markers.forEach(function (marker) {
-        marker.dragging.disable();
-      });
-      buttonElm.dataset.draggable = 'false';
-      buttonElm.title = 'ポイント移動 : 無効';
-      buttonElm.classList.remove('btn-primary');
-      buttonElm.classList.add('btn-white');
+      GpxTrailEditor.disableMarkerDrag(buttonElm);
     }
+  },
 
+  enableMarkerDrag: function(buttonElm) {
+    GpxTrailEditor.markers.forEach(function (marker) {
+      marker.dragging.enable();
+    });
+    buttonElm.dataset.draggable = 'true';
+    buttonElm.title = 'ポイント移動 : 有効';
+    buttonElm.classList.remove('btn-white');
+    buttonElm.classList.add('btn-primary');
+  },
+
+  disableMarkerDrag: function(buttonElm) {
+    GpxTrailEditor.markers.forEach(function (marker) {
+      marker.dragging.disable();
+    });
+    buttonElm.dataset.draggable = 'false';
+    buttonElm.title = 'ポイント移動 : 無効';
+    buttonElm.classList.remove('btn-primary');
+    buttonElm.classList.add('btn-white');
   },
   
   toggleMarkerInsertion: function(buttonElm,event) {
-
-    // Prevent clicking through the button.
-    event.stopPropagation();
-
+    event.stopPropagation(); // Prevent clicking through the button.
     if (!GpxTrailEditor.isInsertionModeActive) {
-      buttonElm.dataset.insertionMode = 'true';
-      buttonElm.title = 'ポイント追加 : 有効';
-      buttonElm.classList.remove('btn-white');
-      buttonElm.classList.add('btn-primary');
-      GpxTrailEditor.isInsertionModeActive = true;
+      GpxTrailEditor.enableMarkerInsertion(buttonElm);
     } else {
-      buttonElm.dataset.insertionMode = 'false';
-      buttonElm.title = 'ポイント追加 : 無効';
-      buttonElm.classList.remove('btn-primary');
-      buttonElm.classList.add('btn-white');
-      GpxTrailEditor.isInsertionModeActive = false;
+      GpxTrailEditor.disableMarkerInsertion(buttonElm);
     }
+  },
 
+  enableMarkerInsertion: function(buttonElm) {
+    buttonElm.dataset.insertionMode = 'true';
+    buttonElm.title = 'ポイント追加 : 有効';
+    buttonElm.classList.remove('btn-white');
+    buttonElm.classList.add('btn-primary');
+    GpxTrailEditor.isInsertionModeActive = true;
+  },
+
+  disableMarkerInsertion: function(buttonElm) {
+    buttonElm.dataset.insertionMode = 'false';
+    buttonElm.title = 'ポイント追加 : 無効';
+    buttonElm.classList.remove('btn-primary');
+    buttonElm.classList.add('btn-white');
+    GpxTrailEditor.isInsertionModeActive = false;
   },
 
   insertMarkerAfter: async function(index) {
