@@ -957,6 +957,7 @@ const GpxTrailEditor = {
     buttonElm.classList.remove('btn-white');
     buttonElm.classList.add('btn-primary');
     GpxTrailEditor.isDragModeActive = true;
+    GpxTrailEditor.showAlert('info',i18nMsg.alertEnabledMoveMode);
   },
 
   disableMarkerDrag: function(buttonElm) {
@@ -968,6 +969,7 @@ const GpxTrailEditor = {
     buttonElm.classList.remove('btn-primary');
     buttonElm.classList.add('btn-white');
     GpxTrailEditor.isDragModeActive = false;
+    GpxTrailEditor.showAlert('info',i18nMsg.alertDisabledMoveMode);
   },
   
   toggleMarkerInsertion: function(buttonElm,event) {

@@ -37,9 +37,11 @@ const i18nMsg = (function(lang) {
       "errorMsgDateTimeInvalidGPX": "The datetime info for the point index ${i} is invalid in the gpx file.",
 
       // Alerts
-      "alertEnabledInsertionMode": "Enabled the insersion mode. You can insert a new point between the points #${i} and #${j}",
-      "alertEnabledExtensionMode": "Enabled the extension mode. You can add a new point after the goal point.",
-      "alertDisabledInsertionMode": "Disabled the insertion/extension mode."
+      "alertEnabledMoveMode": "Turnd on the moving point mode. You can drag to move the points on the map.",
+      "alertDisabledMoveMode": "Turned off the moving point mode.",
+      "alertEnabledInsertionMode": "Turned on the insersion mode. You can insert a new point between the points #${i} and #${j}",
+      "alertEnabledExtensionMode": "Turned on the extension mode. You can add a new point after the goal point.",
+      "alertDisabledInsertionMode": "Turned on the insertion/extension mode."
 
     },
     "ja": {
@@ -73,9 +75,11 @@ const i18nMsg = (function(lang) {
       "errorMsgDateTimeInvalidGPX": "GPXファイル中のポイントの日時情報が正しくありません。 (インデックス ${i})",
 
       // Alerts
-      "alertEnabledInsertionMode": "挿入モードが有効になりました。ポイント No.${i} と No.${j} の間にポイントを挿入できます。",
-      "alertEnabledExtensionMode": "追加モードが有効になりました。終了ポイントの先にポイントを追加して、軌跡を延長できます。",
-      "alertDisabledInsertionMode": "追加/挿入モードが無効になりました。"
+      "alertEnabledMoveMode": "ポイント移動モードが有効になりました。ポイントをドラッグして移動できます。",
+      "alertDisabledMoveMode": "ポイント移動モードが無効になりました。",
+      "alertEnabledInsertionMode": "ポイント挿入モードが有効になりました。ポイント No.${i} と No.${j} の間にポイントを挿入できます。",
+      "alertEnabledExtensionMode": "ポイント追加モードが有効になりました。終了ポイントの先にポイントを追加して、軌跡を延長できます。",
+      "alertDisabledInsertionMode": "ポイント追加/挿入モードが無効になりました。"
 
     }
   };
