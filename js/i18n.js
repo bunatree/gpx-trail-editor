@@ -9,6 +9,8 @@ const i18nMsg = (function(lang) {
     "en": {
 
       // General
+      "date": "Date",
+      "dateTime": "Date/Time",
       "latitude": "Latitude",
       "lognitude": "Lognitude",
       "elevation": "Elevation",
@@ -29,6 +31,8 @@ const i18nMsg = (function(lang) {
       // Balloon
       "btnInsertNewMarkerAfter": "New Point After This Marker",
       "btnDeleteThisMarker": "Delete This Marker",
+      "markerNo": "Marker Number",
+      "titleMoveToMarker": "Move to the row #${i}",
 
       // Summary
       "titleRecalcButton": "Re-calculate the summary.",
@@ -51,6 +55,8 @@ const i18nMsg = (function(lang) {
     "ja": {
 
       // General
+      "date": "日付",
+      "dateTime": "日時",
       "latitude": "緯度",
       "lognitude": "経度",
       "elevation": "標高",
@@ -71,6 +77,8 @@ const i18nMsg = (function(lang) {
       // Balloon
       "btnInsertNewMarkerAfter": "この後にポイント挿入",
       "btnDeleteThisMarker": "このポイントを削除",
+      "markerNo": "マーカー番号",
+      "titleMoveToMarker": "行番号 ${i} へ移動",
 
       // Summary
       "titleRecalcButton": "再計算を行います。",

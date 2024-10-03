@@ -694,10 +694,10 @@ const GpxTrailEditor = {
   setPopupBalloon(i,marker,latLng,dateTime) {
     marker.unbindPopup();
     const popupContent = `<ul class="marker-info m-0 p-0 list-unstyled">
-    <li>マーカー番号: ${i+1} <a href="javascript:void(0);" class="move-to-row link-primary bi bi-arrow-right-circle-fill" onclick="GpxTrailEditor.scrollToTableRow(${i})" title="行番号 ${i+1} へ移動"></a></li>
-    <li>日時: ${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTime)}</li>
-    <li>緯度: ${latLng[0]}</li>
-    <li>経度: ${latLng[1]}</li>
+    <li>${i18nMsg.markerNo}: ${i+1} <a href="javascript:void(0);" class="move-to-row link-primary bi bi-arrow-right-circle-fill" onclick="GpxTrailEditor.scrollToTableRow(${i})" title="${i18nMsg.titleMoveToMarker.replace('${i}',i+1)}"></a></li>
+    <li>${i18nMsg.dateTime}: ${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTime)}</li>
+    <li>${i18nMsg.latitude}: ${latLng[0]}</li>
+    <li>${i18nMsg.lognitude}: ${latLng[1]}</li>
     </ul>
     <ul class="marker-op mt-2 p-0 list-unstyled">
       <li class="mb-1"><button class="remove-this-point btn btn-primary" onclick="GpxTrailEditor.insertMarkerAfter(${i})"><i class="bi bi-plus-circle"></i> ${i18nMsg.btnInsertNewMarkerAfter}</button></li>
