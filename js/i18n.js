@@ -34,7 +34,12 @@ const i18nMsg = (function(lang) {
 
       // Error Messages
       "errorMsgTimeElmMissingGPX": "No time element for the point index ${i} in the gpx file.",
-      "errorMsgDateTimeInvalidGPX": "The datetime info for the point index ${i} is invalid in the gpx file."
+      "errorMsgDateTimeInvalidGPX": "The datetime info for the point index ${i} is invalid in the gpx file.",
+
+      // Alerts
+      "alertEnabledInsertionMode": "Enabled the insersion mode. You can insert a new point between the points #${i} and #${j}",
+      "alertEnabledExtensionMode": "Enabled the extension mode. You can add a new point after the goal point.",
+      "alertDisabledInsertionMode": "Disabled the insertion/extension mode."
 
     },
     "ja": {
@@ -65,7 +70,12 @@ const i18nMsg = (function(lang) {
 
       // Error Messages
       "errorMsgTimeElmMissingGPX": "GPXファイル中のポイントのtime要素がありません。 (インデックス ${i})",
-      "errorMsgDateTimeInvalidGPX": "GPXファイル中のポイントの日時情報が正しくありません。 (インデックス ${i})"
+      "errorMsgDateTimeInvalidGPX": "GPXファイル中のポイントの日時情報が正しくありません。 (インデックス ${i})",
+
+      // Alerts
+      "alertEnabledInsertionMode": "挿入モードが有効になりました。ポイント No.${i} と No.${j} の間にポイントを挿入できます。",
+      "alertEnabledExtensionMode": "追加モードが有効になりました。終了ポイントの先にポイントを追加して、軌跡を延長できます。",
+      "alertDisabledInsertionMode": "追加/挿入モードが無効になりました。"
 
     }
   };

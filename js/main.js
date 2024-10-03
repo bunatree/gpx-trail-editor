@@ -700,7 +700,7 @@ const GpxTrailEditor = {
     <li>経度: ${latLng[1]}</li>
     </ul>
     <ul class="marker-op mt-2 p-0 list-unstyled">
-      <li class="mb-1"><button class="remove-this-point btn btn-primary" onclick="GpxTrailEditor.insertMarkerAfter(${i})"><i class="bi bi-plus-lg"></i> 後にポイント挿入</button></li>
+      <li class="mb-1"><button class="remove-this-point btn btn-primary" onclick="GpxTrailEditor.insertMarkerAfter(${i})"><i class="bi bi-plus-circle"></i> 後にポイント挿入</button></li>
       <li class="mb-1"><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})"><i class="bi bi-trash"></i> このポイントを削除</button></li>
     </ul>`;
     marker.bindPopup(popupContent);
@@ -970,12 +970,14 @@ const GpxTrailEditor = {
     GpxTrailEditor.isDragModeActive = false;
   },
   
-  toggleMarkerInsertion: function(buttonElm,event,markerIndex) {
+  toggleMarkerInsertion: function(buttonElm,event) {
     event.stopPropagation(); // Prevent clicking through the button.
     if (!GpxTrailEditor.isInsertionModeActive) {
       GpxTrailEditor.enableMarkerInsertion(buttonElm);
+      GpxTrailEditor.showAlert('info',i18nMsg.alertEnabledExtensionMode);
     } else {
       GpxTrailEditor.disableMarkerInsertion(buttonElm);
+      GpxTrailEditor.showAlert('info',i18nMsg.alertDisabledInsertionMode);
     }
   },
 
@@ -1001,6 +1003,14 @@ const GpxTrailEditor = {
     const buttonElm = document.getElementById('btn-toggle-insertion');
     GpxTrailEditor.enableMarkerInsertion(buttonElm); // 挿入モードをONにしてボタンを青くする
     GpxTrailEditor.markers[index].closePopup(); // 吹き出しを閉じる
+    const markersLength = GpxTrailEditor.markers.length;
+    if (index === markersLength - 1) {
+      // 終了ポイントの後ろにポイントを追加してルートを延長
+      GpxTrailEditor.showAlert('info',i18nMsg.alertEnabledExtensionMode);
+    } else {
+      // ポイントとポイントの間に新しいポイントを挿入
+      GpxTrailEditor.showAlert('info',i18nMsg.alertEnabledInsertionMode.replace('${i}',index+1).replace('${j}',index+2));
+    }
   },
 
   // 地図がクリックされたときの処理
