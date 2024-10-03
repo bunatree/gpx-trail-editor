@@ -882,17 +882,18 @@ const GpxTrailEditor = {
       const insertButton = L.DomUtil.create('button', buttonClass, container);
 
       moveButton.id = 'btn-toggle-draggable';
-      moveButton.title = '有効にすると、ドラッグで各ポイントを移動できるようになります。';
+      moveButton.title = i18nMsg.titleDragMarkerButton;
       moveButton.innerHTML = '<i class="bi bi-arrows-move"></i>';
       moveButton.dataset.draggable = 'false';
       moveButton.dataset.bsToggle = 'tooltip';
+      moveButton.dataset.bsPlacement = 'right';
       moveButton.addEventListener('click', function (event) {
         GpxTrailEditor.toggleMarkerDrag(moveButton,event);
         GpxTrailEditor.disableMarkerInsertion(insertButton);
       });
 
       insertButton.id = 'btn-toggle-insertion';
-      insertButton.title = '有効にすると、新しいポイントを追加/挿入します。';
+      insertButton.title = i18nMsg.titleInsertMarkerButton;
       insertButton.innerHTML = '<i class="bi bi-plus-circle"></i>';
       insertButton.dataset.insertionMode = 'false';
       insertButton.dataset.bsToggle = 'tooltip';
@@ -917,6 +918,14 @@ const GpxTrailEditor = {
         GpxTrailEditor.map.zoomOut();
       });
 
+      // Initialize tooltips for each button
+      setTimeout(() => {
+        const tooltipTriggerList = [].slice.call(container.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+      }, 0);
+
       return container;
 
     };
@@ -939,7 +948,7 @@ const GpxTrailEditor = {
       marker.dragging.enable();
     });
     buttonElm.dataset.draggable = 'true';
-    buttonElm.title = 'ポイント移動 : 有効';
+    // buttonElm.title = 'ポイント移動 : 有効';
     buttonElm.classList.remove('btn-white');
     buttonElm.classList.add('btn-primary');
     GpxTrailEditor.isDragModeActive = true;
@@ -951,7 +960,7 @@ const GpxTrailEditor = {
       marker.dragging.disable();
     });
     buttonElm.dataset.draggable = 'false';
-    buttonElm.title = 'ポイント移動 : 無効';
+    // buttonElm.title = 'ポイント移動 : 無効';
     buttonElm.classList.remove('btn-primary');
     buttonElm.classList.add('btn-white');
     GpxTrailEditor.isDragModeActive = false;
@@ -971,7 +980,7 @@ const GpxTrailEditor = {
 
   enableMarkerInsertion: function(buttonElm) {
     buttonElm.dataset.insertionMode = 'true';
-    buttonElm.title = 'ポイント追加 : 有効';
+    // buttonElm.title = 'ポイント追加 : 有効';
     buttonElm.classList.remove('btn-white');
     buttonElm.classList.add('btn-primary');
     GpxTrailEditor.isInsertionModeActive = true;
@@ -979,7 +988,7 @@ const GpxTrailEditor = {
 
   disableMarkerInsertion: function(buttonElm) {
     buttonElm.dataset.insertionMode = 'false';
-    buttonElm.title = 'ポイント追加 : 無効';
+    // buttonElm.title = 'ポイント追加 : 無効';
     buttonElm.classList.remove('btn-primary');
     buttonElm.classList.add('btn-white');
     GpxTrailEditor.isInsertionModeActive = false;
