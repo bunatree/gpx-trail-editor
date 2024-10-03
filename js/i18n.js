@@ -26,6 +26,10 @@ const i18nMsg = (function(lang) {
       "titleExportButton": "Exports as a GPX file.",
       "titleStartOverButton": "Discards the data being edited and start over.",
 
+      // Balloon
+      "btnInsertNewMarkerAfter": "New Point After This Marker",
+      "btnDeleteThisMarker": "Delete This Marker",
+
       // Summary
       "titleRecalcButton": "Re-calculate the summary.",
 
@@ -63,6 +67,10 @@ const i18nMsg = (function(lang) {
       "titleFillButton": "入力されていない日時を、その前後のポイントの通過日時と標高から計算し、補間します。",
       "titleExportButton": "GPXファイルとしてエクスポートします。",
       "titleStartOverButton": "編集中のデータを破棄し、最初からやり直します。",
+
+      // Balloon
+      "btnInsertNewMarkerAfter": "この後にポイント挿入",
+      "btnDeleteThisMarker": "このポイントを削除",
 
       // Summary
       "titleRecalcButton": "再計算を行います。",

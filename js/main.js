@@ -700,8 +700,8 @@ const GpxTrailEditor = {
     <li>経度: ${latLng[1]}</li>
     </ul>
     <ul class="marker-op mt-2 p-0 list-unstyled">
-      <li class="mb-1"><button class="remove-this-point btn btn-primary" onclick="GpxTrailEditor.insertMarkerAfter(${i})"><i class="bi bi-plus-circle"></i> 後にポイント挿入</button></li>
-      <li class="mb-1"><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})"><i class="bi bi-trash"></i> このポイントを削除</button></li>
+      <li class="mb-1"><button class="remove-this-point btn btn-primary" onclick="GpxTrailEditor.insertMarkerAfter(${i})"><i class="bi bi-plus-circle"></i> ${i18nMsg.btnInsertNewMarkerAfter}</button></li>
+      <li class="mb-1"><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})"><i class="bi bi-trash"></i> ${i18nMsg.btnDeleteThisMarker}</button></li>
     </ul>`;
     marker.bindPopup(popupContent);
   },
