@@ -673,22 +673,8 @@ const GpxTrailEditor = {
       GpxTrailEditor.onMarkerDragStart(i, event.target.getLatLng());
     });
 
-    // Remove existing Popup (if any)
-    // marker.unbindPopup();
-
-    // Add popup balloon to the marker
-
     GpxTrailEditor.setPopupBalloon(i,marker,latLng,dateTime);
-    // const popupContent = `<ul class="marker-info m-0 p-0 list-unstyled">
-    // <li>マーカー番号: ${i+1} <a href="javascript:void(0);" class="move-to-row link-primary bi bi-arrow-right-circle-fill" onclick="GpxTrailEditor.scrollToTableRow(${i})" title="行番号 ${i+1} へ移動"></a></li>
-    // <li>日時: ${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTime)}</li>
-    // <li>緯度: ${latLng[0]}</li>
-    // <li>経度: ${latLng[1]}</li>
-    // </ul>
-    // <ul class="marker-op mt-2 p-0 list-unstyled">
-    // <li><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})">このポイントを削除</button></li></ul>`;
-    // marker.bindPopup(popupContent);
-    
+
   },
 
   setPopupBalloon(i,marker,latLng,dateTime) {
@@ -1030,11 +1016,6 @@ const GpxTrailEditor = {
 
     const elevation = await GpxTrailEditor.latLngToEle(lat, lng);
 
-    // // Insert a new table row at the insertionStartIndex + 1
-    // const newRowIdx = GpxTrailEditor.insertionStartIndex + 1;
-    // GpxTrailEditor.addTableRow(newRowIdx, null, lat, lng, elevation);
-
-
     // Handle case when inserting at the end
     if (GpxTrailEditor.insertionStartIndex === GpxTrailEditor.markers.length - 1) {
       
@@ -1055,10 +1036,8 @@ const GpxTrailEditor = {
         const lastMarker = GpxTrailEditor.markers[GpxTrailEditor.markers.length - 2];
         const latLngs = [lastMarker.getLatLng(), latlng];
         const [polyline, border] = GpxTrailEditor.drawPolylines(latLngs);
-        // GpxTrailEditor.polyline = polyline;
-        // GpxTrailEditor.borderPolyline = border;
 
-        // マーカーとポリラインを更新
+        // Update Markers and Polylines
         GpxTrailEditor.updateMarkersAndPolylines();
 
         // Insert a new table row at the insertionStartIndex (+1)
@@ -2373,13 +2352,13 @@ const GpxTrailEditor = {
   // テーブルに行を追加するためのヘルパー関数
   addTableRow: function(index, dateTime, latitude, longitude, elevation) {
 
-    // デフォルト値を設定（空やnullが渡された場合の処理）
+    // Set defaults
     const defaultDateTime = dateTime || '';
     const defaultLatitude = latitude || '';
     const defaultLongitude = longitude || '';
     const defaultElevation = elevation !== null && elevation !== undefined ? elevation : '';
   
-    // 新しい行を作成
+    // Add a new row
     const newRow = document.createElement('tr');
     newRow.innerHTML = `
       <td class="idx align-middle text-center">${index + 1}</td>
@@ -2400,22 +2379,23 @@ const GpxTrailEditor = {
       </td>
     `;
   
-    // テーブルに行を追加
     const tableBody = document.querySelector('#data-table tbody');
   
-    // 指定されたインデックスの行の後ろに追加
+    // Insert a new row after an existing row with the index
     if (index < tableBody.rows.length) {
       const targetRow = tableBody.rows[index];
       targetRow.insertAdjacentElement('afterend', newRow);
     } else {
-      // 末尾に追加
+      // Add a new row after the last row
       tableBody.appendChild(newRow);
     }
 
-    // イベントリスナー設定
     newRow.querySelectorAll('input').forEach(inputElm => {
       inputElm.addEventListener('blur', GpxTrailEditor.onDataTableInputLostFocus);
     });
+
+    GpxTrailEditor.resetTableRowIndices();
+
   },  
 
   setupTableHeaderOps: function() {
