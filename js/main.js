@@ -1370,16 +1370,12 @@ const GpxTrailEditor = {
       // 標高データがinvalidの場合（元々の取得した標高が文字列"e"を含む場合）
       if (!elevationValue) {
         const resultObj = await GpxTrailEditor.fetchTile(tileInfoObj.tileX, tileInfoObj.tileY);
-        // console.log({resultObj})
-        // tileText = GpxTrailEditor.eleTiles[tileKey];
         tileText = resultObj.tileText;
         elevationValue = GpxTrailEditor.findElevationInTileText(tileInfoObj.tilePixelX, tileInfoObj.tilePixelY, tileText);
       }
     } else {
       // eleTilesにデータが存在しない場合、DEM10を取得
       const resultObj = await GpxTrailEditor.fetchTile(tileInfoObj.tileX, tileInfoObj.tileY);
-      // console.log({resultObj})
-      // tileText = GpxTrailEditor.eleTiles[tileKey];
       tileText = resultObj.tileText;
       elevationValue = GpxTrailEditor.findElevationInTileText(tileInfoObj.tilePixelX, tileInfoObj.tilePixelY, tileText);
     }
@@ -2321,6 +2317,12 @@ const GpxTrailEditor = {
 
     // Update markers and polylines.
     GpxTrailEditor.updateMarkersAndPolylines();
+
+    // If the first marker exists, update its icon to "S" (firstMarkerOptions)
+    if (GpxTrailEditor.markers.length > 0) {
+      const firstMarker = GpxTrailEditor.markers[0];
+      firstMarker.setIcon(GpxTrailEditor.firstMarkerOptions.icon);
+    }
 
     // Update the events and balloons for the markers after the target marker.
     for (let i = index; i < GpxTrailEditor.markers.length; i++) {
