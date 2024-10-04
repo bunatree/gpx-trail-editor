@@ -972,10 +972,10 @@ const GpxTrailEditor = {
   toggleInsertMarkerBetween: function(event) {
     event.stopPropagation(); // Prevent clicking through the button.
     if (!GpxTrailEditor.isInsertionModeActive) {
-      GpxTrailEditor.enableInsertMarkerBetween(event,true);
+      GpxTrailEditor.enableInsertMarkerBetween(event);
       GpxTrailEditor.showAlert('info',i18nMsg.alertEnabledExtensionMode);
     } else {
-      GpxTrailEditor.disableInsertMarkerBetween(event,true);
+      GpxTrailEditor.disableInsertMarkerBetween(event);
       GpxTrailEditor.showAlert('info',i18nMsg.alertDisabledInsertionMode);
     }
   },
@@ -1046,7 +1046,9 @@ const GpxTrailEditor = {
       }
 
       // Add the new marker as the last marker
-      const newMarker = L.marker([lat, lng], GpxTrailEditor.lastMarkerOptions).addTo(GpxTrailEditor.map);
+      const newMarker = L.marker([lat,lng], GpxTrailEditor.normalMarkerOptions);
+      GpxTrailEditor.layerGroup.addLayer(newMarker);
+
       GpxTrailEditor.markers.push(newMarker);
 
       // Connect the new marker with a polyline to the previous one
@@ -1072,7 +1074,9 @@ const GpxTrailEditor = {
     } else {  // Insertion in between markers
 
       // Insert a new marker in the middle of existing markers
-      const newMarker = L.marker([lat, lng], GpxTrailEditor.normalMarkerOptions).addTo(GpxTrailEditor.map);
+      const newMarker = L.marker([lat,lng], GpxTrailEditor.normalMarkerOptions);
+      GpxTrailEditor.layerGroup.addLayer(newMarker);
+
       GpxTrailEditor.markers.splice(GpxTrailEditor.insertionStartIndex + 1, 0, newMarker);
 
       // Update polylines between the surrounding markers
@@ -2296,12 +2300,12 @@ const GpxTrailEditor = {
 
   removeThisMarker: function(index) {
 
-    // GpxTrailEditor.pointsから要素を削除
+    // Remove the target point from GpxTrailEditor.points.
     GpxTrailEditor.points.splice(index, 1);
-    // すべてのpoints[i]のindex要素の値を更新
+    // Reset all the point index values.
     GpxTrailEditor.resetPointIndices();
 
-    // テーブルから対応する行を削除
+    // Remove the table rows.
     const rows = document.querySelectorAll('#data-table tbody tr');
     const targetRow = rows[index];
     if (targetRow) {
@@ -2309,24 +2313,20 @@ const GpxTrailEditor = {
     }
     GpxTrailEditor.resetTableRowIndices();
 
-    // マーカーをレイヤーグループから削除
+    // Remove the marker from the layer group.
     GpxTrailEditor.layerGroup.removeLayer(GpxTrailEditor.markers[index]);
 
-    // GpxTrailEditor.markersから要素を削除
+    // Remove the marker from the array GpxTrailEditor.markers.
     GpxTrailEditor.markers.splice(index, 1);
 
-    // マーカーとポリラインを更新
+    // Update markers and polylines.
     GpxTrailEditor.updateMarkersAndPolylines();
 
-    // 削除されたindexより後ろのmarkerのイベントや吹き出し用データを更新
-    // GpxTrailEditor.resetPopupBalloonAll();//%%%%%%
+    // Update the events and balloons for the markers after the target marker.
     for (let i = index; i < GpxTrailEditor.markers.length; i++) {
       const marker = GpxTrailEditor.markers[i];
       GpxTrailEditor.bindMarkerEvents(marker,i,[marker._latlng.lat,marker._latlng.lng],GpxTrailEditor.points[i].datetime);
     }
-
-    // DEBUG
-    // GpxTrailEditor.reportLatLngError();
 
   },
 
