@@ -15,6 +15,11 @@ const i18nMsg = (function(lang) {
       "lognitude": "Lognitude",
       "elevation": "Elevation",
       "distance": "Distance",
+      "error": "Error",
+
+      // Drop Zone
+      "dropNote": "Drop a GPX file",
+      "dropSubNote": "or click here to upload.",
 
       // Button Toolbar
       "labelReverseButton": "Reverse",
@@ -49,6 +54,10 @@ const i18nMsg = (function(lang) {
       // Error Messages
       "errorMsgTimeElmMissingGPX": "No time element for the point index ${i} in the gpx file.",
       "errorMsgDateTimeInvalidGPX": "The datetime info for the point index ${i} is invalid in the gpx file.",
+      "errorDropFileExtensionGPX": "Drop a file with a .gpx extension.",
+      "errorNotGpxFormat": "The file is not in GPX format.",
+      "errorNotValidGpxFormat": "The file is not in valid GPX format.",
+      "errorInvalidXmlFormat": "An error occurred while parsing XML. The file is in an invalid format.",
 
       // Alerts
       "alertEnabledDragMode": "Turnd on the moving point mode. You can drag to move the points on the map.",
@@ -67,6 +76,11 @@ const i18nMsg = (function(lang) {
       "lognitude": "経度",
       "elevation": "標高",
       "distance": "距離",
+      "error": "エラー",
+
+      // Drop Zone
+      "dropNote": "GPX ファイルをドラッグ&ドロップ",
+      "dropSubNote": "またはクリックしてアップロード",
 
       // Button Toolbar
       "labelReverseButton": "ルート反転",
@@ -101,6 +115,10 @@ const i18nMsg = (function(lang) {
       // Error Messages
       "errorMsgTimeElmMissingGPX": "GPXファイル中のポイントのtime要素がありません。 (インデックス ${i})",
       "errorMsgDateTimeInvalidGPX": "GPXファイル中のポイントの日時情報が正しくありません。 (インデックス ${i})",
+      "errorDropFileExtensionGPX": "拡張子が .gpx のファイルをドロップしてください。",
+      "errorNotGpxFormat": "ファイルは GPX フォーマットではありません。",
+      "errorNotValidGpxFormat": "ファイルは正しい GPX フォーマットではありません。",
+      "errorInvalidXmlFormat": "XML の解析中にエラーが発生しました。ファイルのフォーマットが不正です。",
 
       // Alerts
       "alertEnabledDragMode": "ポイント移動モードが有効になりました。ポイントをドラッグして移動できます。",

@@ -100,7 +100,34 @@ const GpxTrailEditor = {
     };
   },
 
-  confirmStartOver: function() {
+  showOkDialog: function(titleText,bodyContent,buttonLabel,type) {
+
+    const modalDialogElm = document.getElementById('modal-ok');
+    const modalHeaderElm = modalDialogElm.querySelector('.modal-header');
+    const modalTitleElm = modalDialogElm.querySelector('.modal-title');
+    const modalBodyElm = modalDialogElm.querySelector('.modal-body');
+    const confirmButtonElm = modalDialogElm.querySelector('.btn-confirm');
+
+    modalTitleElm.textContent = titleText;
+    modalBodyElm.textContent = bodyContent;
+    confirmButtonElm.textContent = buttonLabel;
+
+    GpxTrailEditor.clearModalHeaderAlert(modalHeaderElm);
+    if (type) {
+      const typeClassName = 'text-bg-' + type;
+      modalHeaderElm.classList.add(typeClassName);
+    }
+
+    const modalDialog = new bootstrap.Modal(modalDialogElm);
+    modalDialog.show();
+
+  },
+
+  clearModalHeaderAlert: function(modalHeaderElm) {
+    modalHeaderElm.classList.remove('text-bg-info','text-bg-success','text-bg-warning','text-bg-danger');
+  },
+
+  showStartOverDialog: function() {
 
     const modalDialogElm = document.getElementById('modal-cancel-confirm');
     const modalTitleElm = modalDialogElm.querySelector('.modal-title');
@@ -119,13 +146,13 @@ const GpxTrailEditor = {
 
     // When the OK button is clicked
     newConfirmButtonElm.addEventListener('click', () => {
-      const dynamicModal = new bootstrap.Modal(modalDialogElm); // Create a modal instance.
-      dynamicModal.hide();
+      const modaiDialog = new bootstrap.Modal(modalDialogElm);
+      modaiDialog.hide();
       location.reload(); // Reload the page
     });
 
-    const dynamicModal = new bootstrap.Modal(modalDialogElm); // Create a modal instance.
-    dynamicModal.show();
+    const modaiDialog = new bootstrap.Modal(modalDialogElm);
+    modaiDialog.show();
 
   },
 
@@ -169,11 +196,62 @@ const GpxTrailEditor = {
 
   onGPXFileDropped: function(files) {
     const file = files[0];
-    if (file) {
-      GpxTrailEditor.parseAndDisplayGPX(file);
-      GpxTrailEditor.hideDropZoneForm();
-      GpxTrailEditor.showNavbarButtons();
+
+    if (file && file.name.endsWith('.gpx')) {
+      const reader = new FileReader();
+    
+      // Reading file completed
+      reader.onload = function(event) {
+        const gpxContent = event.target.result;
+        
+        // Check if the file is in the XML format.
+        try {
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(gpxContent, "application/xml");
+
+          // Check an existence of a parsererror tag.
+          if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+            GpxTrailEditor.showOkDialog(i18nMsg.error,i18nMsg.errorNotGpxFormat,'OK','warning');
+            GpxTrailEditor.resetDropZone();
+            return;
+          }
+
+          // Check an existence of a gpx tag.
+          if (xmlDoc.getElementsByTagName('gpx').length === 0) {
+            GpxTrailEditor.showOkDialog(i18nMsg.error,i18nMsg.errorNotValidGpxFormat,'OK','warning');
+            GpxTrailEditor.resetDropZone();
+            return;
+          }
+
+          // Clear the alert if the file is valid.
+          GpxTrailEditor.clearAlert();
+
+          // Handle the dropped file...
+          GpxTrailEditor.parseAndDisplayGPX(file);
+          GpxTrailEditor.hideDropZoneForm();
+          GpxTrailEditor.showNavbarButtons();
+            
+        } catch (error) {
+          GpxTrailEditor.showOkDialog(i18nMsg.error,i18nMsg.errorInvalidXmlFormat,'OK','warning');
+          GpxTrailEditor.resetDropZone();
+        }
+      };
+
+      // Read the file as a text file.
+      reader.readAsText(file);
+
+    } else {
+      GpxTrailEditor.showOkDialog(i18nMsg.error,i18nMsg.errorDropFileExtensionGPX,'OK','warning');
+      GpxTrailEditor.resetDropZone();
     }
+  },
+
+  resetDropZone: function() {
+    const dropZoneContainer = document.getElementById('drop-zone');
+    dropZoneContainer.classList.remove('drag-over');
+    dropZoneContainer.dataset.wasFileDropped = 'false';
+    const dropZoneForm = document.getElementById('drop-zone-form');
+    dropZoneForm.classList.remove('bg-primary','text-light');
   },
 
   // Analyze the uploaded GPX file, display the data in a table,
@@ -1621,6 +1699,11 @@ const GpxTrailEditor = {
       }
     });
 
+    const dropNoteElm = dropZoneForm.querySelector('.drop-note');
+    dropNoteElm.innerHTML = i18nMsg.dropNote;
+    const dropSubNoteElm = dropZoneForm.querySelector('.drop-subnote');
+    dropSubNoteElm.innerHTML = i18nMsg.dropSubNote;
+
   },
 
   calcHubenyDistance: function(lat1, lon1, lat2, lon2){ 
@@ -1638,27 +1721,9 @@ const GpxTrailEditor = {
   },
 
   setupLogNameForm: function() {
-
     const nameInput = document.getElementById('log-name-input');
-    const applyButton = document.getElementById('apply-name-button');
-
     nameInput.addEventListener('input', () => {
-      const shouldDisabled = nameInput.value.trim() === '';
-      applyButton.disabled = shouldDisabled;
-      if (shouldDisabled) {  
-        applyButton.classList.remove('btn-primary');
-        applyButton.classList.add('btn-secondary');
-      } else {
-        applyButton.classList.remove('btn-secondary');
-        applyButton.classList.add('btn-primary');
-      }
-    });
-
-    applyButton.addEventListener('click', () => {
       GpxTrailEditor.logName = nameInput.value;
-      applyButton.disabled = true;
-      applyButton.classList.remove('btn-primary');
-      applyButton.classList.add('btn-secondary');
     });
   },
 
@@ -2484,7 +2549,7 @@ const GpxTrailEditor = {
 
     buttonNew.addEventListener('click', GpxTrailEditor.onCreateNewBtnClicked);
     buttonExport.addEventListener('click', GpxTrailEditor.onGpxExportBtnClicked);
-    buttonStartOver.addEventListener('click', GpxTrailEditor.confirmStartOver);
+    buttonStartOver.addEventListener('click', GpxTrailEditor.showStartOverDialog);
 
   },
 
@@ -2501,7 +2566,7 @@ const GpxTrailEditor = {
     buttonShift.addEventListener('click', GpxTrailEditor.shiftDateTime);
     buttonFill.addEventListener('click', GpxTrailEditor.fillEmptyDateTime);
     buttonExport.addEventListener('click', GpxTrailEditor.onGpxExportBtnClicked);
-    buttonStartOver.addEventListener('click', GpxTrailEditor.confirmStartOver);
+    buttonStartOver.addEventListener('click', GpxTrailEditor.showStartOverDialog);
 
   },
 
