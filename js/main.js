@@ -1046,7 +1046,7 @@ const GpxTrailEditor = {
       }
 
       // Add the new marker as the last marker
-      const newMarker = L.marker([lat,lng], GpxTrailEditor.normalMarkerOptions);
+      const newMarker = L.marker([lat,lng], GpxTrailEditor.lastMarkerOptions);
       GpxTrailEditor.layerGroup.addLayer(newMarker);
 
       GpxTrailEditor.markers.push(newMarker);
