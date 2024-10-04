@@ -161,7 +161,7 @@ const GpxTrailEditor = {
       // Add click event listener for marker insertion mode
       this.map.on('click', (e) => {
         if (this.isInsertionModeActive) {
-          this.handleMapClick(e);
+          this.onMapClick(e);
         }
       });
     }
@@ -172,15 +172,12 @@ const GpxTrailEditor = {
     if (file) {
       GpxTrailEditor.parseAndDisplayGPX(file);
       GpxTrailEditor.hideDropZoneForm();
-      // ナビゲーションバーのボタンでエクスポートなどの操作を行うことにしたので、
-      // ボタンツールバーは非表示のままで良い。
-      // GpxTrailEditor.showButtonToolbar();
       GpxTrailEditor.showNavbarButtons();
     }
   },
 
-  // アップロードされたGPXファイルを解析し、テーブルにデータを表示し、
-  // 地図にマーカーとポリラインを描く。
+  // Analyze the uploaded GPX file, display the data in a table,
+  // and draw markers and polylines on the map.
   parseAndDisplayGPX: function(file) {
 
     const reader = new FileReader();
@@ -209,8 +206,8 @@ const GpxTrailEditor = {
         GpxTrailEditor.parseDataTable(xmlDoc);
         GpxTrailEditor.showDataTable();
 
-        // テーブルの表示内容からpointsデータを作成し、
-        // ネームスペースGpxTrailEditorのpointsに代入
+        // Create points data from the table display contents and
+        // assign it to points in the namespace GpxTrailEditor.
         const points =  GpxTrailEditor.convertTableToPoints();
         GpxTrailEditor.points = points;
 
@@ -218,9 +215,7 @@ const GpxTrailEditor = {
         GpxTrailEditor.showSummary();
 
       } catch (error) {
-        // Handle parsing error
-        console.error('Error parsing GPX:', error);
-        
+        console.error('Error parsing GPX:', error); // Handle parsing error
       }
     };
 
@@ -363,17 +358,16 @@ const GpxTrailEditor = {
 
     if (targetMarker && targetPoint) {
       
-      // イベントリスナーを一旦削除
+      // Delete event listeners temporarily.
       targetMarker.off('click');
       targetMarker.off('dragend');
       targetMarker.off('dragstart');
       
-      // マーカークリック時の吹き出し表示を更新
+      // Update the balloon content.
       GpxTrailEditor.bindMarkerEvents(targetMarker,index,[latitude,longitude],datetime);
-      // マーカー情報を更新
+      // Update the marker info.
       GpxTrailEditor.updateMarkerLatLng(index,[latitude,longitude]);
 
-      // ポイント情報を更新
       GpxTrailEditor.points[index].datetime = datetime;
       // GpxTrailEditor.points[index].latitude = latitude;
       // GpxTrailEditor.points[index].longitude = longitude;
@@ -382,7 +376,7 @@ const GpxTrailEditor = {
 
       targetMarker.options.elevation = elevation;  
 
-      // 緯度と経度がvalidな場合のみマーカーとポリラインを更新
+      // Update markers and polylines only if latitude and longitude are valid
       if (latitude && longitude) {
         targetMarker.setLatLng([latitude, longitude]);
         GpxTrailEditor.updateMarkersAndPolylines();
@@ -468,19 +462,19 @@ const GpxTrailEditor = {
 
   calcTimeTotal: function(points) {
 
+    // If no trackpoints exist, return zero time.
     if (points.length === 0) {
-      // トラックポイントが存在しない場合はゼロの時間を返す
       return [0, 0, 0];
     }
 
-    // 最初と最後のトラックポイントの時間を取得
+    // Get the datetimes of the first and last points.
     const firstDatetime = new Date(points[0].datetime);
     const lastDatetime = new Date(points[points.length - 1].datetime);
 
-    // 時間の差を計算
+    // Get the time difference
     const diff = Math.abs(lastDatetime - firstDatetime);
 
-    // 時間、分、秒に変換
+    // Convert the difference to hours, minutes, and seconds.
     return GpxTrailEditor.millisecToHMS(diff);
   },
 
@@ -888,8 +882,8 @@ const GpxTrailEditor = {
       moveButton.dataset.bsToggle = 'tooltip';
       moveButton.dataset.bsPlacement = 'right';
       moveButton.addEventListener('click', function (event) {
-        GpxTrailEditor.toggleMarkerDrag(moveButton,event);
-        GpxTrailEditor.disableMarkerInsertion(insertButton);
+        GpxTrailEditor.toggleMarkerDrag(event);
+        GpxTrailEditor.disableInsertMarkerBetween(event);
       });
 
       insertButton.id = 'btn-toggle-insertion';
@@ -897,15 +891,19 @@ const GpxTrailEditor = {
       insertButton.innerHTML = '<i class="bi bi-plus-circle"></i>';
       insertButton.dataset.insertionMode = 'false';
       insertButton.dataset.bsToggle = 'tooltip';
+      insertButton.dataset.bsPlacement = 'right';
       insertButton.addEventListener('click', function (event) {
         // ボタンがクリックされた場合は、最後のポイントのindexを開始基準にする
         GpxTrailEditor.insertionStartIndex = GpxTrailEditor.points.length - 1;
-        GpxTrailEditor.toggleMarkerInsertion(insertButton,event);
-        GpxTrailEditor.disableMarkerDrag(moveButton);
+        GpxTrailEditor.toggleInsertMarkerBetween(event);
+        GpxTrailEditor.disableMarkerDrag(event);
       });
-
+      
       const zoomInButton = L.DomUtil.create('button', buttonClass, container);
       zoomInButton.id = 'btn-zoom-in';
+      zoomInButton.title = i18nMsg.titleZoomInButton;
+      zoomInButton.dataset.bsToggle = 'tooltip';
+      zoomInButton.dataset.bsPlacement = 'right';
       zoomInButton.innerHTML = '<i class="bi bi-plus-lg"></i>';
       zoomInButton.addEventListener('click', function () {
         GpxTrailEditor.map.zoomIn();
@@ -913,6 +911,9 @@ const GpxTrailEditor = {
 
       const zoomOutButton = L.DomUtil.create('button', buttonClass, container);
       zoomOutButton.id = 'btn-zoom-out';
+      zoomOutButton.title = i18nMsg.titleZoomOutButton;
+      zoomOutButton.dataset.bsToggle = 'tooltip';
+      zoomOutButton.dataset.bsPlacement = 'right';
       zoomOutButton.innerHTML = '<i class="bi bi-dash-lg"></i>';
       zoomOutButton.addEventListener('click', function () {
         GpxTrailEditor.map.zoomOut();
@@ -934,84 +935,92 @@ const GpxTrailEditor = {
     customControl.addTo(GpxTrailEditor.map);
   },
 
-  toggleMarkerDrag: function(buttonElm,event) {
+  toggleMarkerDrag: function(event) {
     event.stopPropagation(); // Prevent clicking through the button.
+    const buttonElm = document.getElementById('btn-toggle-draggable');
     if (buttonElm.dataset.draggable === 'false' || !buttonElm.dataset.draggable) {
-      GpxTrailEditor.enableMarkerDrag(buttonElm);
+      GpxTrailEditor.enableMarkerDrag(event);
+      GpxTrailEditor.showAlert('info',i18nMsg.alertEnabledDragMode);
     } else {
-      GpxTrailEditor.disableMarkerDrag(buttonElm);
+      GpxTrailEditor.disableMarkerDrag(event);
+      GpxTrailEditor.showAlert('info',i18nMsg.alertDisabledDragMode);
     }
   },
 
-  enableMarkerDrag: function(buttonElm) {
+  enableMarkerDrag: function(event) {
     GpxTrailEditor.markers.forEach(function (marker) {
       marker.dragging.enable();
     });
+    const buttonElm = document.getElementById('btn-toggle-draggable');
     buttonElm.dataset.draggable = 'true';
-    // buttonElm.title = 'ポイント移動 : 有効';
     buttonElm.classList.remove('btn-white');
     buttonElm.classList.add('btn-primary');
     GpxTrailEditor.isDragModeActive = true;
-    GpxTrailEditor.showAlert('info',i18nMsg.alertEnabledMoveMode);
   },
 
-  disableMarkerDrag: function(buttonElm) {
+  disableMarkerDrag: function(event) {
     GpxTrailEditor.markers.forEach(function (marker) {
       marker.dragging.disable();
     });
+    const buttonElm = document.getElementById('btn-toggle-draggable');
     buttonElm.dataset.draggable = 'false';
-    // buttonElm.title = 'ポイント移動 : 無効';
     buttonElm.classList.remove('btn-primary');
     buttonElm.classList.add('btn-white');
     GpxTrailEditor.isDragModeActive = false;
-    GpxTrailEditor.showAlert('info',i18nMsg.alertDisabledMoveMode);
   },
   
-  toggleMarkerInsertion: function(buttonElm,event) {
+  toggleInsertMarkerBetween: function(event) {
     event.stopPropagation(); // Prevent clicking through the button.
     if (!GpxTrailEditor.isInsertionModeActive) {
-      GpxTrailEditor.enableMarkerInsertion(buttonElm);
+      GpxTrailEditor.enableInsertMarkerBetween(event,true);
       GpxTrailEditor.showAlert('info',i18nMsg.alertEnabledExtensionMode);
     } else {
-      GpxTrailEditor.disableMarkerInsertion(buttonElm);
+      GpxTrailEditor.disableInsertMarkerBetween(event,true);
       GpxTrailEditor.showAlert('info',i18nMsg.alertDisabledInsertionMode);
     }
   },
 
-  enableMarkerInsertion: function(buttonElm) {
+  enableInsertMarkerBetween: function(event) {
+    const buttonElm = document.getElementById('btn-toggle-insertion');
     buttonElm.dataset.insertionMode = 'true';
-    // buttonElm.title = 'ポイント追加 : 有効';
     buttonElm.classList.remove('btn-white');
     buttonElm.classList.add('btn-primary');
     GpxTrailEditor.isInsertionModeActive = true;
   },
 
-  disableMarkerInsertion: function(buttonElm) {
+  disableInsertMarkerBetween: function(event) {
+    const buttonElm = document.getElementById('btn-toggle-insertion');
     buttonElm.dataset.insertionMode = 'false';
-    // buttonElm.title = 'ポイント追加 : 無効';
     buttonElm.classList.remove('btn-primary');
     buttonElm.classList.add('btn-white');
     GpxTrailEditor.isInsertionModeActive = false;
   },
 
-  // 指定されたindexマーカーの後ろにマーカーを挿入
+  enableAddMarkerAfter: function(event) {
+    GpxTrailEditor.enableInsertMarkerBetween(event);
+  },
+
+  // Insert a new marker between existing markers.
+  // It means adding a new marker after an existing marker specified by the index parameter.
   insertMarkerAfter: function(index) {
     GpxTrailEditor.insertionStartIndex = index;
     const buttonElm = document.getElementById('btn-toggle-insertion');
-    GpxTrailEditor.enableMarkerInsertion(buttonElm); // 挿入モードをONにしてボタンを青くする
-    GpxTrailEditor.markers[index].closePopup(); // 吹き出しを閉じる
+    GpxTrailEditor.markers[index].closePopup(); // Close the balloon
     const markersLength = GpxTrailEditor.markers.length;
     if (index === markersLength - 1) {
-      // 終了ポイントの後ろにポイントを追加してルートを延長
+      // Add a new marker after the goal marker to extend the trail route.
+      GpxTrailEditor.enableAddMarkerAfter(); // Enable the extension mode and turn the button blue
       GpxTrailEditor.showAlert('info',i18nMsg.alertEnabledExtensionMode);
     } else {
-      // ポイントとポイントの間に新しいポイントを挿入
+      // Insert a new marker between existing markers.
+      GpxTrailEditor.enableInsertMarkerBetween(); // Enable the extension mode and turn the button blue
       GpxTrailEditor.showAlert('info',i18nMsg.alertEnabledInsertionMode.replace('${i}',index+1).replace('${j}',index+2));
     }
+    GpxTrailEditor.disableMarkerDrag();
   },
 
   // 地図がクリックされたときの処理
-  handleMapClick: async function(e) {
+  onMapClick: async function(e) {
     // マーカー追加モードでない場合は即時終了
     if (!GpxTrailEditor.isInsertionModeActive) return;
     GpxTrailEditor.addNewMarkerPolyline(e);
