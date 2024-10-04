@@ -17,6 +17,12 @@ const i18nMsg = (function(lang) {
       "distance": "Distance",
       "error": "Error",
 
+      // Top Navigation
+      "btnNewLabel": "New",
+      "btnExportLabel": "Export",
+      "btnStartOverLabel": "Start Over",
+      "linkGitHubTitle": "Open GitHub repository",
+
       // Drop Zone
       "dropNote": "Drop a GPX file",
       "dropSubNote": "or click here to upload.",
@@ -34,10 +40,10 @@ const i18nMsg = (function(lang) {
       "titleStartOverButton": "Discards the data being edited and start over.",
 
       // Bottons on the map
-      "titleZoomInButton": "Zooms in the map",
-      "titleZoomOutButton": "Zooms out the map",
-      "titleDragMarkerButton": "Allows you to drag the points",
-      "titleInsertMarkerButton": "Add or insert a new marker",
+      "titleZoomInButton": "Zoom In",
+      "titleZoomOutButton": "Zoom Out",
+      "titleDragMarkerButton": "Drag Marker",
+      "titleInsertMarkerButton": "Add/Insert Marker",
 
       // Balloon
       "btnInsertNewMarkerAfter": "New Point After This Marker",
@@ -63,8 +69,12 @@ const i18nMsg = (function(lang) {
       "alertEnabledDragMode": "Turnd on the moving point mode. You can drag to move the points on the map.",
       "alertDisabledDragMode": "Turned off the moving point mode.",
       "alertEnabledInsertionMode": "Turned on the insersion mode. You can insert a new point between the points #${i} and #${j}",
-      "alertEnabledExtensionMode": "Turned on the extension mode. You can add a new point after the goal point.",
-      "alertDisabledInsertionMode": "Turned on the insertion/extension mode."
+      "alertEnabledExtensionMode": "Turned on the extension mode. You can add a new point after the last point.",
+      "alertDisabledInsertionMode": "Turned on the insertion/extension mode.",
+      "alertInvalidLatLngEle": "<div>Invalid latitude, longitude, or elevation.</div><div>Row: ${i}</div>",
+      "alertInvalidStartDateTime": "Set the date/time of the first point.",
+      "alertInvalidGoalDateTime": "Set the date/time of the last point.",
+      "alertReserveDateTime": "Reverse the date and time as well?",
 
     },
     "ja": {
@@ -77,6 +87,12 @@ const i18nMsg = (function(lang) {
       "elevation": "標高",
       "distance": "距離",
       "error": "エラー",
+
+      // Top Navigation
+      "btnNewLabel": "新規作成",
+      "btnExportLabel": "エクスポート",
+      "btnStartOverLabel": "最初から",
+      "linkGitHubTitle": "GitHub レポジトリを開く",
 
       // Drop Zone
       "dropNote": "GPX ファイルをドラッグ&ドロップ",
@@ -95,10 +111,10 @@ const i18nMsg = (function(lang) {
       "titleStartOverButton": "編集中のデータを破棄し、最初からやり直します。",
 
       // Bottons on the map
-      "titleZoomInButton": "地図を拡大表示します。",
-      "titleZoomOutButton": "地図を縮小表示します。",
-      "titleDragMarkerButton": "各ポイントをドラッグで移動可能にします。",
-      "titleInsertMarkerButton": "新しいポイントを追加可能にします。",
+      "titleZoomInButton": "地図を拡大",
+      "titleZoomOutButton": "地図を縮小",
+      "titleDragMarkerButton": "ポイント移動",
+      "titleInsertMarkerButton": "ポイント追加/挿入",
 
       // Balloon
       "btnInsertNewMarkerAfter": "この後にポイント挿入",
@@ -125,7 +141,11 @@ const i18nMsg = (function(lang) {
       "alertDisabledDragMode": "ポイント移動モードが無効になりました。",
       "alertEnabledInsertionMode": "ポイント挿入モードが有効になりました。ポイント No.${i} と No.${j} の間にポイントを挿入できます。",
       "alertEnabledExtensionMode": "ポイント追加モードが有効になりました。終了ポイントの先にポイントを追加して、軌跡を延長できます。",
-      "alertDisabledInsertionMode": "ポイント追加/挿入モードが無効になりました。"
+      "alertDisabledInsertionMode": "ポイント追加/挿入モードが無効になりました。",
+      "alertInvalidLatLngEle": "<div>緯度、経度、標高のいずれかに問題があります。</div><div>行番号: ${i}</div>",
+      "alertInvalidStartDateTime": "スタート地点の日時を設定してください。",
+      "alertInvalidGoalDateTime": "ゴール地点の日時を設定してください。",
+      "alertReserveDateTime": "日時も反転させますか?",
 
     }
   };

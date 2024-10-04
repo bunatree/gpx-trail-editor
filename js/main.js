@@ -100,6 +100,17 @@ const GpxTrailEditor = {
     };
   },
 
+  onStartOverClicked: function() {
+    GpxTrailEditor.showQuestionDialog(
+      '破棄の確認',
+      '読み込み済みのデータを破棄して最初からやり直します。よろしいですか?',
+      'OK',
+      'キャンセル',
+      'danger',
+      function() { location.reload(); }
+    );
+  },
+
   showOkDialog: function(titleText,bodyContent,buttonLabel,type) {
 
     const modalDialogElm = document.getElementById('modal-ok');
@@ -127,29 +138,36 @@ const GpxTrailEditor = {
     modalHeaderElm.classList.remove('text-bg-info','text-bg-success','text-bg-warning','text-bg-danger');
   },
 
-  showStartOverDialog: function() {
+  showQuestionDialog: function(titleText,bodyContent,confirmLabel,cancelLabel,type,onConfirm) {
 
     const modalDialogElm = document.getElementById('modal-cancel-confirm');
+    const modalHeaderElm = modalDialogElm.querySelector('.modal-header');
     const modalTitleElm = modalDialogElm.querySelector('.modal-title');
     const modalBodyElm = modalDialogElm.querySelector('.modal-body');
     const cancelButtonElm = modalDialogElm.querySelector('.btn-cancel');
     const confirmButtonElm = modalDialogElm.querySelector('.btn-confirm');
 
-    modalTitleElm.textContent = '破棄の確認';
-    modalBodyElm.textContent = '読み込み済みのデータを破棄して最初からやり直します。よろしいですか？';
-    cancelButtonElm.textContent = 'キャンセル';
-    confirmButtonElm.textContent = 'OK';
+    modalTitleElm.textContent = titleText;
+    modalBodyElm.textContent = bodyContent;
+    confirmButtonElm.textContent = confirmLabel;
+    cancelButtonElm.textContent = cancelLabel;
+
+    GpxTrailEditor.clearModalHeaderAlert(modalHeaderElm);
+    if (type) {
+      const typeClassName = 'text-bg-' + type;
+      modalHeaderElm.classList.add(typeClassName);
+    }
 
     // Remove the existing event listener.
     confirmButtonElm.replaceWith(confirmButtonElm.cloneNode(true));
     const newConfirmButtonElm = modalDialogElm.querySelector('.btn-confirm');
 
     // When the OK button is clicked
-    newConfirmButtonElm.addEventListener('click', () => {
-      const modaiDialog = new bootstrap.Modal(modalDialogElm);
-      modaiDialog.hide();
-      location.reload(); // Reload the page
-    });
+   newConfirmButtonElm.addEventListener('click', () => {
+    onConfirm();
+    const modalInstance = bootstrap.Modal.getInstance(modalDialogElm);
+    modalInstance.hide(); 
+});
 
     const modaiDialog = new bootstrap.Modal(modalDialogElm);
     modaiDialog.show();
@@ -632,7 +650,7 @@ const GpxTrailEditor = {
       // Set the markers array to the GpxTrailEditor name space.
       GpxTrailEditor.markers = GpxTrailEditor.drawMarkers(latLngs,dateTimes);
 
-      GpxTrailEditor.addCustomControl();
+      GpxTrailEditor.setupMapButtons();
 
       // The variable "bounds" is a rectangular area calculated
       // from the coordinate points through which the polyline passes.
@@ -673,36 +691,6 @@ const GpxTrailEditor = {
 
     const markers = [];  // Array to store references to markers
 
-    // const normalMarkerOptions = {
-    //   icon: L.divIcon({
-    //     className: 'normal-div-icon',
-    //     html: '',
-    //     iconSize: [GpxTrailEditor.NORMAL_MARKER_RADIUS*2,GpxTrailEditor.NORMAL_MARKER_RADIUS*2],
-    //     iconAnchor: [GpxTrailEditor.NORMAL_MARKER_RADIUS,GpxTrailEditor.NORMAL_MARKER_RADIUS],
-    //   }),
-    //   draggable: false, // Do not allow to drag the markers by default.
-    // };
-
-    // const firstMarkerOptions = {
-    //   ...normalMarkerOptions,
-    //   icon: L.divIcon({
-    //     className: 'first-div-icon',
-    //     html: '<span class="label">S</span>',
-    //     iconSize: [GpxTrailEditor.FIRST_MARKER_RADIUS*2,GpxTrailEditor.FIRST_MARKER_RADIUS*2],
-    //     iconAnchor: [GpxTrailEditor.FIRST_MARKER_RADIUS,GpxTrailEditor.FIRST_MARKER_RADIUS],
-    //   }),
-    // };
-    
-    // const lastMarkerOptions = {
-    //   ...normalMarkerOptions,
-    //   icon: L.divIcon({
-    //     className: 'last-div-icon',
-    //     html: '<span class="label">G</span>',
-    //     iconSize: [GpxTrailEditor.LAST_MARKER_RADIUS*2,GpxTrailEditor.LAST_MARKER_RADIUS*2],
-    //     iconAnchor: [GpxTrailEditor.LAST_MARKER_RADIUS,GpxTrailEditor.LAST_MARKER_RADIUS],
-    //   }),
-    // };
-
     // Draw markers at each point.
     for (let i = 0; i < latLngs.length; i++) {
 
@@ -716,7 +704,6 @@ const GpxTrailEditor = {
         }
       })();
 
-      // const marker = L.circleMarker(latLngs[i], markerOptions).addTo(GpxTrailEditor.map);
       const marker = L.marker(latLngs[i], markerOptions).addTo(GpxTrailEditor.map);
       markers.push(marker);  // Store reference
 
@@ -787,8 +774,6 @@ const GpxTrailEditor = {
     }
   },
 
-  // マーカーのドラッグ終了時に、テーブル、マーカー、ポイント情報を更新し、
-  // マーカーとポリラインを再描画する
   onMarkerDragEnd: async function (i,newLatLng) {
 
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
@@ -796,15 +781,10 @@ const GpxTrailEditor = {
       tableRows[i].classList.remove('dragged-marker','table-primary');
     }
 
-    // マーカー情報を更新
     GpxTrailEditor.markers[i].setLatLng(newLatLng);
-    // マーカーのドラッグ先の標高を取得
     const newElevation = await GpxTrailEditor.latLngToEle(newLatLng.lat,newLatLng.lng);
-    // ポイント情報を更新
     GpxTrailEditor.updatePointInfo(i,newLatLng,newElevation);
-    // テーブル情報を更新
     GpxTrailEditor.updateTableRow(i,newLatLng,newElevation);
-    // すべてのマーカーとポリラインを更新
     GpxTrailEditor.updateMarkersAndPolylines();
 
   },
@@ -939,7 +919,7 @@ const GpxTrailEditor = {
   
   },
 
-  addCustomControl: function() {
+  setupMapButtons: function() {
 
     // The tool box custom control
     const customControl = L.control({ position: 'topleft' });
@@ -997,7 +977,7 @@ const GpxTrailEditor = {
         GpxTrailEditor.map.zoomOut();
       });
 
-      // Initialize tooltips for each button
+      // tooltips for each button
       setTimeout(() => {
         const tooltipTriggerList = [].slice.call(container.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -1637,15 +1617,19 @@ const GpxTrailEditor = {
 
   isDateTimeOrderValid: function(prevDateTime, curDateTime, nextDateTime) {
     if (!prevDateTime) {
-      // prevDateTime が null の場合は curDateTime と nextDateTime の順序をチェック
       return curDateTime <= nextDateTime;
     } else if (!nextDateTime) {
-      // nextDateTime が null の場合は prevDateTime と curDateTime の順序をチェック
       return prevDateTime <= curDateTime;
     } else {
-      // どちらも null でない場合は 3 つの順序をチェック
       return prevDateTime <= curDateTime && curDateTime <= nextDateTime;
     }
+  },
+
+  setupTopNav: function () {
+    document.querySelector('#btn-nav-create-new .label').innerText = i18nMsg.btnNewLabel;
+    document.querySelector('#btn-nav-export .label').innerText = i18nMsg.btnExportLabel;
+    document.querySelector('#btn-nav-start-over .label').innerText = i18nMsg.btnStartOverLabel;
+    document.getElementById('goto-github-repo').title = i18nMsg.linkGitHubTitle;
   },
 
   setupDropZone: function() {
@@ -1735,15 +1719,15 @@ const GpxTrailEditor = {
     // Check dates
     const invalidDatetime = GpxTrailEditor.checkRowDateTimeValid(rows);
 
-    // スタート地点の日時に問題がある場合に警告
+    // Check if the start date/time is valid
     if (!invalidDatetime.result && invalidDatetime.index[0] === 0) {
-      GpxTrailEditor.showAlert('warning','スタート地点の日時を設定してください。');
+      GpxTrailEditor.showAlert('warning',i18nMsg.alertInvalidStartDateTime);
       return false;
     }
 
-    // ゴール地点の日時に問題がある場合に警告
+    // Check if the goal date/time is valid
     if (!invalidDatetime.result && invalidDatetime.index[invalidDatetime.index.length - 1] === rowCount - 1) {
-      GpxTrailEditor.showAlert('warning','ゴール地点の日時を設定してください。');
+      GpxTrailEditor.showAlert('warning',i18nMsg.alertInvalidGoalDateTime);
       return false;
     }
 
@@ -1751,13 +1735,12 @@ const GpxTrailEditor = {
     const invalidLatLngEle = GpxTrailEditor.checkRowLatLngEleValid(rows);
 
     if (!invalidLatLngEle.result) {
-      GpxTrailEditor.showAlert('warning','<div>緯度、経度、標高のいずれかに問題があります。</div><div>行番号: ' + invalidLatLngEle.row.join(', ') + '</div>');
+      GpxTrailEditor.showAlert('warning', i18nMsg.alertInvalidLatLngEle.replace('${i}', invalidLatLngEle.row.join(', ')));
       GpxTrailEditor.alertTableCell([],invalidLatLngEle.latitude,invalidLatLngEle.longitude,invalidLatLngEle.elevation);
       return false;
     }
 
-    // テーブルの表示内容からpointsデータを作成し、
-    // ネームスペースGpxTrailEditorのpointsに代入
+    // Create a new points data from the table
     const points = GpxTrailEditor.convertTableToPoints();
     const interpolatedIndices = GpxTrailEditor.interpolateIntermediatePointTimes(points);
     GpxTrailEditor.clearAlert();
@@ -1853,8 +1836,6 @@ const GpxTrailEditor = {
 
   },
 
-  // テーブルの行から緯度、経度、標高、次ポイントまでの距離などをオブジェクトにまとめ、
-  // すべての情報をひとつにまとめた配列として返します。
   convertTableToPoints: function() {
 
     const tableElm = document.getElementById('data-table');
@@ -1976,9 +1957,7 @@ const GpxTrailEditor = {
     return result;
   },
 
-  // 第1パラメーター points 配列内の、startIndex から endIndex - 1 までの
-  // toNextDistance プロパティの合計を計算して返す。
-  //
+  // 第1パラメーター points 配列内の、startIndex から endIndex - 1 までの toNextDistance プロパティの合計を計算して返す。
   // points: 距離情報を含むオブジェクトの配列
   // startIndex: 合計計算の開始インデックス
   // endIndex: 合計計算の終了インデックス（この値は合計に含まれない）
@@ -2039,7 +2018,7 @@ const GpxTrailEditor = {
     GpxTrailEditor.points.reverse();
     GpxTrailEditor.markers.reverse();
 
-    if (!confirm('日時も反転させますか？')) {
+    if (!confirm(i18nMsg.alertReserveDateTime)) {
       GpxTrailEditor.reverseDateTime();
     }
 
@@ -2549,7 +2528,7 @@ const GpxTrailEditor = {
 
     buttonNew.addEventListener('click', GpxTrailEditor.onCreateNewBtnClicked);
     buttonExport.addEventListener('click', GpxTrailEditor.onGpxExportBtnClicked);
-    buttonStartOver.addEventListener('click', GpxTrailEditor.showStartOverDialog);
+    buttonStartOver.addEventListener('click', GpxTrailEditor.onStartOverClicked);
 
   },
 
@@ -2566,7 +2545,7 @@ const GpxTrailEditor = {
     buttonShift.addEventListener('click', GpxTrailEditor.shiftDateTime);
     buttonFill.addEventListener('click', GpxTrailEditor.fillEmptyDateTime);
     buttonExport.addEventListener('click', GpxTrailEditor.onGpxExportBtnClicked);
-    buttonStartOver.addEventListener('click', GpxTrailEditor.showStartOverDialog);
+    buttonStartOver.addEventListener('click', GpxTrailEditor.onStartOverClicked);
 
   },
 
@@ -2638,71 +2617,6 @@ const GpxTrailEditor = {
 
 };
 
-// const i18nData = {
-//   "en": {
-
-//     // General
-//     "latitude": "Latitude",
-//     "lognitude": "Lognitude",
-//     "elevation": "Elevation",
-//     "distance": "Distance",
-
-//     // Button Toolbar
-//     "labelReverseButton": "Reverse",
-//     "labelShiftButton": "Shift",
-//     "labelFillButton": "Fill",
-//     "labelExportButton": "Export",
-//     "labelStartOverButton": "Start Over",
-//     "titleReverseButton": "Reverses the route order from start to goal.",
-//     "titleShiftButton": "Shifts the passing date and time of all points by the specified number of seconds.",
-//     "titleFillButton": "Calculates and interpolates missing dates from those and the elevations of the points before and after.",
-//     "titleExportButton": "Exports as a GPX file.",
-//     "titleStartOverButton": "Discards the data being edited and start over.",
-
-//     // Summary
-//     "titleRecalcButton": "Re-calculate the summary.",
-
-//     // Data Table
-//     "titleEraserIcon": "Clear the date and time.",
-
-//     // Error Messages
-//     "errorMsgTimeElmMissingGPX": "No time element for the point index ${i} in the gpx file.",
-//     "errorMsgDateTimeInvalidGPX": "The datetime info for the point index ${i} is invalid in the gpx file."
-
-//   },
-//   "ja": {
-
-//     // General
-//     "latitude": "緯度",
-//     "lognitude": "経度",
-//     "elevation": "標高",
-//     "distance": "距離",
-
-//     // Button Toolbar
-//     "labelReverseButton": "ルート反転",
-//     "labelShiftButton": "日時をずらす",
-//     "labelFillButton": "日時を補間",
-//     "labelExportButton": "エクスポート",
-//     "labelStartOverButton": "破棄",
-//     "titleReverseButton": "スタートからゴールへのルート順序を反転させます。",
-//     "titleShiftButton": "すべてのポイントの通過日時を指定された秒数だけずらします。",
-//     "titleFillButton": "入力されていない日時を、その前後のポイントの通過日時と標高から計算し、補間します。",
-//     "titleExportButton": "GPXファイルとしてエクスポートします。",
-//     "titleStartOverButton": "編集中のデータを破棄し、最初からやり直します。",
-
-//     // Summary
-//     "titleRecalcButton": "再計算を行います。",
-
-//     // Data Table
-//     "titleEraserIcon": "左の欄の日時を消去します。",
-
-//     // Error Messages
-//     "errorMsgTimeElmMissingGPX": "GPXファイル中のポイントのtime要素がありません。 (インデックス ${i})",
-//     "errorMsgDateTimeInvalidGPX": "GPXファイル中のポイントの日時情報が正しくありません。 (インデックス ${i})"
-
-//   }
-// };
-
 document.addEventListener('DOMContentLoaded', function () {
 
   const userLang = navigator.language || navigator.userLanguage; // 'ja', 'en-US', etc.
@@ -2710,6 +2624,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // i18nMsg = GpxTrailEditor.setI18nData(i18nMsgData,lang);
   GpxTrailEditor.initMap();
+  GpxTrailEditor.setupTopNav();
   GpxTrailEditor.setupDropZone();
   GpxTrailEditor.setupLogNameForm();
   GpxTrailEditor.setupSummary();
