@@ -345,8 +345,6 @@ const GpxTrailEditor = {
 
     // The "Check All" checkbox
     const headerChkCell = document.querySelector('#data-table thead .chkbox');
-    // const headerChkbox = headerChkCell.querySelector('input');
-    // headerChkbox.addEventListener('change',GpxTrailEditor.onChkAllChanged);
 
     const tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
 
@@ -467,9 +465,6 @@ const GpxTrailEditor = {
       GpxTrailEditor.updateMarkerLatLng(index,[latitude,longitude]);
 
       GpxTrailEditor.points[index].datetime = datetime;
-      // GpxTrailEditor.points[index].latitude = latitude;
-      // GpxTrailEditor.points[index].longitude = longitude;
-      // GpxTrailEditor.points[index].elevation = elevation;
       GpxTrailEditor.updatePointInfo(index,{"lat":latitude,"lng":longitude},elevation);
 
       targetMarker.options.elevation = elevation;  
@@ -1278,7 +1273,7 @@ const GpxTrailEditor = {
       });
     } else {
       shouldAlert = true;
-      alertMsg = '消去したい行のチェックボックスを ON にしてください。';
+      alertMsg = i18nMsg.alertTurnOnCheckboxToClear;
     }
     if (shouldAlert) {
       GpxTrailEditor.showAlert('warning',alertMsg);
@@ -1321,7 +1316,7 @@ const GpxTrailEditor = {
       });
     } else {
       shouldAlert = true;
-      alertMsg = '消去したい行のチェックボックスを ON にしてください。';
+      alertMsg = i18nMsg.alertTurnOnCheckboxToClear;
     }
     if (shouldAlert) {
       GpxTrailEditor.showAlert('warning',alertMsg);
@@ -1589,7 +1584,7 @@ const GpxTrailEditor = {
       });
     } else {
       shouldAlert = true;
-      alertMsg = '消去したい行のチェックボックスを ON にしてください。';
+      alertMsg = i18nMsg.alertTurnOnCheckboxToClear;
     }
     if (shouldAlert) {
       GpxTrailEditor.showAlert('warning',alertMsg);
@@ -1625,13 +1620,6 @@ const GpxTrailEditor = {
     } else {
       return prevDateTime <= curDateTime && curDateTime <= nextDateTime;
     }
-  },
-
-  setupTopNav: function () {
-    document.querySelector('#btn-nav-create-new .label').innerText = i18nMsg.btnNewLabel;
-    document.querySelector('#btn-nav-export .label').innerText = i18nMsg.btnExportLabel;
-    document.querySelector('#btn-nav-start-over .label').innerText = i18nMsg.btnStartOverLabel;
-    document.getElementById('goto-github-repo').title = i18nMsg.linkGitHubTitle;
   },
 
   setupTable: function () {
@@ -2044,7 +2032,7 @@ const GpxTrailEditor = {
       targetMarker.off('click');
       targetMarker.off('dragend');
       targetMarker.off('dragstart');
-      // マーカークリック時の吹き出し表示を更新
+      // Update the balloon content
       const latitude = targetMarker._latlng.lat;
       const longitude = targetMarker._latlng.lng;
       const datetime = GpxTrailEditor.points[index].datetime;
@@ -2121,7 +2109,7 @@ const GpxTrailEditor = {
 
         });
       } else {
-        console.log('The value that you input didn\'t make sense. value = ' + inputValue);
+        console.error('The value that you input didn\'t make sense. value = ' + inputValue);
       }
 
     } else {
@@ -2160,11 +2148,6 @@ const GpxTrailEditor = {
         // There is at least one invalid date/time.
         GpxTrailEditor.alertTableCell(invalidDateTime.datetime,invalidPointLatLng.latitude,invalidPointLatLng.longitude,[]);
 
-        // const arrayToString = (array) => {
-        //   const sortedArray = array.sort((a, b) => a - b);
-        //   return sortedArray.map(item => item + 1).join(', ');
-        // };
-
         const invalidRowHtml = function(array) {
           if (Array.isArray(array) && array.length > 0) {
             return array.map(rowIndex => {
@@ -2174,19 +2157,19 @@ const GpxTrailEditor = {
           return '';
         };
 
-        let errorMsg = (invalidPointLatLng.latitude.length > 0) ? '<div class="error-message">緯度エラー (行番号: ' + invalidRowHtml(invalidPointLatLng.latitude) + ')</div>' : '';
-        errorMsg += (invalidPointLatLng.longitude.length > 0) ? '<div class="error-message">経度エラー (行番号: ' + invalidRowHtml(invalidPointLatLng.longitude) + ')</div>' : '';
-        errorMsg += (invalidDateTime.datetimeValue.length) ? '<div class="error-message">日時エラー (行番号: ' + invalidRowHtml(invalidDateTime.datetimeValue) + ')</div>' : '';
-        errorMsg += (invalidDateTime.datetimeOrder.length > 0) ? '<div class="error-message">日時順序エラー (行番号: ' + invalidRowHtml(invalidDateTime.datetimeOrder) + ')</div>' : '';
+        let errorMsg = (invalidPointLatLng.latitude.length > 0) ? `<div class="error-message">${i18nMsg.errorInvalidLatitude.replace('${i}',invalidRowHtml(invalidPointLatLng.latitude))}</div>` : '';
+        errorMsg += (invalidPointLatLng.longitude.length > 0) ? `<div class="error-message">${i18nMsg.errorInvalidLongitude.replace('${i}',invalidRowHtml(invalidPointLatLng.longitude))}</div>` : '';
+        errorMsg += (invalidDateTime.datetimeValue.length) ? `<div class="error-message">${i18nMsg.errorInvalidDateTime.replace('${i}',invalidRowHtml(invalidPointLatLng.datetimeValue))}</div>` : '';
+        errorMsg += (invalidDateTime.datetimeOrder.length > 0) ? `<div class="error-message">${i18nMsg.errorInvalidDateOrder.replace('${i}',invalidRowHtml(invalidPointLatLng.datetimeOrder))}</div>` : '';
 
         GpxTrailEditor.showAlert('warning',errorMsg);
 
         if (!invalidPointLatLng.result && !invalidDateTime.result) {
-          alert('一覧表の日時と標高に問題があるため、エクスポートできません。');
+          GpxTrailEditor.showOkDialog(i18nMsg.modalExportErrorTitle,i18nMsg.errorCanNotExportDateTimeLatLng,'OK','warning')
         } else if (!invalidPointLatLng.result) {
-          alert('一覧表の標高に問題あるため、エクスポートできません。');
+          GpxTrailEditor.showOkDialog(i18nMsg.modalExportErrorTitle,i18nMsg.errorCanNotExportLatLng,'OK','warning')
         } else if (!invalidDateTime.result) {
-          alert('一覧表の日時に問題あるため、エクスポートできません。');
+          GpxTrailEditor.showOkDialog(i18nMsg.modalExportErrorTitle,i18nMsg.errorCanNotExportDateTime,'OK','warning')
         }
 
         return;
@@ -2419,15 +2402,6 @@ const GpxTrailEditor = {
     });
   },
 
-  // NOT IN USE
-  // テーブルの行を削除するためのヘルパー関数
-  // removeTableRow: function(index) {
-  //   const tableRow = document.getElementById(`row-${index}`);
-  //   if (tableRow) {
-  //     tableRow.remove();
-  //   }
-  // },
-
   // テーブルに行を追加するためのヘルパー関数
   addTableRow: function(index, dateTime, latitude, longitude, elevation) {
 
@@ -2584,11 +2558,14 @@ const GpxTrailEditor = {
     return new Promise(function (resolve, reject) { resolve(); });
   },
 
-  // setI18nData: function(langObj,language) {
-  //   return langObj[language] || langObj['en'];
-  // },
-
   applyI18n: function() {
+
+    // Top Nav
+    GpxTrailEditor.setI18nInnerText('#btn-nav-create-new .label', i18nMsg.btnNewLabel);
+    GpxTrailEditor.setI18nInnerText('#btn-nav-export .label', i18nMsg.btnExportLabel);
+    GpxTrailEditor.setI18nInnerText('#btn-nav-start-over .label', i18nMsg.btnStartOverLabel);
+    GpxTrailEditor.setI18nTitle('goto-github-repo', i18nMsg.linkGitHubTitle);
+
     GpxTrailEditor.setI18nInnerText('#btn-reverse > span', i18nMsg.labelReverseButton);
     GpxTrailEditor.setI18nInnerText('#btn-shift > span', i18nMsg.labelShiftButton);
     GpxTrailEditor.setI18nInnerText('#btn-fill > span', i18nMsg.labelFillButton);
@@ -2667,7 +2644,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // i18nMsg = GpxTrailEditor.setI18nData(i18nMsgData,lang);
   GpxTrailEditor.initMap();
-  GpxTrailEditor.setupTopNav();
   GpxTrailEditor.setupDropZone();
   GpxTrailEditor.setupLogNameForm();
   GpxTrailEditor.setupTable();

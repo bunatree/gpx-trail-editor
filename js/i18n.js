@@ -90,6 +90,7 @@ const i18nMsg = (function(lang) {
       "modalStartOverBodyContent": "Are you sure to discard the loaded data and start over?",
       "modalStartOverConfirmLabel": "OK",
       "modalStartOverCancelLabel": "Cancel",
+      "modalExportErrorTitle": "Export Error",
 
       // Error Messages
       "errorMsgTimeElmMissingGPX": "No time element for the point index ${i} in the gpx file.",
@@ -98,6 +99,13 @@ const i18nMsg = (function(lang) {
       "errorNotGpxFormat": "The file is not in GPX format.",
       "errorNotValidGpxFormat": "The file is not in valid GPX format.",
       "errorInvalidXmlFormat": "An error occurred while parsing XML. The file is in an invalid format.",
+      "errorCanNotExportLatLng": "Can not export a gpx file because the table contains an invalid latitude and/or longitude.",
+      "errorCanNotExportDateTime": "Can not export a gpx file because the table contains an invalid datetime.",
+      "errorCanNotExportDateTimeLatLng": "Can not export a gpx file because the table contains an invalid datetime, latitude, or longitude.",
+      "errorInvalidDateTime": "Invalid Date/Time (Row: ${i})",
+      "errorInvalidLatitude": "Invalid Latitude (Row: ${i})",
+      "errorInvalidLongitude": "Invalid Longitude (Row: ${i})",
+      "errorInvalidDateOrder": "Invalid Date Order (Row: ${i})",
 
       // Alerts
       "alertCheckRowFirst": "Check ON the checkboxes of the rows you want to update.",
@@ -110,6 +118,7 @@ const i18nMsg = (function(lang) {
       "alertInvalidStartDateTime": "Set the date/time of the first point.",
       "alertInvalidGoalDateTime": "Set the date/time of the last point.",
       "alertReserveDateTime": "Reverse the date and time as well?",
+      "alertTurnOnCheckboxToClear": "Check ON the checkboxes of the rows you want to clear.",
 
     },
     "ja": {
@@ -196,6 +205,7 @@ const i18nMsg = (function(lang) {
       "modalStartOverBodyContent": "読み込み済みのデータを破棄して最初からやり直します。よろしいですか?",
       "modalStartOverConfirmLabel": "OK",
       "modalStartOverCancelLabel": "キャンセル",
+      "modalExportErrorTitle": "エクスポート エラー",
 
       // Error Messages
       "errorMsgTimeElmMissingGPX": "GPXファイル中のポイントのtime要素がありません。 (インデックス ${i})",
@@ -204,6 +214,13 @@ const i18nMsg = (function(lang) {
       "errorNotGpxFormat": "ファイルは GPX フォーマットではありません。",
       "errorNotValidGpxFormat": "ファイルは正しい GPX フォーマットではありません。",
       "errorInvalidXmlFormat": "XML の解析中にエラーが発生しました。ファイルのフォーマットが不正です。",
+      "errorCanNotExportLatLng": "一覧表の緯度/経度に問題があるため、エクスポートできません。",
+      "errorCanNotExportDateTime": "一覧表の日時に問題があるため、エクスポートできません。",
+      "errorCanNotExportDateTimeLatLng": "一覧表の日時と緯度/経度に問題があるため、エクスポートできません。",
+      "errorInvalidDateTime": "日時エラー (行番号: ${i})",
+      "errorInvalidLatitude": "緯度エラー (行番号: ${i})",
+      "errorInvalidLongitude": "経度エラー (行番号: ${i})",
+      "errorInvalidDateOrder": "日時順序エラー (行番号: ${i})",
 
       // Alerts
       "alertCheckRowFirst": "更新したい行のチェックボックスを ON にしてください。",
@@ -216,6 +233,7 @@ const i18nMsg = (function(lang) {
       "alertInvalidStartDateTime": "スタート地点の日時を設定してください。",
       "alertInvalidGoalDateTime": "ゴール地点の日時を設定してください。",
       "alertReserveDateTime": "日時も反転させますか?",
+      "alertTurnOnCheckboxToClear": "消去したい行のチェックボックスを ON にしてください。",
 
     }
   };
