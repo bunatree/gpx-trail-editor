@@ -32,10 +32,6 @@
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png"><!-- 180×180 -->
 
-  
-
-
-  
 </head>
 <body>
 
@@ -120,7 +116,10 @@
                       <i class="bi bi-three-dots-vertical"></i>
                     </button>
                     <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" data-target-name="idx" data-op-name="reverse" title="スタートからゴールへのルート順序を反転させます。" data-bs-toggle="tooltip" data-bs-placement="right"><i class="bi bi-arrow-down-up me-2"></i>ルート反転</a></li>
+                      <li class="op-reverse-route"><a class="dropdown-item" data-target-name="idx" data-op-name="reverse" title="スタートからゴールへのルート順序を反転させます。" data-bs-toggle="tooltip" data-bs-placement="right">
+                        <i class="bi bi-arrow-down-up me-2"></i>
+                        <span class="label">ルート反転</span>
+                      </a></li>
                     </ul>
                   </div>
                 </div>
@@ -133,9 +132,18 @@
                       <i class="bi bi-three-dots-vertical"></i>
                     </button>
                     <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" data-target-name="check" data-op-name="turn-on" title="すべての行のチェックボックスをONにします。" data-bs-toggle="tooltip" data-bs-placement="right"><i class="bi bi-check-square me-2"></i>チェック ON</a></li>
-                      <li><a class="dropdown-item" data-target-name="check" data-op-name="turn-off" title="すべての行のチェックボックスをOFFにします。" data-bs-toggle="tooltip" data-bs-placement="right"><i class="bi bi-square me-2"></i>チェック OFF</a></li>
-                      <li><a class="dropdown-item" data-target-name="check" data-op-name="toggle" title="チェックボックスの状態を反転させます。" data-bs-toggle="tooltip" data-bs-placement="right"><i class="bi bi-arrow-repeat me-2"></i>チェック反転</a></li>
+                      <li class="op-check-all"><a class="dropdown-item" data-target-name="check" data-op-name="turn-on" title="すべての行のチェックボックスをONにします。" data-bs-toggle="tooltip" data-bs-placement="right">
+                        <i class="bi bi-check-square me-2"></i>
+                        <span class="label">チェック ON</span>
+                      </a></li>
+                      <li class="op-uncheck-all"><a class="dropdown-item" data-target-name="check" data-op-name="turn-off" title="すべての行のチェックボックスをOFFにします。" data-bs-toggle="tooltip" data-bs-placement="right">
+                        <i class="bi bi-square me-2"></i>
+                        <span class="label">チェック OFF</span>
+                      </a></li>
+                      <li class="op-check-reverse"><a class="dropdown-item" data-target-name="check" data-op-name="toggle" title="チェックボックスの状態を反転させます。" data-bs-toggle="tooltip" data-bs-placement="right">
+                        <i class="bi bi-arrow-repeat me-2"></i>
+                        <span class="label">チェック反転</span>
+                      </a></li>
                     </ul>
                   </div>
                 </div>
@@ -148,15 +156,27 @@
                       <i class="bi bi-three-dots-vertical"></i>
                     </button>
                     <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" data-target-name="datetime" data-op-name="clear-checked" title="チェックされた行の日時を消去します。" data-bs-toggle="tooltip" data-bs-placement="right"><i class="bi bi-eraser-fill me-2"></i>選択された日時を消去</a></li>
+                      <li class="op-clear-datetime"><a class="dropdown-item" data-target-name="datetime" data-op-name="clear-checked" title="チェックされた行の日時を消去します。" data-bs-toggle="tooltip" data-bs-placement="right">
+                        <i class="bi bi-eraser-fill me-2"></i>
+                        <span class="label">選択された日時を消去</span>
+                      </a></li>
                       <li><hr class="dropdown-divider"></li>
-                      <li><a class="dropdown-item" data-target-name="datetime" data-op-name="shift-datetime" title="すべてのポイントの通過日時を指定された秒数だけずらします。" data-bs-toggle="tooltip" data-bs-placement="right"><i class="bi bi-arrow-down-square me-2"></i>すべての日時をずらす</a></li>
-                      <li><a class="dropdown-item" data-target-name="datetime" data-op-name="reverse-datetime" title="すべてのポイントの通過日時の順序を逆にします。" data-bs-toggle="tooltip" data-bs-placement="right"><i class="bi bi-arrow-down-up me-2"></i>すべての日時を反転</a></li>
-                      <li><a class="dropdown-item" data-target-name="datetime" data-op-name="fill-datetime" title="入力されていない日時を、その前後のポイントの通過日時と標高から計算し、補間します。" data-bs-toggle="tooltip" data-bs-placement="right"><i class="bi bi-clock-history me-2"></i>未入力の日時を補間</a></li>
+                      <li class="op-shift-datetime"><a class="dropdown-item" data-target-name="datetime" data-op-name="shift-datetime" title="すべてのポイントの通過日時を指定された秒数だけずらします。" data-bs-toggle="tooltip" data-bs-placement="right">
+                        <i class="bi bi-arrow-down-square me-2"></i>
+                        <span class="label">すべての日時をずらす</span>
+                      </a></li>
+                      <li class="op-reverse-datetime"><a class="dropdown-item" data-target-name="datetime" data-op-name="reverse-datetime" title="すべてのポイントの通過日時の順序を逆にします。" data-bs-toggle="tooltip" data-bs-placement="right">
+                        <i class="bi bi-arrow-down-up me-2"></i>
+                        <span class="label">すべての日時を反転</span>
+                      </a></li>
+                      <li class="op-fill-datetime"><a class="dropdown-item" data-target-name="datetime" data-op-name="fill-datetime" title="入力されていない日時を、その前後のポイントの通過日時と標高から計算し、補間します。" data-bs-toggle="tooltip" data-bs-placement="right">
+                        <i class="bi bi-clock-history me-2"></i>
+                        <span class="label">未入力の日時を補間</span>
+                      </a></li>
                     </ul>
                   </div>
-                </th>
-              <!-- <th class="eraser"></th> -->
+                </div>
+              </th>
               <th class="latitude">
                 <div class="th-content d-flex justify-content-between align-items-center">
                   <span class="label">緯度</span>
@@ -165,7 +185,10 @@
                       <i class="bi bi-three-dots-vertical"></i>
                     </button>
                     <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" data-target-name="latitude" data-op-name="clear-checked" title="チェックされた行の緯度を消去します。" data-bs-toggle="tooltip" data-bs-placement="right"><i class="bi bi-eraser-fill me-2"></i>選択された緯度を消去</a></li>
+                      <li class="op-clear-latitude"><a class="dropdown-item" data-target-name="latitude" data-op-name="clear-checked" title="チェックされた行の緯度を消去します。" data-bs-toggle="tooltip" data-bs-placement="right">
+                        <i class="bi bi-eraser-fill me-2"></i>
+                        <span class="label">選択された緯度を消去</span>
+                      </a></li>
                     </ul>
                   </div>
                 </div>
@@ -178,7 +201,10 @@
                       <i class="bi bi-three-dots-vertical"></i>
                     </button>
                     <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" data-target-name="longitude" data-op-name="clear-checked" title="チェックされた行の経度を消去します。" data-bs-toggle="tooltip" data-bs-placement="right"><i class="bi bi-eraser-fill me-2"></i>選択された経度を消去</a></li>
+                      <li class="op-clear-longitude"><a class="dropdown-item" data-target-name="longitude" data-op-name="clear-checked" title="チェックされた行の経度を消去します。" data-bs-toggle="tooltip" data-bs-placement="right">
+                        <i class="bi bi-eraser-fill me-2"></i>
+                        <span class="label">選択された経度を消去</span>
+                      </a></li>
                     </ul>
                   </div>
                 </div>
@@ -191,8 +217,14 @@
                       <i class="bi bi-three-dots-vertical"></i>
                     </button>
                     <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" data-target-name="elevation" data-op-name="clear-checked" title="チェックされた行の標高を消去します。" data-bs-toggle="tooltip" data-bs-placement="right"><i class="bi bi-eraser-fill me-2"></i>選択された標高を消去</a></li>
-                      <li><a class="dropdown-item" data-target-name="elevation" data-op-name="replace-checked" title="チェックされた行の標高を国土地理院の標高に置き換えます。" data-bs-toggle="tooltip" data-bs-placement="right"><i class="bi bi-pin-map-fill me-2"></i>国土地理院の標高で更新</a></li>
+                      <li class="op-clear-elevation"><a class="dropdown-item" data-target-name="elevation" data-op-name="clear-checked" title="チェックされた行の標高を消去します。" data-bs-toggle="tooltip" data-bs-placement="right">
+                        <i class="bi bi-eraser-fill me-2"></i>
+                        <span class="label">選択された標高を消去</span>
+                      </a></li>
+                      <li class="op-update-elevation"><a class="dropdown-item" data-target-name="elevation" data-op-name="replace-checked" title="チェックされた行の標高を国土地理院の標高に置き換えます。" data-bs-toggle="tooltip" data-bs-placement="right">
+                        <i class="bi bi-pin-map-fill me-2"></i>
+                        <span class="label">国土地理院の標高で更新</span>
+                      </a></li>
                     </ul>
                   </div>
                 </div>
@@ -322,8 +354,8 @@
   </div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="./js/main.js"></script>
   <script src="./js/i18n.js"></script>
+  <script src="./js/main.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

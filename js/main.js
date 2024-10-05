@@ -102,10 +102,10 @@ const GpxTrailEditor = {
 
   onStartOverClicked: function() {
     GpxTrailEditor.showQuestionDialog(
-      '破棄の確認',
-      '読み込み済みのデータを破棄して最初からやり直します。よろしいですか?',
-      'OK',
-      'キャンセル',
+      i18nMsg.modalStartOverTitle,
+      i18nMsg.modalStartOverBodyContent,
+      i18nMsg.modalStartOverConfirmLabel,
+      i18nMsg.modalStartOverCancelLabel,
       'danger',
       function() { location.reload(); }
     );
@@ -164,7 +164,9 @@ const GpxTrailEditor = {
 
     // When the OK button is clicked
    newConfirmButtonElm.addEventListener('click', () => {
-    onConfirm();
+    if (onConfirm) {
+      onConfirm();
+    }
     const modalInstance = bootstrap.Modal.getInstance(modalDialogElm);
     modalInstance.hide(); 
 });
@@ -412,7 +414,7 @@ const GpxTrailEditor = {
       const longitudeCell = row.insertCell(4);
       const longitudeTextBox = document.createElement('input');
       longitudeTextBox.type = 'text';
-      longitudeTextBox.setAttribute('placeholder',i18nMsg.lognitude);
+      longitudeTextBox.setAttribute('placeholder',i18nMsg.longitude);
       longitudeTextBox.classList.add('form-control');
       longitudeTextBox.value = longitude;
       longitudeCell.appendChild(longitudeTextBox);
@@ -742,7 +744,7 @@ const GpxTrailEditor = {
     <li>${i18nMsg.markerNo}: ${i+1} <a href="javascript:void(0);" class="move-to-row link-primary bi bi-arrow-right-circle-fill" onclick="GpxTrailEditor.scrollToTableRow(${i})" title="${i18nMsg.titleMoveToMarker.replace('${i}',i+1)}"></a></li>
     <li>${i18nMsg.dateTime}: ${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTime)}</li>
     <li>${i18nMsg.latitude}: ${latLng[0]}</li>
-    <li>${i18nMsg.lognitude}: ${latLng[1]}</li>
+    <li>${i18nMsg.longitude}: ${latLng[1]}</li>
     </ul>
     <ul class="marker-op mt-2 p-0 list-unstyled">
       <li class="mb-1"><button class="remove-this-point btn btn-primary" onclick="GpxTrailEditor.insertMarkerAfter(${i})"><i class="bi bi-plus-circle"></i> ${i18nMsg.btnInsertNewMarkerAfter}</button></li>
@@ -1372,13 +1374,13 @@ const GpxTrailEditor = {
         }
         if (invalidRows.length > 0 ) {
           shouldAlert = true;
-          alertMsg = `At least one latitude or lognitude is invalid. Not going to replace the elavation. (row: ${invalidRows.join(", ")})`;
+          alertMsg = `At least one latitude or longitude is invalid. Not going to replace the elavation. (row: ${invalidRows.join(", ")})`;
         }
       });
 
     } else {
       shouldAlert = true;
-      alertMsg = '更新したい行のチェックボックスを ON にしてください。';
+      alertMsg = i18nMsg.alertCheckRowFirst;
     }
 
     if (shouldAlert) {
@@ -1630,6 +1632,19 @@ const GpxTrailEditor = {
     document.querySelector('#btn-nav-export .label').innerText = i18nMsg.btnExportLabel;
     document.querySelector('#btn-nav-start-over .label').innerText = i18nMsg.btnStartOverLabel;
     document.getElementById('goto-github-repo').title = i18nMsg.linkGitHubTitle;
+  },
+
+  setupTable: function () {
+    ['idx','chkbox','datetime','latitude','longitude','elevation'].forEach(className => {
+      const tableCell = document.querySelector('#data-table thead th.' + className);
+      tableCell.querySelectorAll('.op ul.dropdown-menu > li > a').forEach(menuLink => {
+        menuLink.addEventListener('click', (event) => {
+          const opName = menuLink.dataset.opName;
+          const targetName = menuLink.dataset.targetName;
+          GpxTrailEditor.onTableHeaderOpMenuItemClicked(opName,targetName);
+        });
+      });
+    });
   },
 
   setupDropZone: function() {
@@ -2462,19 +2477,6 @@ const GpxTrailEditor = {
 
   },  
 
-  setupTableHeaderOps: function() {
-    ['idx','chkbox','datetime','latitude','longitude','elevation'].forEach(className => {
-      const tableCell = document.querySelector('#data-table thead th.' + className);
-      tableCell.querySelectorAll('.op ul.dropdown-menu > li > a').forEach(menuLink => {
-        menuLink.addEventListener('click', (event) => {
-          const opName = menuLink.dataset.opName;
-          const targetName = menuLink.dataset.targetName;
-          GpxTrailEditor.onTableHeaderOpMenuItemClicked(opName,targetName);
-        });
-      });
-    });
-  },
-
   onTableHeaderOpMenuItemClicked: function(opName,targetName) {
 
     const operationMap = {
@@ -2598,6 +2600,47 @@ const GpxTrailEditor = {
     GpxTrailEditor.setI18nTitle('#btn-fill', i18nMsg.titleFillButton);
     GpxTrailEditor.setI18nTitle('#btn-export', i18nMsg.titleExportButton);
     GpxTrailEditor.setI18nTitle('#btn-startover', i18nMsg.titleStartOverButton);
+
+    // Title Input
+    GpxTrailEditor.setI18nInnerText('#log-name-form .input-group-text', i18nMsg.title);
+
+    // Data Table Header
+    GpxTrailEditor.setI18nInnerText('#data-table th.idx .label', i18nMsg.index);
+    GpxTrailEditor.setI18nInnerText('#data-table th.chkbox .label', i18nMsg.check);
+    GpxTrailEditor.setI18nInnerText('#data-table th.datetime .label', i18nMsg.dateTime);
+    GpxTrailEditor.setI18nInnerText('#data-table th.latitude .label', i18nMsg.latitude);
+    GpxTrailEditor.setI18nInnerText('#data-table th.longitude .label', i18nMsg.longitude);
+    GpxTrailEditor.setI18nInnerText('#data-table th.elevation .label', i18nMsg.elevation);
+
+    // Data Table Menu Options
+    GpxTrailEditor.setI18nTitle('#data-table th.idx .op-reverse-route a.dropdown-item', i18nMsg.menuReverseRouteTitle);
+    GpxTrailEditor.setI18nInnerText('#data-table th.idx .op-reverse-route a.dropdown-item .label', i18nMsg.menuReverseRouteLabel);
+    GpxTrailEditor.setI18nTitle('#data-table th.chkbox .op-check-all a.dropdown-item', i18nMsg.menuCheckAllTitle);
+    GpxTrailEditor.setI18nInnerText('#data-table th.chkbox .op-check-all a.dropdown-item .label', i18nMsg.menuCheckAllLabel);
+    GpxTrailEditor.setI18nTitle('#data-table th.chkbox .op-uncheck-all a.dropdown-item', i18nMsg.menuUncheckAllTitle);
+    GpxTrailEditor.setI18nInnerText('#data-table th.chkbox .op-uncheck-all a.dropdown-item .label', i18nMsg.menuUncheckAllLabel);
+    GpxTrailEditor.setI18nTitle('#data-table th.chkbox .op-check-reverse a.dropdown-item', i18nMsg.menuCheckReverseTitle);
+    GpxTrailEditor.setI18nInnerText('#data-table th.chkbox .op-check-reverse a.dropdown-item .label', i18nMsg.menuCheckReverseLabel);
+    
+    GpxTrailEditor.setI18nTitle('#data-table th.datetime .op-clear-datetime a.dropdown-item', i18nMsg.menuClearCheckedDatetimeTitle);
+    GpxTrailEditor.setI18nInnerText('#data-table th.datetime .op-clear-datetime a.dropdown-item .label', i18nMsg.menuClearCheckedDatetimeLabel);
+    GpxTrailEditor.setI18nTitle('#data-table th.datetime .op-shift-datetime a.dropdown-item', i18nMsg.menuShiftDatetimeTitle);
+    GpxTrailEditor.setI18nInnerText('#data-table th.datetime .op-shift-datetime a.dropdown-item .label', i18nMsg.menuShiftDatetimeLabel);
+    GpxTrailEditor.setI18nTitle('#data-table th.datetime .op-reverse-datetime a.dropdown-item', i18nMsg.menuReverseDatetimeTitle);
+    GpxTrailEditor.setI18nInnerText('#data-table th.datetime .op-reverse-datetime a.dropdown-item .label', i18nMsg.menuReverseDatetimeLabel);
+    GpxTrailEditor.setI18nTitle('#data-table th.datetime .op-fill-datetime a.dropdown-item', i18nMsg.menuFillDatetimeTitle);
+    GpxTrailEditor.setI18nInnerText('#data-table th.datetime .op-fill-datetime a.dropdown-item .label', i18nMsg.menuFillDatetimeLabel);
+
+    GpxTrailEditor.setI18nTitle('#data-table th.latitude .op-clear-latitude a.dropdown-item', i18nMsg.menuClearCheckedLatitudeTitle);
+    GpxTrailEditor.setI18nInnerText('#data-table th.latitude .op-clear-latitude a.dropdown-item .label', i18nMsg.menuClearCheckedLatitudeLabel);
+    GpxTrailEditor.setI18nTitle('#data-table th.longitude .op-clear-longitude a.dropdown-item', i18nMsg.menuClearCheckedLongitudeTitle);
+    GpxTrailEditor.setI18nInnerText('#data-table th.longitude .op-clear-longitude a.dropdown-item .label', i18nMsg.menuClearCheckedLongitudeLabel);
+    
+    GpxTrailEditor.setI18nTitle('#data-table th.elevation .op-clear-elevation a.dropdown-item', i18nMsg.menuClearCheckedElevationTitle);
+    GpxTrailEditor.setI18nInnerText('#data-table th.elevation .op-clear-elevation a.dropdown-item .label', i18nMsg.menuClearCheckedElevationLabel);
+    GpxTrailEditor.setI18nTitle('#data-table th.elevation .op-update-elevation a.dropdown-item', i18nMsg.menuUpdateCheckedElevationTitle);
+    GpxTrailEditor.setI18nInnerText('#data-table th.elevation .op-update-elevation a.dropdown-item .label', i18nMsg.menuUpdateCheckedElevationLabel);
+
   },
 
   setI18nInnerText: function(selector,innerText) {
@@ -2627,10 +2670,10 @@ document.addEventListener('DOMContentLoaded', function () {
   GpxTrailEditor.setupTopNav();
   GpxTrailEditor.setupDropZone();
   GpxTrailEditor.setupLogNameForm();
+  GpxTrailEditor.setupTable();
   GpxTrailEditor.setupSummary();
   GpxTrailEditor.setupOpButtonToolbar();
   GpxTrailEditor.setupOpButtonNavbar();
-  GpxTrailEditor.setupTableHeaderOps();
   GpxTrailEditor.applyI18n();
 
   // Initialize the tooltips
