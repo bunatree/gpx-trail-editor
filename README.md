@@ -50,7 +50,6 @@
 
 この拡張機能は、次のライブラリや画像を使用しています。
 
-[Leaflet](https://github.com/Leaflet/Leaflet) ... [BSD-2-Clause license](https://github.com/Leaflet/Leaflet?tab=BSD-2-Clause-1-ov-file). This web app contains a file under the "BSD-2-Clause license", which is Leaflet's license.
+[Leaflet](https://github.com/Leaflet/Leaflet) ... [BSD-2-Clause license](https://github.com/Leaflet/Leaflet?tab=BSD-2-Clause-1-ov-file)
 
-[Route icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/route) ... Free for personal and commercial purpose with attribution
-
+[Font Awesome Map Location Dot Icon](https://www.iconarchive.com/show/fontawesome-icons-by-fa-team/FontAwesome-Map-Location-Dot-icon.html) ... [CC Attribution 4.0](https://creativecommons.org/licenses/by/4.0/)
