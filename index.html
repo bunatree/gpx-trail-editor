@@ -38,7 +38,10 @@
   <header>
     <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
       <div class="container-fluid">
-        <div class="navbar-brand fw-bold" href="#">GPX Trail Editor</div>
+        <div class="navbar-brand fw-bold" href="#">
+          <img src="images/icon192.png"class="app-icon me-2" alt="App Icon" class="me-2">
+          GPX Trail Editor
+        </div>
         <div class="justify-content-end" id="nav-buttons">
           <button id="btn-nav-create-new" class="btn btn-sm btn-light d-none"><span class="label">New</span></button>
           <button id="btn-nav-export" class="btn btn-sm btn-primary d-none"><i class="bi bi-download me-2"></i><span class="label">Export</span></button>
@@ -58,14 +61,14 @@
 
       <div id="drop-zone" data-was-file-dropped="false">
 
-          <div id="drop-zone-form" class="mt-3 mb-3 p-3 border rounded d-flex flex-column justify-content-center">
-            <i class="bi bi-cloud-upload text-center fs-3"></i>
-            <div class="drop-zone-prompt text-center">
-              <div class="drop-note h5">GPX ファイルをドラッグ&ドロップ</div>
-              <div class="drop-subnote">またはクリックしてアップロード</div>
-            </div>
-            <input type="file" id="upload-gpx-fileinput" class="d-none" accept=".gpx" area-hidden="true">
+        <div id="drop-zone-form" class="mt-3 mb-3 p-3 border rounded d-flex flex-column justify-content-center">
+          <i class="bi bi-cloud-upload text-center fs-3"></i>
+          <div class="drop-zone-prompt text-center">
+            <div class="drop-note h5">GPX ファイルをドラッグ&ドロップ</div>
+            <div class="drop-subnote">またはクリックしてアップロード</div>
           </div>
+          <input type="file" id="upload-gpx-fileinput" class="d-none" accept=".gpx" area-hidden="true">
+        </div>
 
         <div id="log-name-form" class="input-group mt-3 mb-3 d-none">
           <label class="input-group-text" for="log-name-input">タイトル</label>
