@@ -123,6 +123,9 @@ const GpxTrailEditor = {
     modalBodyElm.textContent = bodyContent;
     confirmButtonElm.textContent = buttonLabel;
 
+    confirmButtonElm.classList.remove('btn-primary','btn-info','btn-warning','btn-danger');
+    confirmButtonElm.classList.add('btn-' + type);
+
     GpxTrailEditor.clearModalHeaderAlert(modalHeaderElm);
     if (type) {
       const typeClassName = 'text-bg-' + type;
@@ -2159,8 +2162,8 @@ const GpxTrailEditor = {
 
         let errorMsg = (invalidPointLatLng.latitude.length > 0) ? `<div class="error-message">${i18nMsg.errorInvalidLatitude.replace('${i}',invalidRowHtml(invalidPointLatLng.latitude))}</div>` : '';
         errorMsg += (invalidPointLatLng.longitude.length > 0) ? `<div class="error-message">${i18nMsg.errorInvalidLongitude.replace('${i}',invalidRowHtml(invalidPointLatLng.longitude))}</div>` : '';
-        errorMsg += (invalidDateTime.datetimeValue.length) ? `<div class="error-message">${i18nMsg.errorInvalidDateTime.replace('${i}',invalidRowHtml(invalidPointLatLng.datetimeValue))}</div>` : '';
-        errorMsg += (invalidDateTime.datetimeOrder.length > 0) ? `<div class="error-message">${i18nMsg.errorInvalidDateOrder.replace('${i}',invalidRowHtml(invalidPointLatLng.datetimeOrder))}</div>` : '';
+        errorMsg += (invalidDateTime.datetimeValue.length) ? `<div class="error-message">${i18nMsg.errorInvalidDateTime.replace('${i}',invalidRowHtml(invalidDateTime.datetimeValue))}</div>` : '';
+        errorMsg += (invalidDateTime.datetimeOrder.length > 0) ? `<div class="error-message">${i18nMsg.errorInvalidDateOrder.replace('${i}',invalidRowHtml(invalidDateTime.datetimeOrder))}</div>` : '';
 
         GpxTrailEditor.showAlert('warning',errorMsg);
 
