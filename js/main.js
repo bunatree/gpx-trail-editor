@@ -394,7 +394,7 @@ const GpxTrailEditor = {
       const timeCell = row.insertCell(2);
       const datetimeTextBox = document.createElement('input');
       datetimeTextBox.type = 'datetime-local';
-      datetimeTextBox.classList.add('form-control');
+      datetimeTextBox.classList.add('form-control','datetime-input');
       datetimeTextBox.setAttribute('step','1');
       const formattedDateTime = GpxTrailEditor.convertGPXDateTimeToHTMLFormat(gpxDateTime);
       datetimeTextBox.value = formattedDateTime;
@@ -406,7 +406,7 @@ const GpxTrailEditor = {
       const latitudeTextBox = document.createElement('input');
       latitudeTextBox.type = 'text';
       latitudeTextBox.setAttribute('placeholder',i18nMsg.latitude);
-      latitudeTextBox.classList.add('form-control');
+      latitudeTextBox.classList.add('form-control','latitude-input');
       latitudeTextBox.value = latitude;
       latitudeCell.appendChild(latitudeTextBox);
       latitudeCell.classList.add('latitude');
@@ -416,7 +416,7 @@ const GpxTrailEditor = {
       const longitudeTextBox = document.createElement('input');
       longitudeTextBox.type = 'text';
       longitudeTextBox.setAttribute('placeholder',i18nMsg.longitude);
-      longitudeTextBox.classList.add('form-control');
+      longitudeTextBox.classList.add('form-control','longitude-input');
       longitudeTextBox.value = longitude;
       longitudeCell.appendChild(longitudeTextBox);
       longitudeCell.classList.add('longitude');
@@ -426,7 +426,7 @@ const GpxTrailEditor = {
       const elevationTextBox = document.createElement('input');
       elevationTextBox.type = 'text';
       elevationTextBox.setAttribute('placeholder',i18nMsg.elevation);
-      elevationTextBox.classList.add('form-control');
+      elevationTextBox.classList.add('form-control','elevation-input');
       elevationTextBox.value = elevation;
       elevationCell.appendChild(elevationTextBox);
       elevationCell.classList.add('elevation');
@@ -438,7 +438,7 @@ const GpxTrailEditor = {
     }
   },
 
-  onDataTableInputLostFocus: function(event) {
+  onDataTableInputLostFocus: async function(event) {
 
     const row = event.target.closest('tr');
     const cell = event.target.closest('td');
@@ -447,7 +447,26 @@ const GpxTrailEditor = {
     const datetime = row.querySelector('.datetime input').value;
     const latitude = parseFloat(row.querySelector('.latitude input').value);
     const longitude = parseFloat(row.querySelector('.longitude input').value);
-    const elevation = parseFloat(row.querySelector('.elevation input').value);
+    const curElevation = parseFloat(row.querySelector('.elevation input').value);
+
+    let newElevation;
+    if (!curElevation) {
+      try {
+        newElevation = (
+          (cell.classList.contains('latitude') || cell.classList.contains('longitude'))
+          ||
+          (cell.classList.contains('elevation') && !curElevation)
+        )
+        ? await GpxTrailEditor.latLngToEle(latitude, longitude) 
+        : parseFloat(row.querySelector('.elevation input')?.value || 0);
+      } catch (error) {
+        console.error('Failed to fetch elevation:', error);
+        newElevation = curElevation;
+      }
+      row.querySelector('.elevation input').value = newElevation;
+    } else {
+      newElevation = curElevation;
+    }
 
     const targetMarker = GpxTrailEditor.markers[index];
     const targetPoint = GpxTrailEditor.points[index];
@@ -468,9 +487,9 @@ const GpxTrailEditor = {
       GpxTrailEditor.updateMarkerLatLng(index,[latitude,longitude]);
 
       GpxTrailEditor.points[index].datetime = datetime;
-      GpxTrailEditor.updatePointInfo(index,{"lat":latitude,"lng":longitude},elevation);
+      GpxTrailEditor.updatePointInfo(index,{"lat":latitude,"lng":longitude},newElevation);
 
-      targetMarker.options.elevation = elevation;  
+      targetMarker.options.elevation = newElevation;  
 
       // Update markers and polylines only if latitude and longitude are valid
       if (latitude && longitude) {
@@ -782,7 +801,15 @@ const GpxTrailEditor = {
     }
 
     GpxTrailEditor.markers[i].setLatLng(newLatLng);
-    const newElevation = await GpxTrailEditor.latLngToEle(newLatLng.lat,newLatLng.lng);
+
+    let newElevation;
+    try {
+      newElevation = await GpxTrailEditor.latLngToEle(newLatLng.lat, newLatLng.lng);
+    } catch (error) {
+      console.error('Failed to fetch elevation:', error);
+      newElevation = null;
+    }
+
     GpxTrailEditor.updatePointInfo(i,newLatLng,newElevation);
     GpxTrailEditor.updateTableRow(i,newLatLng,newElevation);
     GpxTrailEditor.updateMarkersAndPolylines();
@@ -842,7 +869,15 @@ const GpxTrailEditor = {
         const prevDateTime = points[i-1].datetime;
         const prevLatitude = points[i-1].latitude;
         const prevLongitude = points[i-1].longitude;
-        const prevElevation = await GpxTrailEditor.getElevationData(prevLatitude,prevLongitude);
+
+        let prevElevation;
+        try {
+          prevElevation = await GpxTrailEditor.latLngToEle(prevLatitude,prevLongitude);
+        } catch (error) {
+          console.error('Failed to fetch elevation:', error);
+          prevElevation = null;
+        }
+        
         const toCurDistance = (points[i]) ? GpxTrailEditor.calcHubenyDistance(prevLatitude, prevLongitude, curLatitude, curLongitude) : null;
         const toCurElevation = (prevElevation) ? curElevation - prevElevation : null;
         const toCurSeconds = (prevDateTime) ? GpxTrailEditor.calcDateTimeDifference(prevDateTime,curDateTime) : null;
