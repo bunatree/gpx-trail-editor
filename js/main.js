@@ -450,23 +450,18 @@ const GpxTrailEditor = {
     const curElevation = parseFloat(row.querySelector('.elevation input').value);
 
     let newElevation;
-    if (!curElevation) {
-      try {
-        newElevation = (
-          (cell.classList.contains('latitude') || cell.classList.contains('longitude'))
-          ||
-          (cell.classList.contains('elevation') && !curElevation)
-        )
-        ? await GpxTrailEditor.latLngToEle(latitude, longitude) 
-        : parseFloat(row.querySelector('.elevation input')?.value || 0);
-      } catch (error) {
-        console.error('Failed to fetch elevation:', error);
-        newElevation = curElevation;
-      }
-      row.querySelector('.elevation input').value = newElevation;
-    } else {
+    try {
+      newElevation = (
+        (cell.classList.contains('latitude') || cell.classList.contains('longitude')) ||
+        (cell.classList.contains('elevation') && !curElevation)
+      )
+      ? await GpxTrailEditor.latLngToEle(latitude, longitude) 
+      : parseFloat(row.querySelector('.elevation input')?.value || 0);
+    } catch (error) {
+      console.error('Failed to fetch elevation:', error);
       newElevation = curElevation;
     }
+    row.querySelector('.elevation input').value = newElevation;
 
     const targetMarker = GpxTrailEditor.markers[index];
     const targetPoint = GpxTrailEditor.points[index];
@@ -869,15 +864,8 @@ const GpxTrailEditor = {
         const prevDateTime = points[i-1].datetime;
         const prevLatitude = points[i-1].latitude;
         const prevLongitude = points[i-1].longitude;
+        const prevElevation = points[i-1].elevation;
 
-        let prevElevation;
-        try {
-          prevElevation = await GpxTrailEditor.latLngToEle(prevLatitude,prevLongitude);
-        } catch (error) {
-          console.error('Failed to fetch elevation:', error);
-          prevElevation = null;
-        }
-        
         const toCurDistance = (points[i]) ? GpxTrailEditor.calcHubenyDistance(prevLatitude, prevLongitude, curLatitude, curLongitude) : null;
         const toCurElevation = (prevElevation) ? curElevation - prevElevation : null;
         const toCurSeconds = (prevDateTime) ? GpxTrailEditor.calcDateTimeDifference(prevDateTime,curDateTime) : null;
@@ -937,18 +925,28 @@ const GpxTrailEditor = {
     // Temporarily save a layer of markers
     const markerLayers = GpxTrailEditor.layerGroup.getLayers().filter(layer => layer instanceof L.Marker);
   
+    // Collect latLngs from all markers
+    const latLngs = GpxTrailEditor.markers.map(marker => marker.getLatLng());
+
+    // Check if any latLngs contain invalid coordinates (NaN values)
+    const hasInvalidLatLng = latLngs.some(latLng => isNaN(latLng.lat) || isNaN(latLng.lng));
+
+    if (hasInvalidLatLng) {
+      console.warn('Invalid latitude/longitude values found. Skipping marker and polyline redraw.');
+      return;  // Exit! skipping polyline redraw...
+    }
+  
     // Clear all the layers
     GpxTrailEditor.layerGroup.clearLayers();
 
-    const latLngs = GpxTrailEditor.markers.map(marker => marker.getLatLng());
-
-    // Add the new polyline (with a border) to the layerGroup
+    // If all latLngs are valid, proceed to add the polylines
     const border = L.polyline(latLngs, GpxTrailEditor.borderPolylineOptions).addTo(GpxTrailEditor.layerGroup);
     const polyline = L.polyline(latLngs, GpxTrailEditor.normalPolylineOptions).addTo(GpxTrailEditor.layerGroup);
 
-    // Add the saved marker layer to layerGroup again.
+    // Re-add the saved marker layers to the layerGroup
     markerLayers.forEach(layer => GpxTrailEditor.layerGroup.addLayer(layer));
 
+    // Store the polylines in the GpxTrailEditor object for future reference
     GpxTrailEditor.borderPolyline = border;
     GpxTrailEditor.polyline = polyline;
   
@@ -1183,7 +1181,7 @@ const GpxTrailEditor = {
       const [polyline1, border1] = GpxTrailEditor.drawPolylines([prevMarker.getLatLng(), latlng]);
       const [polyline2, border2] = GpxTrailEditor.drawPolylines([latlng, nextMarker.getLatLng()]);
 
-      // マーカーとポリラインを更新
+      // Redraw markers and polylines
       GpxTrailEditor.updateMarkersAndPolylines();
 
       // Insert a new table row at the insertionStartIndex
