@@ -1728,12 +1728,14 @@ const GpxTrailEditor = {
     // Check if the start date/time is valid
     if (!invalidDatetime.result && invalidDatetime.index[0] === 0) {
       GpxTrailEditor.showAlert('warning',i18nMsg.alertInvalidStartDateTime);
+      GpxTrailEditor.alertTableCell([0],[],[],[]);
       return false;
     }
 
     // Check if the goal date/time is valid
     if (!invalidDatetime.result && invalidDatetime.index[invalidDatetime.index.length - 1] === rowCount - 1) {
       GpxTrailEditor.showAlert('warning',i18nMsg.alertInvalidGoalDateTime);
+      GpxTrailEditor.alertTableCell([rows.length - 1],[],[],[]);
       return false;
     }
 
