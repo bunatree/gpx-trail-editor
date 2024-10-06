@@ -302,7 +302,7 @@ const GpxTrailEditor = {
         const logNameInputElm = document.getElementById('log-name-input');
         logNameInputElm.value = GpxTrailEditor.logName;
 
-        GpxTrailEditor.parseMapGPX(xmlDoc);
+        
 
         GpxTrailEditor.parseDataTable(xmlDoc);
         GpxTrailEditor.showDataTable();
@@ -314,6 +314,10 @@ const GpxTrailEditor = {
 
         GpxTrailEditor.parseSummary(points);
         GpxTrailEditor.showSummary();
+
+        // Drap markers and polylines on the map and
+        // put the data into GpxTrailEditor.markers etc.
+        GpxTrailEditor.parseMapGPX(xmlDoc);
 
       } catch (error) {
         console.error('Error parsing GPX:', error); // Handle parsing error
@@ -751,11 +755,23 @@ const GpxTrailEditor = {
   },
 
   setPopupBalloon(i,marker,latLng,dateTime) {
+
     marker.unbindPopup();
-    const buttonContent = '<button class="remove-this-point btn btn-primary text-start" onclick="GpxTrailEditor.insertMarkerAfter(${i})"><i class="bi bi-plus-circle me-2"></i>' + i18nMsg.btnInsertNewMarkerAfter + '</button>' +
-    '<button class="remove-this-point btn btn-danger text-start" onclick="GpxTrailEditor.deletePreviousMarkers(' + i + ')"><i class="bi bi-trash me-2"></i>' + i18nMsg.btnDeletePreviousMarkers + '</button>' +
-    '<button class="remove-this-point btn btn-danger text-start" onclick="GpxTrailEditor.deleteThisMarker(' + i + ')"><i class="bi bi-trash me-2"></i>' + i18nMsg.btnDeleteThisMarker + '</button>' + 
-    '<button class="remove-this-point btn btn-danger text-start" onclick="GpxTrailEditor.deleteSubsequentMarkers(' + i + ')"><i class="bi bi-trash me-2"></i>' + i18nMsg.btnDeleteSubsequentMarkers + '</button>';
+
+    let buttonContent = '<button class="remove-this-point btn btn-primary text-start" onclick="GpxTrailEditor.insertMarkerAfter(${i})"><i class="bi bi-plus-circle me-2"></i>' + i18nMsg.btnInsertNewMarkerAfter + '</button>';
+
+    if (i !== 0) {
+      buttonContent += '<button class="remove-this-point btn btn-danger text-start" onclick="GpxTrailEditor.deletePreviousMarkers(' + i + ')"><i class="bi bi-trash me-2"></i>' + i18nMsg.btnDeletePreviousMarkers + '</button>';
+    }
+
+    buttonContent += '<button class="remove-this-point btn btn-danger text-start" onclick="GpxTrailEditor.deleteThisMarker(' + i + ')"><i class="bi bi-trash me-2"></i>' + i18nMsg.btnDeleteThisMarker + '</button>';
+
+    // Use GpxTrailEditor.points here.
+    // Don't use GpxTrailEditor.markers because its value is not set
+    // when this function is initially called.
+    if (i !== GpxTrailEditor.points.length -1) {
+      buttonContent += '<button class="remove-this-point btn btn-danger text-start" onclick="GpxTrailEditor.deleteSubsequentMarkers(' + i + ')"><i class="bi bi-trash me-2"></i>' + i18nMsg.btnDeleteSubsequentMarkers + '</button>';
+    }
 
     const popupContent = `<ul class="marker-info m-0 p-0 list-unstyled">
     <li>${i18nMsg.markerNo}: ${i+1} <a href="javascript:void(0);" class="move-to-row link-primary bi bi-arrow-right-circle-fill" onclick="GpxTrailEditor.scrollToTableRow(${i})" title="${i18nMsg.titleMoveToMarker.replace('${i}',i+1)}"></a></li>
@@ -766,7 +782,9 @@ const GpxTrailEditor = {
     <div class="marker-op mt-2 d-grid gap-1">
       ${buttonContent}
     </div>`;
+
     marker.bindPopup(popupContent);
+
   },
 
   resetPopupBalloonAll: function() {
@@ -2457,7 +2475,6 @@ const GpxTrailEditor = {
 
   },
   
-
   deleteSubsequentMarkers: function(index) {
     console.log('#### deleteSubsequentMarkers');
 
