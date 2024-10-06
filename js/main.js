@@ -2089,6 +2089,7 @@ const GpxTrailEditor = {
     }
 
     GpxTrailEditor.updateMarkersAndPolylines();
+    GpxTrailEditor.setStartLastMarkers();
     GpxTrailEditor.resetPopupBalloonAll();
 
     GpxTrailEditor.markers.forEach((targetMarker,index) => {
