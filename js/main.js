@@ -165,6 +165,9 @@ const GpxTrailEditor = {
     confirmButtonElm.replaceWith(confirmButtonElm.cloneNode(true));
     const newConfirmButtonElm = modalDialogElm.querySelector('.btn-confirm');
 
+    newConfirmButtonElm.classList.remove('btn-primary','btn-info','btn-warning','btn-danger');
+    newConfirmButtonElm.classList.add('btn-' + type);
+
     // When the OK button is clicked
    newConfirmButtonElm.addEventListener('click', () => {
     if (onConfirm) {
@@ -760,17 +763,17 @@ const GpxTrailEditor = {
 
     let buttonContent = '<button class="remove-this-point btn btn-primary text-start" onclick="GpxTrailEditor.insertMarkerAfter(${i})"><i class="bi bi-plus-circle me-2"></i>' + i18nMsg.btnInsertNewMarkerAfter + '</button>';
 
-    if (i !== 0) {
-      buttonContent += '<button class="remove-this-point btn btn-danger text-start" onclick="GpxTrailEditor.deletePreviousMarkers(' + i + ')"><i class="bi bi-trash me-2"></i>' + i18nMsg.btnDeletePreviousMarkers + '</button>';
-    }
-
     buttonContent += '<button class="remove-this-point btn btn-danger text-start" onclick="GpxTrailEditor.deleteThisMarker(' + i + ')"><i class="bi bi-trash me-2"></i>' + i18nMsg.btnDeleteThisMarker + '</button>';
+
+    if (i !== 0) {
+      buttonContent += '<button class="remove-this-point btn btn-danger text-start" onclick="GpxTrailEditor.deletePreviousMarkers(' + i + ')"><i class="bi bi-arrow-up me-2"></i>' + i18nMsg.btnDeletePreviousMarkers + '</button>';
+    }
 
     // Use GpxTrailEditor.points here.
     // Don't use GpxTrailEditor.markers because its value is not set
     // when this function is initially called.
     if (i !== GpxTrailEditor.points.length -1) {
-      buttonContent += '<button class="remove-this-point btn btn-danger text-start" onclick="GpxTrailEditor.deleteSubsequentMarkers(' + i + ')"><i class="bi bi-trash me-2"></i>' + i18nMsg.btnDeleteSubsequentMarkers + '</button>';
+      buttonContent += '<button class="remove-this-point btn btn-danger text-start" onclick="GpxTrailEditor.deleteSubsequentMarkers(' + i + ')"><i class="bi bi-arrow-down me-2"></i>' + i18nMsg.btnDeleteSubsequentMarkers + '</button>';
     }
 
     const popupContent = `<ul class="marker-info m-0 p-0 list-unstyled">
