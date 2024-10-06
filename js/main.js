@@ -2420,10 +2420,10 @@ const GpxTrailEditor = {
     // Update markers and polylines.
     GpxTrailEditor.updateMarkersAndPolylines();
 
-    // If the first marker exists, update its icon to "S" (firstMarkerOptions)
+    // Update the icon of the first marker to "S" if it exists,
+    // and update the last marker icon to "G" if it exists.
     if (GpxTrailEditor.markers.length > 0) {
-      const firstMarker = GpxTrailEditor.markers[0];
-      firstMarker.setIcon(GpxTrailEditor.firstMarkerOptions.icon);
+      GpxTrailEditor.setStartLastMarkers();
     }
 
     // Update the events and balloons for the markers after the target marker.
@@ -2461,10 +2461,10 @@ const GpxTrailEditor = {
     // Update markers and polylines.
     GpxTrailEditor.updateMarkersAndPolylines();
 
-    // If the first marker exists, update its icon to "S" (firstMarkerOptions)
+    // Update the icon of the first marker to "S" if it exists,
+    // and update the last marker icon to "G" if it exists.
     if (GpxTrailEditor.markers.length > 0) {
-      const firstMarker = GpxTrailEditor.markers[0];
-      firstMarker.setIcon(GpxTrailEditor.firstMarkerOptions.icon);
+      GpxTrailEditor.setStartLastMarkers();
     }
 
     // Update the events and balloons for the remaining markers.
@@ -2502,12 +2502,25 @@ const GpxTrailEditor = {
     // Update markers and polylines.
     GpxTrailEditor.updateMarkersAndPolylines();
 
+    // Update the icon of the first marker to "S" if it exists,
+    // and update the last marker icon to "G" if it exists.
+    if (GpxTrailEditor.markers.length > 0) {
+      GpxTrailEditor.setStartLastMarkers();
+    }
+
     // Update the events and balloons for the remaining markers.
     for (let i = index; i < GpxTrailEditor.markers.length; i++) {
       const marker = GpxTrailEditor.markers[i];
       GpxTrailEditor.bindMarkerEvents(marker, i, [marker._latlng.lat, marker._latlng.lng], GpxTrailEditor.points[i].datetime);
     }
     
+  },
+
+  setStartLastMarkers: function() {
+    const firstMarker = GpxTrailEditor.markers[0];
+    firstMarker.setIcon(GpxTrailEditor.firstMarkerOptions.icon);
+    const lastMarker = GpxTrailEditor.markers[GpxTrailEditor.markers.length - 1];
+    lastMarker.setIcon(GpxTrailEditor.lastMarkerOptions.icon);
   },
 
   reportLatLngError: function() {
