@@ -752,16 +752,20 @@ const GpxTrailEditor = {
 
   setPopupBalloon(i,marker,latLng,dateTime) {
     marker.unbindPopup();
+    const buttonContent = '<button class="remove-this-point btn btn-primary text-start" onclick="GpxTrailEditor.insertMarkerAfter(${i})"><i class="bi bi-plus-circle me-2"></i>' + i18nMsg.btnInsertNewMarkerAfter + '</button>' +
+    '<button class="remove-this-point btn btn-danger text-start" onclick="GpxTrailEditor.deletePreviousMarkers(' + i + ')"><i class="bi bi-trash me-2"></i>' + i18nMsg.btnDeletePreviousMarkers + '</button>' +
+    '<button class="remove-this-point btn btn-danger text-start" onclick="GpxTrailEditor.deleteThisMarker(' + i + ')"><i class="bi bi-trash me-2"></i>' + i18nMsg.btnDeleteThisMarker + '</button>' + 
+    '<button class="remove-this-point btn btn-danger text-start" onclick="GpxTrailEditor.deleteSubsequentMarkers(' + i + ')"><i class="bi bi-trash me-2"></i>' + i18nMsg.btnDeleteSubsequentMarkers + '</button>';
+
     const popupContent = `<ul class="marker-info m-0 p-0 list-unstyled">
     <li>${i18nMsg.markerNo}: ${i+1} <a href="javascript:void(0);" class="move-to-row link-primary bi bi-arrow-right-circle-fill" onclick="GpxTrailEditor.scrollToTableRow(${i})" title="${i18nMsg.titleMoveToMarker.replace('${i}',i+1)}"></a></li>
     <li>${i18nMsg.dateTime}: ${GpxTrailEditor.convertGPXDateTimeToHTMLFormat(dateTime)}</li>
     <li>${i18nMsg.latitude}: ${latLng[0]}</li>
     <li>${i18nMsg.longitude}: ${latLng[1]}</li>
     </ul>
-    <ul class="marker-op mt-2 p-0 list-unstyled">
-      <li class="mb-1"><button class="remove-this-point btn btn-primary" onclick="GpxTrailEditor.insertMarkerAfter(${i})"><i class="bi bi-plus-circle"></i> ${i18nMsg.btnInsertNewMarkerAfter}</button></li>
-      <li class="mb-1"><button class="remove-this-point btn btn-warning" onclick="GpxTrailEditor.removeThisMarker(${i})"><i class="bi bi-trash"></i> ${i18nMsg.btnDeleteThisMarker}</button></li>
-    </ul>`;
+    <div class="marker-op mt-2 d-grid gap-1">
+      ${buttonContent}
+    </div>`;
     marker.bindPopup(popupContent);
   },
 
@@ -2374,7 +2378,7 @@ const GpxTrailEditor = {
     }
   },
 
-  removeThisMarker: function(index) {
+  deleteThisMarker: function(index) {
 
     // Remove the target point from GpxTrailEditor.points.
     GpxTrailEditor.points.splice(index, 1);
@@ -2410,6 +2414,83 @@ const GpxTrailEditor = {
       GpxTrailEditor.bindMarkerEvents(marker,i,[marker._latlng.lat,marker._latlng.lng],GpxTrailEditor.points[i].datetime);
     }
 
+  },
+
+  deletePreviousMarkers: function(index) {
+    console.log('#### deletePreviousMarkers');
+
+    // Remove all points before the target index from GpxTrailEditor.points.
+    GpxTrailEditor.points.splice(0, index);
+    // Reset all the point index values.
+    GpxTrailEditor.resetPointIndices();
+
+    // Remove the corresponding table rows.
+    const rows = document.querySelectorAll('#data-table tbody tr');
+    for (let i = 0; i < index; i++) {
+      const targetRow = rows[i];
+      if (targetRow) {
+        targetRow.remove();
+      }
+    }
+    GpxTrailEditor.resetTableRowIndices();
+
+    // Remove all markers before the target index from the layer group and the markers array.
+    for (let i = 0; i < index; i++) {
+      GpxTrailEditor.layerGroup.removeLayer(GpxTrailEditor.markers[i]);
+    }
+    GpxTrailEditor.markers.splice(0, index);
+
+    // Update markers and polylines.
+    GpxTrailEditor.updateMarkersAndPolylines();
+
+    // If the first marker exists, update its icon to "S" (firstMarkerOptions)
+    if (GpxTrailEditor.markers.length > 0) {
+      const firstMarker = GpxTrailEditor.markers[0];
+      firstMarker.setIcon(GpxTrailEditor.firstMarkerOptions.icon);
+    }
+
+    // Update the events and balloons for the remaining markers.
+    for (let i = 0; i < GpxTrailEditor.markers.length; i++) {
+      const marker = GpxTrailEditor.markers[i];
+      GpxTrailEditor.bindMarkerEvents(marker, i, [marker._latlng.lat, marker._latlng.lng], GpxTrailEditor.points[i].datetime);
+    }
+
+  },
+  
+
+  deleteSubsequentMarkers: function(index) {
+    console.log('#### deleteSubsequentMarkers');
+
+    // Remove all points after the target index from GpxTrailEditor.points.
+    GpxTrailEditor.points.splice(index + 1);
+    // Reset all the point index values.
+    GpxTrailEditor.resetPointIndices();
+
+    // Remove the corresponding table rows.
+    const rows = document.querySelectorAll('#data-table tbody tr');
+    for (let i = index + 1; i < rows.length; i++) {
+      const targetRow = rows[i];
+      if (targetRow) {
+        targetRow.remove();
+      }
+    }
+    GpxTrailEditor.resetTableRowIndices();
+
+    // Remove all markers after the target index from the layer group and the markers array.
+    for (let i = index + 1; i < GpxTrailEditor.markers.length; i++) {
+      GpxTrailEditor.layerGroup.removeLayer(GpxTrailEditor.markers[i]);
+    }
+    GpxTrailEditor.markers.splice(index + 1);
+
+    // Update markers and polylines.
+    GpxTrailEditor.updateMarkersAndPolylines();
+
+    // Update the events and balloons for the remaining markers.
+    for (let i = index; i < GpxTrailEditor.markers.length; i++) {
+      const marker = GpxTrailEditor.markers[i];
+      GpxTrailEditor.bindMarkerEvents(marker, i, [marker._latlng.lat, marker._latlng.lng], GpxTrailEditor.points[i].datetime);
+    }
+    
   },
 
   reportLatLngError: function() {

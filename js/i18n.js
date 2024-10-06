@@ -51,6 +51,8 @@ const i18nMsg = (function(lang) {
       // Balloon
       "btnInsertNewMarkerAfter": "New Point After This Marker",
       "btnDeleteThisMarker": "Delete This Marker",
+      "btnDeletePreviousMarkers": "Delete Previous Markers",
+      "btnDeleteSubsequentMarkers": "Delete Subsequent Markers",
       "markerNo": "Marker Number",
       "titleMoveToMarker": "Move to the row #${i}",
 
@@ -164,8 +166,10 @@ const i18nMsg = (function(lang) {
       "titleInsertMarkerButton": "ポイント追加/挿入",
 
       // Balloon
-      "btnInsertNewMarkerAfter": "この後にポイント挿入",
+      "btnInsertNewMarkerAfter": "この後に追加/挿入",
       "btnDeleteThisMarker": "このポイントを削除",
+      "btnDeletePreviousMarkers": "これより前を削除",
+      "btnDeleteSubsequentMarkers": "これより後を削除",
       "markerNo": "マーカー番号",
       "titleMoveToMarker": "行番号 ${i} へ移動",
 
