@@ -761,7 +761,7 @@ const GpxTrailEditor = {
 
     marker.unbindPopup();
 
-    let buttonContent = '<button class="remove-this-point btn btn-primary text-start" onclick="GpxTrailEditor.insertMarkerAfter(${i})"><i class="bi bi-plus-circle me-2"></i>' + i18nMsg.btnInsertNewMarkerAfter + '</button>';
+    let buttonContent = '<button class="remove-this-point btn btn-primary text-start" onclick="GpxTrailEditor.insertMarkerAfter(' + i + ')"><i class="bi bi-plus-circle me-2"></i>' + i18nMsg.btnInsertNewMarkerAfter + '</button>';
 
     buttonContent += '<button class="remove-this-point btn btn-danger text-start" onclick="GpxTrailEditor.deleteThisMarker(' + i + ')"><i class="bi bi-trash me-2"></i>' + i18nMsg.btnDeleteThisMarker + '</button>';
 
