@@ -837,6 +837,7 @@ const GpxTrailEditor = {
   },
 
   updateTableRow: async function(i,newLatLng,newElevation) {
+
     const tableRows = document.getElementById('data-table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
     if (i < tableRows.length) {
 
@@ -1445,6 +1446,65 @@ const GpxTrailEditor = {
       GpxTrailEditor.clearAlert();
     }
     
+  },
+
+  smoothTrack: async function() {
+    for (let i = 1; i < GpxTrailEditor.points.length - 1; i++) {
+      const prev = GpxTrailEditor.points[i - 1];
+      const current = GpxTrailEditor.points[i];
+      const next = GpxTrailEditor.points[i + 1];
+
+      // Calculate the angle B in A-B-C
+      const angleABC = GpxTrailEditor.calculateAngle(prev, current, next);
+
+      // 角度が180度未満なら凸と判断して補正を行う
+      if (angleABC < 180) {
+          // AとCの中間点に向けてBを移動させる
+          const midLat = (prev.latitude + next.latitude) / 2;
+          const midLng = (prev.longitude + next.longitude) / 2;
+          // 平滑化のための移動量（例：0.2で調整）
+          current.latitude = current.latitude * 0.8 + midLat * 0.2;
+          current.longitude = current.longitude * 0.8 + midLng * 0.2;
+      }
+
+      let newElevation;
+      try {
+        newElevation = await GpxTrailEditor.latLngToEle(current.latitude, current.longitude);
+      } catch (error) {
+        console.error('Failed to fetch elevation:', error);
+        newElevation = null;
+      }
+      
+      GpxTrailEditor.points[i].elevation = newElevation;
+      // 更新後の座標と標高をテーブルに反映
+      GpxTrailEditor.updateTableRow(i,{"lat": current.latitude, "lng": current.longitude},newElevation);
+      // 更新後の座標をマーカーに適用
+      GpxTrailEditor.markers[i].setLatLng([current.latitude, current.longitude]);
+    }
+  
+    GpxTrailEditor.updateMarkersAndPolylines();
+
+  },
+
+  // 3点間の角度を計算する関数
+  calculateAngle: function(pointA, pointB, pointC) {
+    const ab = {
+        x: pointB.latitude - pointA.latitude,
+        y: pointB.longitude - pointA.longitude
+    };
+    const bc = {
+        x: pointC.latitude - pointB.latitude,
+        y: pointC.longitude - pointB.longitude
+    };
+
+    // 内積とベクトルの大きさを使って角度を計算
+    const dotProduct = ab.x * bc.x + ab.y * bc.y;
+    const magnitudeAB = Math.sqrt(ab.x * ab.x + ab.y * ab.y);
+    const magnitudeBC = Math.sqrt(bc.x * bc.x + bc.y * bc.y);
+
+    const cosTheta = dotProduct / (magnitudeAB * magnitudeBC);
+    const angle = Math.acos(cosTheta) * (180 / Math.PI);  // 角度に変換
+    return angle;
   },
 
   showAlert: function(type,message) {
@@ -2439,7 +2499,6 @@ const GpxTrailEditor = {
   },
 
   deletePreviousMarkers: function(index) {
-    console.log('#### deletePreviousMarkers');
 
     // Remove all points before the target index from GpxTrailEditor.points.
     GpxTrailEditor.points.splice(0, index);
@@ -2480,7 +2539,6 @@ const GpxTrailEditor = {
   },
   
   deleteSubsequentMarkers: function(index) {
-    console.log('#### deleteSubsequentMarkers');
 
     // Remove all points after the target index from GpxTrailEditor.points.
     GpxTrailEditor.points.splice(index + 1);
@@ -2627,6 +2685,7 @@ const GpxTrailEditor = {
         'clear-all': GpxTrailEditor.clearLatitudeAll,
         'clear-checked': GpxTrailEditor.clearLatitudeChecked,
         'clear-unchecked': GpxTrailEditor.clearLatitudeUnchecked,
+        'smooth-track': GpxTrailEditor.smoothTrack,
       },
       longitude: {
         'clear-all': GpxTrailEditor.clearLongitudeAll,
