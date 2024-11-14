@@ -93,6 +93,14 @@ const i18nMsg = (function(lang) {
       "modalStartOverConfirmLabel": "OK",
       "modalStartOverCancelLabel": "Cancel",
       "modalExportErrorTitle": "Export Error",
+      "modalSmoothTrackTitle": "Smooth Track",
+      "modalSmoothTrackConfirmLabel": "OK",
+      "modalSmoothTrackCancelLabel": "Cancel",
+      "modalSmoothTrackCorrection": "Correction Level",
+      "modalAddRandomNoiseTitle": "Add Random Noise",
+      "modalAddRandomNoiseConfirmLabel": "OK",
+      "modalAddRandomNoiseCancelLabel": "Cancel",
+      "modalAddRandomNoiseCorrection": "Noise Level",
 
       // Error Messages
       "errorMsgTimeElmMissingGPX": "No time element for the point index ${i} in the gpx file.",
@@ -210,6 +218,14 @@ const i18nMsg = (function(lang) {
       "modalStartOverConfirmLabel": "OK",
       "modalStartOverCancelLabel": "キャンセル",
       "modalExportErrorTitle": "エクスポート エラー",
+      "modalSmoothTrackTitle": "ギザギザの平滑化",
+      "modalSmoothTrackConfirmLabel": "OK",
+      "modalSmoothTrackCancelLabel": "キャンセル",
+      "modalSmoothTrackCorrection": "補正レベル",
+      "modalAddRandomNoiseTitle": "ランダムノイズの追加",
+      "modalAddRandomNoiseConfirmLabel": "OK",
+      "modalAddRandomNoiseCancelLabel": "キャンセル",
+      "modalAddRandomNoiseCorrection": "ノイズ レベル",
 
       // Error Messages
       "errorMsgTimeElmMissingGPX": "GPXファイル中のポイントのtime要素がありません。 (インデックス ${i})",

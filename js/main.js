@@ -151,7 +151,7 @@ const GpxTrailEditor = {
     const confirmButtonElm = modalDialogElm.querySelector('.btn-confirm');
 
     modalTitleElm.textContent = titleText;
-    modalBodyElm.textContent = bodyContent;
+    modalBodyElm.innerHTML = bodyContent;
     confirmButtonElm.textContent = confirmLabel;
     cancelButtonElm.textContent = cancelLabel;
 
@@ -169,13 +169,13 @@ const GpxTrailEditor = {
     newConfirmButtonElm.classList.add('btn-' + type);
 
     // When the OK button is clicked
-   newConfirmButtonElm.addEventListener('click', () => {
-    if (onConfirm) {
-      onConfirm();
-    }
-    const modalInstance = bootstrap.Modal.getInstance(modalDialogElm);
-    modalInstance.hide(); 
-});
+    newConfirmButtonElm.addEventListener('click', () => {
+      if (onConfirm) {
+        onConfirm();
+      }
+      const modalInstance = bootstrap.Modal.getInstance(modalDialogElm);
+      modalInstance.hide(); 
+    });
 
     const modaiDialog = new bootstrap.Modal(modalDialogElm);
     modaiDialog.show();
@@ -1448,53 +1448,83 @@ const GpxTrailEditor = {
     
   },
 
-  smoothTrack: async function() {
+  onSmoothTrackClicked: function() {
+
+    const bodyContent = `
+      <label for="smoothnessRange" class="form-label">${i18nMsg.modalSmoothTrackCorrection} (1 - 5)</label>
+      <input type="range" class="form-range" min="1" max="5" step="1" id="smoothnessRange" value="2">
+      <div id="smoothnessValue" class="text-center mt-2">2</div>
+    `;
+
+    GpxTrailEditor.showQuestionDialog(
+      i18nMsg.modalSmoothTrackTitle,
+      bodyContent,
+      i18nMsg.modalSmoothTrackConfirmLabel,
+      i18nMsg.modalSmoothTrackCancelLabel,
+      'primary',
+      async () => {
+        // スライダーの値を0.1〜0.5の範囲に変換
+        const smoothnessLevel = parseInt(document.getElementById('smoothnessRange').value) * 0.1;
+        await GpxTrailEditor.smoothTrack(smoothnessLevel);
+      }
+    );
+
+    const modalDialogElm = document.getElementById('modal-cancel-confirm');
+    modalDialogElm.querySelector('#smoothnessRange').addEventListener('input', (event) => {
+      const smoothnessDisplay = modalDialogElm.querySelector('#smoothnessValue');
+      const smoothnessLevel = parseInt(event.target.value);
+      smoothnessDisplay.textContent = smoothnessLevel;
+    });
+  },
+
+  smoothTrack: async function(smoothnessLevel) {
     for (let i = 1; i < GpxTrailEditor.points.length - 1; i++) {
       const prev = GpxTrailEditor.points[i - 1];
       const current = GpxTrailEditor.points[i];
       const next = GpxTrailEditor.points[i + 1];
 
-      // Calculate the angle B in A-B-C
+      // A-B-C間の角度を計算
       const angleABC = GpxTrailEditor.calculateAngle(prev, current, next);
 
-      // 角度が180度未満なら凸と判断して補正を行う
+      // 角度が180度未満なら補正を行う
       if (angleABC < 180) {
-          // AとCの中間点に向けてBを移動させる
-          const midLat = (prev.latitude + next.latitude) / 2;
-          const midLng = (prev.longitude + next.longitude) / 2;
-          // 平滑化のための移動量（例：0.2で調整）
-          current.latitude = current.latitude * 0.8 + midLat * 0.2;
-          current.longitude = current.longitude * 0.8 + midLng * 0.2;
+        const midLat = (prev.latitude + next.latitude) / 2;
+        const midLng = (prev.longitude + next.longitude) / 2;
+
+        // 指定された調整量に基づいて移動
+        current.latitude = current.latitude * (1 - smoothnessLevel) + midLat * smoothnessLevel;
+        current.longitude = current.longitude * (1 - smoothnessLevel) + midLng * smoothnessLevel;
       }
 
+      // 国土地理院APIから新しい標高を取得
       let newElevation;
       try {
-        newElevation = await GpxTrailEditor.latLngToEle(current.latitude, current.longitude);
+          newElevation = await GpxTrailEditor.latLngToEle(current.latitude, current.longitude);
       } catch (error) {
-        console.error('Failed to fetch elevation:', error);
-        newElevation = null;
+          console.error('Failed to fetch elevation:', error);
+          newElevation = null;
       }
       
       GpxTrailEditor.points[i].elevation = newElevation;
+
       // 更新後の座標と標高をテーブルに反映
-      GpxTrailEditor.updateTableRow(i,{"lat": current.latitude, "lng": current.longitude},newElevation);
+      GpxTrailEditor.updateTableRow(i, { "lat": current.latitude, "lng": current.longitude }, newElevation);
+
       // 更新後の座標をマーカーに適用
       GpxTrailEditor.markers[i].setLatLng([current.latitude, current.longitude]);
     }
-  
-    GpxTrailEditor.updateMarkersAndPolylines();
 
+    GpxTrailEditor.updateMarkersAndPolylines();
   },
 
-  // 3点間の角度を計算する関数
   calculateAngle: function(pointA, pointB, pointC) {
     const ab = {
-        x: pointB.latitude - pointA.latitude,
-        y: pointB.longitude - pointA.longitude
+      x: pointB.latitude - pointA.latitude,
+      y: pointB.longitude - pointA.longitude
     };
     const bc = {
-        x: pointC.latitude - pointB.latitude,
-        y: pointC.longitude - pointB.longitude
+      x: pointC.latitude - pointB.latitude,
+      y: pointC.longitude - pointB.longitude
     };
 
     // 内積とベクトルの大きさを使って角度を計算
@@ -1505,6 +1535,87 @@ const GpxTrailEditor = {
     const cosTheta = dotProduct / (magnitudeAB * magnitudeBC);
     const angle = Math.acos(cosTheta) * (180 / Math.PI);  // 角度に変換
     return angle;
+  },
+
+  onAddRandomNoiseClicked: function() {
+    const bodyContent = `
+      <label for="noise-level" class="form-label">${i18nMsg.modalAddRandomNoiseCorrection} (1 - 6)</label>
+      <input type="range" class="form-range" min="1" max="6" step="1" id="noise-level" value="3">
+      <div id="noise-level-value" class="text-center mt-2">3</div>
+    `;
+  
+    GpxTrailEditor.showQuestionDialog(
+      i18nMsg.modalAddRandomNoiseTitle,
+      bodyContent,
+      i18nMsg.modalAddRandomNoiseConfirmLabel,
+      i18nMsg.modalAddRandomNoiseCancelLabel,
+      'primary',
+      async () => {
+        const noiseLevel = parseInt(document.getElementById('noise-level').value, 10);
+        await GpxTrailEditor.addRandomNoise(noiseLevel);
+      }
+    );
+  
+    const modalDialogElm = document.getElementById('modal-cancel-confirm');
+    modalDialogElm.querySelector('#noise-level').addEventListener('input', (event) => {
+      const valueDisplay = modalDialogElm.querySelector('#noise-level-value');
+      valueDisplay.textContent = event.target.value;
+    });
+  },
+
+  addRandomNoise: async function(noiseLevel) {
+    // ノイズレベルに基づき小数点以下の桁数を指定
+    const scales = {
+        1: Math.pow(10, -8),  // 小数点第8位
+        2: Math.pow(10, -7),  // 小数点第7位
+        3: Math.pow(10, -6),  // 小数点第6位
+        4: Math.pow(10, -5),  // 小数点第5位
+        5: Math.pow(10, -4),  // 小数点第4位
+        6: Math.pow(10, -3)   // 小数点第3位
+    };
+    const scale = scales[noiseLevel] || Math.pow(10, -6);
+
+    // ノイズレベル6で倍率を0.5に設定
+    const multiplyingFactors = {
+      1: 1,
+      2: 1,
+      3: 1,
+      4: 1,
+      5: 1,
+      6: 0.5 // 0.5倍に調整
+    };
+    const mf = multiplyingFactors[noiseLevel] || 1;
+  
+    for (let i = 0; i < GpxTrailEditor.points.length; i++) {
+      const point = GpxTrailEditor.points[i];
+  
+      // ランダムなノイズを計算
+      const noiseLat = (Math.random() - 0.5) * 2 * scale * mf;
+      const noiseLng = (Math.random() - 0.5) * 2 * scale * mf;
+  
+      // ノイズを適用
+      point.latitude += noiseLat;
+      point.longitude += noiseLng;
+  
+      // 国土地理院APIを使って新しい標高を取得
+      let newElevation;
+      try {
+          newElevation = await GpxTrailEditor.latLngToEle(point.latitude, point.longitude);
+      } catch (error) {
+          console.error('Failed to fetch elevation:', error);
+          newElevation = null;
+      }
+      point.elevation = newElevation;
+      GpxTrailEditor.updateTableRow(i, { "lat": point.latitude, "lng": point.longitude }, newElevation);
+  
+      // マーカーの位置とテーブル表示を更新
+      if (GpxTrailEditor.markers[i]) {
+          GpxTrailEditor.markers[i].setLatLng([point.latitude, point.longitude]);
+      }
+    }
+  
+    // ポリラインの再描画
+    GpxTrailEditor.updateMarkersAndPolylines();
   },
 
   showAlert: function(type,message) {
@@ -2685,12 +2796,15 @@ const GpxTrailEditor = {
         'clear-all': GpxTrailEditor.clearLatitudeAll,
         'clear-checked': GpxTrailEditor.clearLatitudeChecked,
         'clear-unchecked': GpxTrailEditor.clearLatitudeUnchecked,
-        'smooth-track': GpxTrailEditor.smoothTrack,
+        'smooth-track': GpxTrailEditor.onSmoothTrackClicked,
+        'add-random-noise': GpxTrailEditor.onAddRandomNoiseClicked,
       },
       longitude: {
         'clear-all': GpxTrailEditor.clearLongitudeAll,
         'clear-checked': GpxTrailEditor.clearLongitudeChecked,
         'clear-unchecked': GpxTrailEditor.clearLongitudeUnchecked,
+        'smooth-track': GpxTrailEditor.onSmoothTrackClicked,
+        'add-random-noise': GpxTrailEditor.onAddRandomNoiseClicked,
       },
       elevation: {
         'replace-checked': GpxTrailEditor.replaceElevationChecked,
