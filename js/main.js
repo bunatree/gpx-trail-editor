@@ -2938,6 +2938,16 @@ const GpxTrailEditor = {
     GpxTrailEditor.setI18nInnerText('#data-table th.latitude .op-clear-latitude a.dropdown-item .label', i18nMsg.menuClearCheckedLatitudeLabel);
     GpxTrailEditor.setI18nTitle('#data-table th.longitude .op-clear-longitude a.dropdown-item', i18nMsg.menuClearCheckedLongitudeTitle);
     GpxTrailEditor.setI18nInnerText('#data-table th.longitude .op-clear-longitude a.dropdown-item .label', i18nMsg.menuClearCheckedLongitudeLabel);
+
+    GpxTrailEditor.setI18nTitle('#data-table th.latitude .op-smooth-track a.dropdown-item', i18nMsg.menuSmoothTrackTitle);
+    GpxTrailEditor.setI18nInnerText('#data-table th.latitude .op-smooth-track a.dropdown-item .label', i18nMsg.menuSmoothTrackLabel);
+    GpxTrailEditor.setI18nTitle('#data-table th.longitude .op-smooth-track a.dropdown-item', i18nMsg.menuSmoothTrackTitle);
+    GpxTrailEditor.setI18nInnerText('#data-table th.longitude .op-smooth-track a.dropdown-item .label', i18nMsg.menuSmoothTrackLabel);
+    
+    GpxTrailEditor.setI18nTitle('#data-table th.latitude .op-add-random-noise a.dropdown-item', i18nMsg.menuAddRandomNoiseTitle);
+    GpxTrailEditor.setI18nInnerText('#data-table th.latitude .op-add-random-noise a.dropdown-item .label', i18nMsg.menuAddRandomNoiseLabel);
+    GpxTrailEditor.setI18nTitle('#data-table th.longitude .op-add-random-noise a.dropdown-item', i18nMsg.menuAddRandomNoiseTitle);
+    GpxTrailEditor.setI18nInnerText('#data-table th.longitude .op-add-random-noise a.dropdown-item .label', i18nMsg.menuAddRandomNoiseLabel);
     
     GpxTrailEditor.setI18nTitle('#data-table th.elevation .op-clear-elevation a.dropdown-item', i18nMsg.menuClearCheckedElevationTitle);
     GpxTrailEditor.setI18nInnerText('#data-table th.elevation .op-clear-elevation a.dropdown-item .label', i18nMsg.menuClearCheckedElevationLabel);

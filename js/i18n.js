@@ -86,6 +86,10 @@ const i18nMsg = (function(lang) {
       "menuClearCheckedElevationLabel": "Clear Selected Elevation",
       "menuUpdateCheckedElevationTitle": "Update the selected row's elevation (GSI)",
       "menuUpdateCheckedElevationLabel": "Update Selected Elevation",
+      "menuSmoothTrackTitle": "Smooth Track",
+      "menuSmoothTrackLabel": "Adjusts the coordinates of each point to reduce zigzags in the track.",
+      "menuAddRandomNoiseTitle": "Add Random Noise",
+      "menuAddRandomNoiseLabel": "Adds random noise at each point to increase the zigzag of the track",
 
       // Modal Dialog
       "modalStartOverTitle": "Confirm",
@@ -211,6 +215,10 @@ const i18nMsg = (function(lang) {
       "menuClearCheckedElevationLabel": "選択された標高を消去",
       "menuUpdateCheckedElevationTitle": "チェックされた行の標高を国土地理院の標高に置き換えます。",
       "menuUpdateCheckedElevationLabel": "国土地理院の標高で更新",
+      "menuSmoothTrackTitle": "各ポイントの座標を調整し、軌跡のジグザグを少なくします。",
+      "menuSmoothTrackLabel": "軌跡のジグザグを平滑化",
+      "menuAddRandomNoiseTitle": "各ポイントにランダムなノイズを加え、軌跡のジグザグを大きくします。",
+      "menuAddRandomNoiseLabel": "軌跡のジグザグを強調",
 
       // Modal Dialog
       "modalStartOverTitle": "破棄の確認",
