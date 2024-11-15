@@ -2251,14 +2251,57 @@ const GpxTrailEditor = {
 
   deletePointChecked: function() {
     const checkedInputs = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:checked');
+    const deleteIndices = [];
     if (checkedInputs.length > 0) {
       checkedInputs.forEach(checkbox => {
         const row = checkbox.closest('tr');
-        const rowIndex = Array.from(row.parentNode.children).indexOf(row); // 行のインデックス取得
-        GpxTrailEditor.deleteThisMarker(rowIndex);
+        const rowIndex = Array.from(row.parentNode.children).indexOf(row);
+        deleteIndices.push(rowIndex);
       });
     }
+    GpxTrailEditor.deleteMultiMarkers(deleteIndices);
     GpxTrailEditor.clearAlert();
+  },
+
+  onThinOutPointsClicked: function() {
+    const bodyContent = `
+        <label for="thinOutRange" class="form-label">ポイントを残す間隔 (2 - 6)</label>
+        <input type="range" class="form-range" min="2" max="6" step="1" id="thinOutRange" value="2">
+        <div id="thinOutValue" class="text-center mt-2">2</div>
+        <div class="alert alert-info">
+          <p>選択した間隔でポイントが残り、その間にあるポイントは削除されます。</p>
+          <p>例えば、「2」を選択すると、2個ごとにポイントが残され、間のポイントが削除されます。</p>
+        </div>
+    `;
+
+    GpxTrailEditor.showQuestionDialog(
+        "ポイントの間引き",
+        bodyContent,
+        "OK",
+        "キャンセル",
+        'primary',
+        async () => {
+          const interval = parseInt(document.getElementById('thinOutRange').value, 10);
+          await GpxTrailEditor.thinOutPoints(interval);
+        }
+    );
+
+    const modalDialogElm = document.getElementById('modal-cancel-confirm');
+    modalDialogElm.querySelector('#thinOutRange').addEventListener('input', (event) => {
+        const thinOutDisplay = modalDialogElm.querySelector('#thinOutValue');
+        thinOutDisplay.textContent = event.target.value;
+    });
+  },
+
+  thinOutPoints: async function(interval) {
+    // 最初と最後のポイントは残すため、削除対象インデックスを配列に保持
+    const deleteIndices = [];
+    for (let i = 1; i < GpxTrailEditor.points.length - 1; i++) {
+      if (i % interval !== 0) {
+        deleteIndices.push(i);
+      }
+    }
+    GpxTrailEditor.deleteMultiMarkers(deleteIndices);
   },
 
   reverseRoute: function() {
@@ -2615,6 +2658,50 @@ const GpxTrailEditor = {
 
     // Update the events and balloons for the markers after the target marker.
     for (let i = index; i < GpxTrailEditor.markers.length; i++) {
+      const marker = GpxTrailEditor.markers[i];
+      GpxTrailEditor.bindMarkerEvents(marker,i,[marker._latlng.lat,marker._latlng.lng],GpxTrailEditor.points[i].datetime);
+    }
+
+  },
+
+  deleteMultiMarkers: function(deleteIndices) {
+
+    for (let i = deleteIndices.length - 1; i >= 0; i--) {
+      const index = deleteIndices[i]; // index to be deleted
+
+      // Remove the target point from GpxTrailEditor.points.
+      GpxTrailEditor.points.splice(index, 1);
+
+      // Remove the table rows.
+      const rows = document.querySelectorAll('#data-table tbody tr');
+      const targetRow = rows[index];
+      if (targetRow) {
+        targetRow.remove();
+      }
+
+      // Remove the marker from the layer group.
+      GpxTrailEditor.layerGroup.removeLayer(GpxTrailEditor.markers[index]);
+
+      // Remove the marker from the array GpxTrailEditor.markers.
+      GpxTrailEditor.markers.splice(index, 1);
+    }
+
+    // Reset all the point index values.
+    GpxTrailEditor.resetPointIndices();
+
+    GpxTrailEditor.resetTableRowIndices();
+
+    // Update markers and polylines.
+    GpxTrailEditor.updateMarkersAndPolylines();
+
+    // Update the icon of the first marker to "S" if it exists,
+    // and update the last marker icon to "G" if it exists.
+    if (GpxTrailEditor.markers.length > 0) {
+      GpxTrailEditor.setStartLastMarkers();
+    }
+
+    // Update the events and balloons for the markers.
+    for (let i = 0; i < GpxTrailEditor.markers.length; i++) {
       const marker = GpxTrailEditor.markers[i];
       GpxTrailEditor.bindMarkerEvents(marker,i,[marker._latlng.lat,marker._latlng.lng],GpxTrailEditor.points[i].datetime);
     }
