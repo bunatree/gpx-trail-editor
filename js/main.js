@@ -2249,6 +2249,18 @@ const GpxTrailEditor = {
 
   },
 
+  deletePointChecked: function() {
+    const checkedInputs = document.querySelectorAll('#data-table tbody tr input[type="checkbox"]:checked');
+    if (checkedInputs.length > 0) {
+      checkedInputs.forEach(checkbox => {
+        const row = checkbox.closest('tr');
+        const rowIndex = Array.from(row.parentNode.children).indexOf(row); // 行のインデックス取得
+        GpxTrailEditor.deleteThisMarker(rowIndex);
+      });
+    }
+    GpxTrailEditor.clearAlert();
+  },
+
   reverseRoute: function() {
 
     GpxTrailEditor.reverseTableRows();
@@ -2778,6 +2790,8 @@ const GpxTrailEditor = {
     const operationMap = {
       idx: {
         "reverse": GpxTrailEditor.reverseRoute,
+        "delete-checked": GpxTrailEditor.deletePointChecked,
+        "thin-out":GpxTrailEditor.onThinOutPointsClicked,
       },
       check: {
         "turn-on": GpxTrailEditor.turnOnCheckboxAll,
