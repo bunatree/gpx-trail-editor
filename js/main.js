@@ -180,6 +180,16 @@ const GpxTrailEditor = {
     const modaiDialog = new bootstrap.Modal(modalDialogElm);
     modaiDialog.show();
 
+    // モーダルが表示された後にツールチップを初期化
+    modalDialogElm.addEventListener('shown.bs.modal', () => {
+      setTimeout(() => {
+        const tooltipTriggerList = [].slice.call(modalDialogElm.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+      }, 0);
+    });
+
   },
 
   initMap: function() {
@@ -2265,13 +2275,13 @@ const GpxTrailEditor = {
 
   onThinOutPointsClicked: function() {
     const bodyContent = `
-        <label for="thinOutRange" class="form-label">ポイントを残す間隔 (2 - 6)</label>
+        <label for="thinOutRange" class="form-label">
+          ポイントを残す間隔 (2 - 6)
+          <i class="bi bi-question-circle-fill" data-bs-toggle="tooltip" data-bs-placement="right" 
+         title="指定した間隔でポイントが残り、間にあるポイントは削除されます。例: '2'を選択すると、2個ごとにポイントが残り、間のポイントが削除されます。"></i>
+        </label>
         <input type="range" class="form-range" min="2" max="6" step="1" id="thinOutRange" value="2">
         <div id="thinOutValue" class="text-center mt-2">2</div>
-        <div class="alert alert-info">
-          <p>選択した間隔でポイントが残り、その間にあるポイントは削除されます。</p>
-          <p>例えば、「2」を選択すると、2個ごとにポイントが残され、間のポイントが削除されます。</p>
-        </div>
     `;
 
     GpxTrailEditor.showQuestionDialog(
