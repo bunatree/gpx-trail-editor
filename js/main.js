@@ -230,114 +230,99 @@ const GpxTrailEditor = {
     }
   },
 
-  onGPXFileDropped: function(files) {
+  onGPXFileDropped: async function(files) {
+
+    GpxTrailEditor.showLoadingMessage();
+
     const file = files[0];
 
     if (file && file.name.endsWith('.gpx')) {
-      const reader = new FileReader();
-    
-      // Reading file completed
-      reader.onload = function(event) {
-        const gpxContent = event.target.result;
-        
-        // Check if the file is in the XML format.
-        try {
-          const parser = new DOMParser();
-          const xmlDoc = parser.parseFromString(gpxContent, "application/xml");
-
-          // Check an existence of a parsererror tag.
-          if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
-            GpxTrailEditor.showOkDialog(i18nMsg.error,i18nMsg.errorNotGpxFormat,'OK','warning');
-            GpxTrailEditor.resetDropZone();
-            return;
-          }
-
-          // Check an existence of a gpx tag.
-          if (xmlDoc.getElementsByTagName('gpx').length === 0) {
-            GpxTrailEditor.showOkDialog(i18nMsg.error,i18nMsg.errorNotValidGpxFormat,'OK','warning');
-            GpxTrailEditor.resetDropZone();
-            return;
-          }
-
-          // Clear the alert if the file is valid.
-          GpxTrailEditor.clearAlert();
-
-          // Handle the dropped file...
-          GpxTrailEditor.parseAndDisplayGPX(file);
-          GpxTrailEditor.hideDropZoneForm();
-          GpxTrailEditor.showNavbarButtons();
-            
-        } catch (error) {
-          GpxTrailEditor.showOkDialog(i18nMsg.error,i18nMsg.errorInvalidXmlFormat,'OK','warning');
-          GpxTrailEditor.resetDropZone();
-        }
-      };
-
-      // Read the file as a text file.
-      reader.readAsText(file);
-
+      try {
+        // Wait for asynchronous processing to complete...
+        await GpxTrailEditor.parseAndDisplayGPX(file);
+        // When parsing is complete, hide the drop zone and display the table.
+        GpxTrailEditor.hideDropZoneContainer();
+        GpxTrailEditor.showTableContainer();
+        GpxTrailEditor.showNavbarButtons();
+      } catch (error) {
+        alert(error);
+        GpxTrailEditor.showOkDialog(i18nMsg.error, i18nMsg.errorGpxAnalysisFailed, 'OK', 'warning');
+        GpxTrailEditor.resetDropZone();
+      }
     } else {
-      GpxTrailEditor.showOkDialog(i18nMsg.error,i18nMsg.errorDropFileExtensionGPX,'OK','warning');
+      GpxTrailEditor.showOkDialog(i18nMsg.error, i18nMsg.errorDropFileExtensionGPX, 'OK', 'warning');
       GpxTrailEditor.resetDropZone();
     }
   },
 
-  resetDropZone: function() {
-    const dropZoneContainer = document.getElementById('drop-zone');
-    dropZoneContainer.classList.remove('drag-over');
-    dropZoneContainer.dataset.wasFileDropped = 'false';
+  showLoadingMessage: function() {
     const dropZoneForm = document.getElementById('drop-zone-form');
-    dropZoneForm.classList.remove('bg-primary','text-light');
+    const dropNoteElm = dropZoneForm.querySelector('.drop-note');
+    const dropSubNoteElm = dropZoneForm.querySelector('.drop-subnote');
+    dropNoteElm.innerHTML = i18nMsg.dropNoteLoading;
+    dropSubNoteElm.innerHTML = i18nMsg.dropSubNoteLoading;
+  },
+
+  resetDropZone: function() {
+    const dropZoneForm = document.getElementById('drop-zone-form');
+    dropZoneForm.classList.remove('drag-over');
+    dropZoneForm.dataset.wasFileDropped = 'false';
+    const dropZonePrompt = document.getElementById('drop-zone-prompt');
+    dropZonePrompt.classList.remove('bg-primary','text-light');
+    const dropNoteElm = dropZoneForm.querySelector('.drop-note');
+    const dropSubNoteElm = dropZoneForm.querySelector('.drop-subnote');
+    dropNoteElm.innerHTML = i18nMsg.dropNoteDefault;
+    dropSubNoteElm.innerHTML = i18nMsg.dropSubNoteDefault;
   },
 
   // Analyze the uploaded GPX file, display the data in a table,
   // and draw markers and polylines on the map.
   parseAndDisplayGPX: function(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
 
-    const reader = new FileReader();
+        reader.onload = function (e) {
+            try {
+                const gpxData = e.target.result;
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(gpxData, 'text/xml');
 
-    reader.onload = function (e) {
-      try {
-        const gpxData = e.target.result;
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(gpxData, 'text/xml');
+                if (!GpxTrailEditor.isValidGPX(xmlDoc)) {
+                    console.error('Oops! Invalid GPX file.');
+                    reject('Invalid GPX file'); // エラーを返して処理を中断
+                    return;
+                }
 
-        if (!GpxTrailEditor.isValidGPX(xmlDoc)) {
-          // Handle invalid GPX file
-          console.error('Oops! Invalid GPX file.');
-          // You can show a user-friendly error message here
-          return;
-        }
+                GpxTrailEditor.logName = GpxTrailEditor.getTrackTitle(xmlDoc);
+                const logNameForm = document.getElementById('log-name-form');
+                logNameForm.classList.remove('d-none');
+                const logNameInputElm = document.getElementById('log-name-input');
+                logNameInputElm.value = GpxTrailEditor.logName;
 
-        GpxTrailEditor.logName = GpxTrailEditor.getTrackTitle(xmlDoc);
-        const logNameForm = document.getElementById('log-name-form');
-        logNameForm.classList.remove('d-none');
-        const logNameInputElm = document.getElementById('log-name-input');
-        logNameInputElm.value = GpxTrailEditor.logName;
+                GpxTrailEditor.parseDataTable(xmlDoc);
+                GpxTrailEditor.showDataTable();
 
-        
+                // Create points data from the table display contents and
+                // assign it to points in the namespace GpxTrailEditor.
+                const points = GpxTrailEditor.convertTableToPoints();
+                GpxTrailEditor.points = points;
 
-        GpxTrailEditor.parseDataTable(xmlDoc);
-        GpxTrailEditor.showDataTable();
+                GpxTrailEditor.parseSummary(points);
+                GpxTrailEditor.showSummary();
 
-        // Create points data from the table display contents and
-        // assign it to points in the namespace GpxTrailEditor.
-        const points =  GpxTrailEditor.convertTableToPoints();
-        GpxTrailEditor.points = points;
+                // Drap markers and polylines on the map and
+                // put the data into GpxTrailEditor.markers etc.
+                GpxTrailEditor.parseMapGPX(xmlDoc);
 
-        GpxTrailEditor.parseSummary(points);
-        GpxTrailEditor.showSummary();
+                resolve(); // すべての処理が完了したら resolve() を呼ぶ
+            } catch (error) {
+                console.error('Error parsing GPX:', error);
+                reject(error); // エラーをキャッチして reject() する
+            }
+        };
 
-        // Drap markers and polylines on the map and
-        // put the data into GpxTrailEditor.markers etc.
-        GpxTrailEditor.parseMapGPX(xmlDoc);
-
-      } catch (error) {
-        console.error('Error parsing GPX:', error); // Handle parsing error
-      }
-    };
-
-    reader.readAsText(file);
+        reader.readAsText(file);
+    });
   },
 
   // Check if the GPX file is valid
@@ -1256,8 +1241,12 @@ const GpxTrailEditor = {
     document.getElementById('op-btn-toolbar').classList.remove('d-none');
   },
 
-  hideDropZoneForm: function() {
-    document.getElementById('drop-zone-form').classList.add('d-none');
+  showTableContainer: function() {
+    document.getElementById('table-container').classList.remove('d-none');
+  },
+
+  hideDropZoneContainer: function() {
+    document.getElementById('drop-zone-container').classList.add('d-none');
   },
 
   onEraserIconClicked: function(icon) {
@@ -1882,38 +1871,38 @@ const GpxTrailEditor = {
     // Input element to select a gpx file
     const fileInput = document.getElementById('upload-gpx-fileinput');
     // Div element as the drop-zone container
-    const dropZoneContainer = document.getElementById('drop-zone');
+    const dropZoneContainer = document.getElementById('drop-zone-container');
     const dropZoneForm = document.getElementById('drop-zone-form');
+    const dropZonePrompt = document.getElementById('drop-zone-prompt');
 
-    dropZoneContainer.addEventListener('click', e => {
-      if (dropZoneContainer.dataset.wasFileDropped === 'false') {
+    dropZonePrompt.addEventListener('click', e => {
+      if (dropZonePrompt.dataset.wasFileDropped === 'false') {
         fileInput.click();
       }
     });
 
-    dropZoneContainer.addEventListener('dragover', e => {
+    dropZoneForm.addEventListener('dragover', e => {
       e.preventDefault();
-      dropZoneContainer.classList.add('drag-over');
+      dropZoneForm.classList.add('drag-over');
     });
     
-    dropZoneForm.addEventListener('dragover', e => {
-      dropZoneForm.classList.add('bg-primary','text-light');
+    dropZonePrompt.addEventListener('dragover', e => {
+      dropZonePrompt.classList.add('bg-primary','text-light');
     });
 
     ['dragleave','dragend'].forEach(type => {
-      dropZoneContainer.addEventListener(type, e => {
-        dropZoneContainer.classList.remove('drag-over');
-        
-      });
       dropZoneForm.addEventListener(type, e => {
-        dropZoneForm.classList.remove('bg-primary','text-light');
+        dropZoneForm.classList.remove('drag-over');
+      });
+      dropZonePrompt.addEventListener(type, e => {
+        dropZonePrompt.classList.remove('bg-primary','text-light');
       });
     });
 
-    dropZoneContainer.addEventListener('drop', e => {
+    dropZonePrompt.addEventListener('drop', e => {
       e.preventDefault();
-      if (e.dataTransfer.files.length > 0 && dropZoneContainer.dataset.wasFileDropped === 'false') {
-        dropZoneContainer.dataset.wasFileDropped = 'true';
+      if (e.dataTransfer.files.length > 0 && dropZoneForm.dataset.wasFileDropped === 'false') {
+        dropZoneForm.dataset.wasFileDropped = 'true';
         // Safari fires the change event when the dropped file(s) is
         // applied to the file input. It leads to a bug that the custom
         // control shows up duplicatedly.
@@ -1929,9 +1918,9 @@ const GpxTrailEditor = {
     });
 
     const dropNoteElm = dropZoneForm.querySelector('.drop-note');
-    dropNoteElm.innerHTML = i18nMsg.dropNote;
+    dropNoteElm.innerHTML = i18nMsg.dropNoteDefault;
     const dropSubNoteElm = dropZoneForm.querySelector('.drop-subnote');
-    dropSubNoteElm.innerHTML = i18nMsg.dropSubNote;
+    dropSubNoteElm.innerHTML = i18nMsg.dropSubNoteDefault;
 
   },
 

@@ -55,29 +55,10 @@
   <main>
 
     <div class="container-fluid">
-      <h1 class="d-none">GPX Trail Editor</h1>
 
-      <h2 class="d-none">Upload GPX</h2>
-
-      <div id="drop-zone" data-was-file-dropped="false">
-
-        <div id="drop-zone-form" class="mt-3 mb-3 p-3 border rounded d-flex flex-column justify-content-center">
-          <i class="bi bi-cloud-upload text-center fs-3"></i>
-          <div class="drop-zone-prompt text-center">
-            <div class="drop-note h5">GPX ファイルをドラッグ&ドロップ</div>
-            <div class="drop-subnote">またはクリックしてアップロード</div>
-          </div>
-          <input type="file" id="upload-gpx-fileinput" class="d-none" accept=".gpx" area-hidden="true">
-        </div>
-
-        <div id="log-name-form" class="input-group mt-3 mb-3 d-none">
-          <label class="input-group-text" for="log-name-input">タイトル</label>
-          <input id="log-name-input" type="text" class="form-control" />
-        </div>
-
-        <h2 class="d-none">Map</h2>
-        <div id="map" class="border rounded mt-3 mb-3"></div>
-
+      <div id="log-name-form" class="input-group mt-3 mb-3 d-none">
+        <label class="input-group-text" for="log-name-input">タイトル</label>
+        <input id="log-name-input" type="text" class="form-control" />
       </div>
 
       <div id="op-btn-toolbar" class="d-flex justify-content-center mt-3 mb-3 d-none" role="toolbar">
@@ -104,169 +85,195 @@
       </div>
 
       <div id="alert-container">
-        <!-- Inner alert-box element will be rendered by JS. -->
+        <!-- JS will render the inner alert element here. -->
       </div>
 
-      <div id="table-container">
-        <table id="data-table" class="table table-sm table-borderless table-hover w-100 d-none">
-          <thead>
-            <tr>
-              <th class="idx align-middle">
-                <div class="th-content d-flex justify-content-center align-items-center">
-                  <span class="label d-none">Index</span>
-                  <div class="op dropdown fw-light">
-                    <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="bi bi-three-dots-vertical"></i>
-                    </button>
-                    <ul class="dropdown-menu shadow-sm">
-                      <li class="op-reverse-route"><a class="dropdown-item" data-target-name="idx" data-op-name="reverse" title="スタートからゴールへのルート順序を反転させます。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-arrow-down-up me-2"></i>
-                        <span class="label">ルート反転</span>
-                      </a></li>
-                      <li><hr class="dropdown-divider"></li>
-                      <li class="op-delete-checked"><a class="dropdown-item" data-target-name="idx" data-op-name="delete-checked" title="選択された行とポイントを削除します。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-x-square me-2"></i>
-                        <span class="label">選択された行を削除</span>
-                      </a></li>
-                      <li class="op-thin-out"><a class="dropdown-item" data-target-name="idx" data-op-name="thin-out" title="指定された間隔で行とポイントを間引きます。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-dash-circle-dotted me-2"></i>
-                        <span class="label">間引く</span>
-                      </a></li>
-                    </ul>
-                  </div>
-                </div>
-              </th>
-              <th class="chkbox align-middle text-center">
-                <div class="th-content d-flex justify-content-center align-items-center">
-                  <span class="label d-none">チェック</span>
-                  <div class="op dropdown fw-light">
-                    <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="bi bi-three-dots-vertical"></i>
-                    </button>
-                    <ul class="dropdown-menu shadow-sm">
-                      <li class="op-check-all"><a class="dropdown-item" data-target-name="check" data-op-name="turn-on" title="すべての行のチェックボックスをONにします。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-check-square me-2"></i>
-                        <span class="label">チェック ON</span>
-                      </a></li>
-                      <li class="op-uncheck-all"><a class="dropdown-item" data-target-name="check" data-op-name="turn-off" title="すべての行のチェックボックスをOFFにします。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-square me-2"></i>
-                        <span class="label">チェック OFF</span>
-                      </a></li>
-                      <li class="op-check-reverse"><a class="dropdown-item" data-target-name="check" data-op-name="toggle" title="チェックボックスの状態を反転させます。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-arrow-repeat me-2"></i>
-                        <span class="label">チェック反転</span>
-                      </a></li>
-                    </ul>
-                  </div>
-                </div>
-              </th>
-              <th class="datetime">
-                <div class="th-content d-flex justify-content-between align-items-center">
-                  <span class="label">日時</span>
-                  <div class="op dropdown fw-light">
-                    <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="bi bi-three-dots-vertical"></i>
-                    </button>
-                    <ul class="dropdown-menu shadow-sm">
-                      <li class="op-clear-datetime"><a class="dropdown-item" data-target-name="datetime" data-op-name="clear-checked" title="チェックされた行の日時を消去します。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-eraser-fill me-2"></i>
-                        <span class="label">選択された日時を消去</span>
-                      </a></li>
-                      <li><hr class="dropdown-divider"></li>
-                      <li class="op-shift-datetime"><a class="dropdown-item" data-target-name="datetime" data-op-name="shift-datetime" title="すべてのポイントの通過日時を指定された秒数だけずらします。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-arrow-down-square me-2"></i>
-                        <span class="label">すべての日時をずらす</span>
-                      </a></li>
-                      <li class="op-reverse-datetime"><a class="dropdown-item" data-target-name="datetime" data-op-name="reverse-datetime" title="すべてのポイントの通過日時の順序を逆にします。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-arrow-down-up me-2"></i>
-                        <span class="label">すべての日時を反転</span>
-                      </a></li>
-                      <li class="op-fill-datetime"><a class="dropdown-item" data-target-name="datetime" data-op-name="fill-datetime" title="入力されていない日時を、その前後のポイントの通過日時と標高から計算し、補間します。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-clock-history me-2"></i>
-                        <span class="label">未入力の日時を補間</span>
-                      </a></li>
-                    </ul>
-                  </div>
-                </div>
-              </th>
-              <th class="latitude">
-                <div class="th-content d-flex justify-content-between align-items-center">
-                  <span class="label">緯度</span>
-                  <div class="op dropdown fw-light">
-                    <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="bi bi-three-dots-vertical"></i>
-                    </button>
-                    <ul class="dropdown-menu shadow-sm">
-                      <li class="op-clear-latitude"><a class="dropdown-item" data-target-name="latitude" data-op-name="clear-checked" title="チェックされた行の緯度を消去します。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-eraser-fill me-2"></i>
-                        <span class="label">選択された緯度を消去</span>
-                      </a></li>
-                      <li><hr class="dropdown-divider"></li>
-                      <li class="op-smooth-track"><a class="dropdown-item" data-target-name="latitude" data-op-name="smooth-track" title="各ポイントの座標を調整し、軌跡のジグザグを少なくします。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-arrows-collapse-vertical me-2"></i>
-                        <span class="label">軌跡のジグザグを平滑化</span>
-                      </a></li>
-                      <li class="op-add-random-noise"><a class="dropdown-item" data-target-name="latitude" data-op-name="add-random-noise" title="各ポイントにランダムなノイズを加え、意図的に軌跡のジグザグを大きくします。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-arrows-expand-vertical me-2"></i>
-                        <span class="label">軌跡のジグザグを強調</span>
-                      </a></li>
-                    </ul>
-                  </div>
-                </div>
-              </th>
-              <th class="longitude">
-                <div class="th-content d-flex justify-content-between align-items-center">
-                  <span class="label">経度</span>
-                  <div class="op dropdown fw-light">
-                    <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="bi bi-three-dots-vertical"></i>
-                    </button>
-                    <ul class="dropdown-menu shadow-sm">
-                      <li class="op-clear-longitude"><a class="dropdown-item" data-target-name="longitude" data-op-name="clear-checked" title="チェックされた行の経度を消去します。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-eraser-fill me-2"></i>
-                        <span class="label">選択された経度を消去</span>
-                      </a></li>
-                      <li><hr class="dropdown-divider"></li>
-                      <li class="op-smooth-track"><a class="dropdown-item" data-target-name="latitude" data-op-name="smooth-track" title="各ポイントの座標を調整し、軌跡のジグザグを少なくします。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-arrows-collapse-vertical me-2"></i>
-                        <span class="label">軌跡のジグザグを平滑化</span>
-                      </a></li>
-                      <li class="op-add-random-noise"><a class="dropdown-item" data-target-name="latitude" data-op-name="add-random-noise" title="各ポイントにランダムなノイズを加え、意図的に軌跡のジグザグを大きくします。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-arrows-expand-vertical me-2"></i>
-                        <span class="label">軌跡のジグザグを強調</span>
-                      </a></li>
-                    </ul>
-                  </div>
-                </div>
-              </th>
-              <th class="elevation">
-                <div class="th-content d-flex justify-content-between align-items-center">
-                  <span class="label">標高</span>
-                  <div class="op dropdown fw-light">
-                    <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="bi bi-three-dots-vertical"></i>
-                    </button>
-                    <ul class="dropdown-menu shadow-sm">
-                      <li class="op-clear-elevation"><a class="dropdown-item" data-target-name="elevation" data-op-name="clear-checked" title="チェックされた行の標高を消去します。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-eraser-fill me-2"></i>
-                        <span class="label">選択された標高を消去</span>
-                      </a></li>
-                      <li class="op-update-elevation"><a class="dropdown-item" data-target-name="elevation" data-op-name="replace-checked" title="チェックされた行の標高を国土地理院の標高に置き換えます。" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <i class="bi bi-pin-map-fill me-2"></i>
-                        <span class="label">国土地理院の標高で更新</span>
-                      </a></li>
-                    </ul>
-                  </div>
-                </div>
-              </th>
-              <!-- <th class="apply"></th> -->
-            </tr>
-          </thead>
-          <tbody class="table-group-divider">
-            <!-- The table rows will be inserted by JS. -->
-          </tbody>
-        </table>
-      </div><!-- #table-container -->
+      <!-- Contains the map and the table. -->
+      <div class="layout-wrapper">
+
+        <div id="primary-container">
+          <div id="map-container">
+            <div id="map" class="border rounded"></div>
+          </div>
+        </div>
+
+        <div id="secondary-container">
+
+          <div id="drop-zone-container">
+            <div id="drop-zone-form" class="d-flex flex-column justify-content-center" data-was-file-dropped="false">
+              <h1 class="h2 fw-bold text-center mb-4">GPX Trail Editor</h1>
+              <div id="drop-zone-prompt" class="text-center p-4 mb-4 border rounded">
+                <i class="bi bi-cloud-upload text-center fs-3"></i>
+                <div class="drop-note h5">GPX ファイルをドラッグ&ドロップ</div>
+                <div class="drop-subnote">またはクリックしてアップロード</div>
+              </div>
+              <input type="file" id="upload-gpx-fileinput" class="d-none" accept=".gpx" area-hidden="true">
+            </div>
+          </div>
+  
+          <div id="table-container" class="d-none">
+            <table id="data-table" class="table table-sm table-borderless table-hover w-100 d-none">
+              <thead>
+                <tr>
+                  <th class="idx align-middle">
+                    <div class="th-content d-flex justify-content-center align-items-center">
+                      <span class="label d-none">Index</span>
+                      <div class="op dropdown fw-light">
+                        <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu shadow-sm">
+                          <li class="op-reverse-route"><a class="dropdown-item" data-target-name="idx" data-op-name="reverse" title="スタートからゴールへのルート順序を反転させます。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-arrow-down-up me-2"></i>
+                            <span class="label">ルート反転</span>
+                          </a></li>
+                          <li><hr class="dropdown-divider"></li>
+                          <li class="op-delete-checked"><a class="dropdown-item" data-target-name="idx" data-op-name="delete-checked" title="選択された行とポイントを削除します。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-x-square me-2"></i>
+                            <span class="label">選択された行を削除</span>
+                          </a></li>
+                          <li class="op-thin-out"><a class="dropdown-item" data-target-name="idx" data-op-name="thin-out" title="指定された間隔で行とポイントを間引きます。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-dash-circle-dotted me-2"></i>
+                            <span class="label">間引く</span>
+                          </a></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </th>
+                  <th class="chkbox align-middle text-center">
+                    <div class="th-content d-flex justify-content-center align-items-center">
+                      <span class="label d-none">チェック</span>
+                      <div class="op dropdown fw-light">
+                        <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu shadow-sm">
+                          <li class="op-check-all"><a class="dropdown-item" data-target-name="check" data-op-name="turn-on" title="すべての行のチェックボックスをONにします。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-check-square me-2"></i>
+                            <span class="label">チェック ON</span>
+                          </a></li>
+                          <li class="op-uncheck-all"><a class="dropdown-item" data-target-name="check" data-op-name="turn-off" title="すべての行のチェックボックスをOFFにします。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-square me-2"></i>
+                            <span class="label">チェック OFF</span>
+                          </a></li>
+                          <li class="op-check-reverse"><a class="dropdown-item" data-target-name="check" data-op-name="toggle" title="チェックボックスの状態を反転させます。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-arrow-repeat me-2"></i>
+                            <span class="label">チェック反転</span>
+                          </a></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </th>
+                  <th class="datetime">
+                    <div class="th-content d-flex justify-content-between align-items-center">
+                      <span class="label">日時</span>
+                      <div class="op dropdown fw-light">
+                        <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu shadow-sm">
+                          <li class="op-clear-datetime"><a class="dropdown-item" data-target-name="datetime" data-op-name="clear-checked" title="チェックされた行の日時を消去します。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-eraser-fill me-2"></i>
+                            <span class="label">選択された日時を消去</span>
+                          </a></li>
+                          <li><hr class="dropdown-divider"></li>
+                          <li class="op-shift-datetime"><a class="dropdown-item" data-target-name="datetime" data-op-name="shift-datetime" title="すべてのポイントの通過日時を指定された秒数だけずらします。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-arrow-down-square me-2"></i>
+                            <span class="label">すべての日時をずらす</span>
+                          </a></li>
+                          <li class="op-reverse-datetime"><a class="dropdown-item" data-target-name="datetime" data-op-name="reverse-datetime" title="すべてのポイントの通過日時の順序を逆にします。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-arrow-down-up me-2"></i>
+                            <span class="label">すべての日時を反転</span>
+                          </a></li>
+                          <li class="op-fill-datetime"><a class="dropdown-item" data-target-name="datetime" data-op-name="fill-datetime" title="入力されていない日時を、その前後のポイントの通過日時と標高から計算し、補間します。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-clock-history me-2"></i>
+                            <span class="label">未入力の日時を補間</span>
+                          </a></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </th>
+                  <th class="latitude">
+                    <div class="th-content d-flex justify-content-between align-items-center">
+                      <span class="label">緯度</span>
+                      <div class="op dropdown fw-light">
+                        <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu shadow-sm">
+                          <li class="op-clear-latitude"><a class="dropdown-item" data-target-name="latitude" data-op-name="clear-checked" title="チェックされた行の緯度を消去します。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-eraser-fill me-2"></i>
+                            <span class="label">選択された緯度を消去</span>
+                          </a></li>
+                          <li><hr class="dropdown-divider"></li>
+                          <li class="op-smooth-track"><a class="dropdown-item" data-target-name="latitude" data-op-name="smooth-track" title="各ポイントの座標を調整し、軌跡のジグザグを少なくします。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-arrows-collapse-vertical me-2"></i>
+                            <span class="label">軌跡のジグザグを平滑化</span>
+                          </a></li>
+                          <li class="op-add-random-noise"><a class="dropdown-item" data-target-name="latitude" data-op-name="add-random-noise" title="各ポイントにランダムなノイズを加え、意図的に軌跡のジグザグを大きくします。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-arrows-expand-vertical me-2"></i>
+                            <span class="label">軌跡のジグザグを強調</span>
+                          </a></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </th>
+                  <th class="longitude">
+                    <div class="th-content d-flex justify-content-between align-items-center">
+                      <span class="label">経度</span>
+                      <div class="op dropdown fw-light">
+                        <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu shadow-sm">
+                          <li class="op-clear-longitude"><a class="dropdown-item" data-target-name="longitude" data-op-name="clear-checked" title="チェックされた行の経度を消去します。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-eraser-fill me-2"></i>
+                            <span class="label">選択された経度を消去</span>
+                          </a></li>
+                          <li><hr class="dropdown-divider"></li>
+                          <li class="op-smooth-track"><a class="dropdown-item" data-target-name="latitude" data-op-name="smooth-track" title="各ポイントの座標を調整し、軌跡のジグザグを少なくします。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-arrows-collapse-vertical me-2"></i>
+                            <span class="label">軌跡のジグザグを平滑化</span>
+                          </a></li>
+                          <li class="op-add-random-noise"><a class="dropdown-item" data-target-name="latitude" data-op-name="add-random-noise" title="各ポイントにランダムなノイズを加え、意図的に軌跡のジグザグを大きくします。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-arrows-expand-vertical me-2"></i>
+                            <span class="label">軌跡のジグザグを強調</span>
+                          </a></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </th>
+                  <th class="elevation">
+                    <div class="th-content d-flex justify-content-between align-items-center">
+                      <span class="label">標高</span>
+                      <div class="op dropdown fw-light">
+                        <button class="btn btn-sm btn-light rounded-circle dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <ul class="dropdown-menu shadow-sm">
+                          <li class="op-clear-elevation"><a class="dropdown-item" data-target-name="elevation" data-op-name="clear-checked" title="チェックされた行の標高を消去します。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-eraser-fill me-2"></i>
+                            <span class="label">選択された標高を消去</span>
+                          </a></li>
+                          <li class="op-update-elevation"><a class="dropdown-item" data-target-name="elevation" data-op-name="replace-checked" title="チェックされた行の標高を国土地理院の標高に置き換えます。" data-bs-toggle="tooltip" data-bs-placement="right">
+                            <i class="bi bi-pin-map-fill me-2"></i>
+                            <span class="label">国土地理院の標高で更新</span>
+                          </a></li>
+                        </ul>
+                      </div>
+                    </div>
+                  </th>
+                  <!-- <th class="apply"></th> -->
+                </tr>
+              </thead>
+              <tbody class="table-group-divider">
+                <!-- The table rows will be inserted by JS. -->
+              </tbody>
+            </table>
+          </div><!-- #table-container -->
+        </div>
+
+      </div><!-- .layout-wrapper -->
 
       <h2 class="d-none">GPX Details</h2>
       <div id="data-summary" class="d-flex justify-content-center align-items-center mt-3 mb-3 p-3 rounded d-none">
@@ -321,7 +328,7 @@
 
   </main>
 
-  <footer class="bg-dark text-light mt-3 p-4 text-center">
+  <footer class="bg-dark text-light d-none text-center">
     <h2 class="h5">GPX Trail Editor</h2>
     <div class="mb-2">Copyright (c) 2024 Bunatree Melonpan</div>
     <div class="mb-2"><a href="https://github.com/bunatree/gpx-trail-editor">GitHub</a> <a href="https://github.com/bunatree/gpx-trail-editor?tab=MIT-1-ov-file#readme">MIT License</a></div>

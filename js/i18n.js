@@ -27,8 +27,10 @@ const i18nMsg = (function(lang) {
       "linkGitHubTitle": "Open GitHub repository",
 
       // Drop Zone
-      "dropNote": "Drop a GPX file",
-      "dropSubNote": "or click here to upload.",
+      "dropNoteDefault": "Drop a GPX file",
+      "dropSubNoteDefault": "or click here to upload.",
+      "dropNoteLoading": "Loading...",
+      "dropSubNoteLoading": "Analyzing the dropped GPX file...",
 
       // Button Toolbar
       "labelReverseButton": "Reverse",
@@ -110,6 +112,7 @@ const i18nMsg = (function(lang) {
       "errorMsgTimeElmMissingGPX": "No time element for the point index ${i} in the gpx file.",
       "errorMsgDateTimeInvalidGPX": "The datetime info for the point index ${i} is invalid in the gpx file.",
       "errorDropFileExtensionGPX": "Drop a file with a .gpx extension.",
+      "errorGpxAnalysisFailed": "GPX analysis failed.",
       "errorNotGpxFormat": "The file is not in GPX format.",
       "errorNotValidGpxFormat": "The file is not in valid GPX format.",
       "errorInvalidXmlFormat": "An error occurred while parsing XML. The file is in an invalid format.",
@@ -156,8 +159,10 @@ const i18nMsg = (function(lang) {
       "linkGitHubTitle": "GitHub レポジトリを開く",
 
       // Drop Zone
-      "dropNote": "GPX ファイルをドラッグ&ドロップ",
-      "dropSubNote": "またはクリックしてアップロード",
+      "dropNoteDefault": "GPX ファイルをドラッグ&ドロップ",
+      "dropSubNoteDefault": "またはクリックしてアップロード",
+      "dropNoteLoading": "Loading..",
+      "dropSubNoteLoading": "ドロップされたGPXファイルを解析しています...",
 
       // Button Toolbar
       "labelReverseButton": "ルート反転",
@@ -239,6 +244,7 @@ const i18nMsg = (function(lang) {
       "errorMsgTimeElmMissingGPX": "GPXファイル中のポイントのtime要素がありません。 (インデックス ${i})",
       "errorMsgDateTimeInvalidGPX": "GPXファイル中のポイントの日時情報が正しくありません。 (インデックス ${i})",
       "errorDropFileExtensionGPX": "拡張子が .gpx のファイルをドロップしてください。",
+      "errorGpxAnalysisFailed": "GPX の解析に失敗しました。",
       "errorNotGpxFormat": "ファイルは GPX フォーマットではありません。",
       "errorNotValidGpxFormat": "ファイルは正しい GPX フォーマットではありません。",
       "errorInvalidXmlFormat": "XML の解析中にエラーが発生しました。ファイルのフォーマットが不正です。",

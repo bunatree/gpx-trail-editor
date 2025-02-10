@@ -1,4 +1,6 @@
-$mapHeight: 480px;
+$mSize: calc(var(--bs-gutter-x) * .5); // margin 0.75rem
+$pSize: calc(var(--bs-gutter-x) * .5); // padding 0.75rem
+$gSize: calc(var(--bs-gutter-x) * .5); // gap 0.75rem
 // $bgTablePrimaryRow: #cfe2ff; // Borrowed from Bootstrap5. (table-primary)
 $fontFamily: 'M PLUS 1p', sans-serif;
 
@@ -34,6 +36,27 @@ body {
   }
 }
 
+.layout-wrapper {
+  display: flex;
+  flex-direction: row;
+  height: calc(100vh - 60px - 1.5rem); // navbarの高さと上下マージンを引く
+  margin-top: $mSize;
+  // margin-bottom: $mSize;
+  gap: $gSize;
+  &> * {
+    flex: 1 1 50%;
+    height: 100%;
+  }
+
+  #map-container, #drop-zone-container, #table-container {
+    height: 100%;
+  }
+}
+
+#drop-zone-form {
+  height: 100%;
+}
+
 #data-summary {
   display: flex;
   justify-content: center;
@@ -43,14 +66,23 @@ body {
   }
 }
 
+
+
+#table-container {
+  overflow-x: auto; /* 横スクロール対応 */
+}
+
 #data-table {
+
+  border-collapse: collapse;
 
   thead {
     th {
       .th-content {
-        // display: flex;
-        // justify-content: space-between;
-        // align-items: center;
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
         .dropdown-toggle:after {
           display: none;
         }
@@ -73,7 +105,7 @@ body {
 
 #map {
 
-  height: $mapHeight;
+  height: 100%;
 
   .leaflet-top.leaflet-left {
     .leaflet-control-zoom {
@@ -160,4 +192,22 @@ footer {
   bottom: 20px;
   right: 20px;
   display: none;
+}
+
+/* 画面幅 800px 未満のレイアウト */
+@media (max-width: 799px) {
+
+  .layout-wrapper {
+    flex-direction: column; /* 縦並び */
+    height: auto; /* 高さの制約を解除 */
+  }
+
+  #map-container {
+    height: 50vh; /* 画面の半分を地図に */
+  }
+
+  #table-container {
+    height: 50vh; /* 画面の半分を一覧表に */
+    overflow: auto;
+  }
 }
