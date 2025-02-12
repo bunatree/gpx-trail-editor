@@ -38,21 +38,22 @@
   <header>
     <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
       <div class="container-fluid">
+
         <div class="navbar-brand fw-bold" href="#">
           <img src="images/icon192.png"class="app-icon me-2" alt="App Icon" class="me-2">
           GPX Trail Editor
         </div>
 
-        <div id="log-name-form" class="d-none">
-          <input id="log-name-input" type="text" class="form-control form-control-sm" />
-        </div>
-
-        <div class="justify-content-end" id="nav-buttons">
+        <div class="d-flex align-items-center gap-1" id="nav-buttons">
+          <div id="log-name-form" class="d-none">
+            <input id="log-name-input" type="text" class="form-control form-control-sm" />
+          </div>
           <button id="btn-nav-create-new" class="btn btn-sm btn-light d-none"><span class="label">New</span></button>
           <button id="btn-nav-export" class="btn btn-sm btn-primary d-none"><i class="bi bi-download me-2"></i><span class="label">Export</span></button>
           <button id="btn-nav-start-over" class="btn btn-sm btn-danger d-none"><!-- i class="bi bi-trash me-2"></! --><i class="bi bi-arrow-clockwise me-2"></i><span class="label">Start Over</span></button>
           <a id="goto-github-repo" class="btn btn-link" href="https://github.com/bunatree/gpx-trail-editor" title="GitHub レポジトリを開く"><i class="bi bi-github"></i></a>
         </div>
+
       </div>
     </nav>
   </header>
