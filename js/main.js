@@ -294,10 +294,7 @@ const GpxTrailEditor = {
                 }
 
                 GpxTrailEditor.logName = GpxTrailEditor.getTrackTitle(xmlDoc);
-                const logNameForm = document.getElementById('log-name-form');
-                logNameForm.classList.remove('d-none');
-                const logNameInputElm = document.getElementById('log-name-input');
-                logNameInputElm.value = GpxTrailEditor.logName;
+                GpxTrailEditor.showLogNameForm(GpxTrailEditor.logName);
 
                 GpxTrailEditor.parseDataTable(xmlDoc);
                 GpxTrailEditor.showDataTable();
@@ -344,6 +341,13 @@ const GpxTrailEditor = {
   showDataTable: function() {
     const tableElm = document.getElementById('data-table');
     tableElm.classList.remove('d-none');
+  },
+
+  showLogNameForm: function(logName) {
+    const formElm = document.getElementById('log-name-form');
+    formElm.classList.remove('d-none');
+    const logNameInputElm = document.getElementById('log-name-input');
+    logNameInputElm.value = logName;
   },
 
   parseDataTable: function(xmlDoc) {
