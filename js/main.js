@@ -1961,6 +1961,8 @@ const GpxTrailEditor = {
     nameInput.addEventListener('input', () => {
       GpxTrailEditor.logName = nameInput.value;
     });
+    nameInput.title = i18nMsg.titleLogNameInput;
+    nameInput.placeholder = i18nMsg.placeholderLogNameInput;
   },
 
   fillEmptyDateTime: function() {
@@ -3098,6 +3100,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // i18nMsg = GpxTrailEditor.setI18nData(i18nMsgData,lang);
   GpxTrailEditor.initMap();
+  GpxTrailEditor.setupDropZone();
   GpxTrailEditor.setupDropZone();
   GpxTrailEditor.setupLogNameForm();
   GpxTrailEditor.setupTable();

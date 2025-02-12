@@ -25,6 +25,8 @@ const i18nMsg = (function(lang) {
       "btnExportLabel": "Export",
       "btnStartOverLabel": "Start Over",
       "linkGitHubTitle": "Open GitHub repository",
+      "titleLogNameInput": "Log Name",
+      "placeholderLogNameInput": "Log Name",
 
       // Drop Zone
       "dropNoteDefault": "Drop a GPX file",
@@ -161,6 +163,8 @@ const i18nMsg = (function(lang) {
       "btnExportLabel": "エクスポート",
       "btnStartOverLabel": "最初から",
       "linkGitHubTitle": "GitHub レポジトリを開く",
+      "titleLogNameInput": "ログ名",
+      "placeholderLogNameInput": "ログ名",
 
       // Drop Zone
       "dropNoteDefault": "GPX ファイルをドラッグ&ドロップ",
