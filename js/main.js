@@ -294,7 +294,8 @@ const GpxTrailEditor = {
                 }
 
                 GpxTrailEditor.logName = GpxTrailEditor.getTrackTitle(xmlDoc);
-                GpxTrailEditor.showLogNameForm(GpxTrailEditor.logName);
+                // GpxTrailEditor.showLogNameForm(GpxTrailEditor.logName);
+                GpxTrailEditor.showLogNameNav(GpxTrailEditor.logName)
 
                 GpxTrailEditor.parseDataTable(xmlDoc);
                 GpxTrailEditor.showDataTable();
@@ -343,7 +344,16 @@ const GpxTrailEditor = {
     tableElm.classList.remove('d-none');
   },
 
+  // Not in use now.
+  // Use showLogNameNav instead to show the log name in the top navigation.
   showLogNameForm: function(logName) {
+    const formElm = document.getElementById('log-name-form');
+    formElm.classList.remove('d-none');
+    const logNameInputElm = document.getElementById('log-name-input');
+    logNameInputElm.value = logName;
+  },
+  
+  showLogNameNav: function(logName) {
     const formElm = document.getElementById('log-name-form');
     formElm.classList.remove('d-none');
     const logNameInputElm = document.getElementById('log-name-input');
