@@ -111,7 +111,13 @@ const GpxTrailEditor = {
     );
   },
 
-  showOkDialog: function(titleText,bodyContent,buttonLabel,type) {
+  showSettingDialog: function() {
+    const modalDialogElm = document.getElementById('modal-settings');
+    const modalDialog = new bootstrap.Modal(modalDialogElm);
+    modalDialog.show();
+  },
+
+  showOkDialog: function(titleText,bodyContent,buttonLabel,type,callback) {
 
     const modalDialogElm = document.getElementById('modal-ok');
     const modalHeaderElm = modalDialogElm.querySelector('.modal-header');
@@ -120,7 +126,7 @@ const GpxTrailEditor = {
     const confirmButtonElm = modalDialogElm.querySelector('.btn-confirm');
 
     modalTitleElm.textContent = titleText;
-    modalBodyElm.textContent = bodyContent;
+    modalBodyElm.innerHTML = bodyContent;
     confirmButtonElm.textContent = buttonLabel;
 
     confirmButtonElm.classList.remove('btn-primary','btn-info','btn-warning','btn-danger');
@@ -134,6 +140,10 @@ const GpxTrailEditor = {
 
     const modalDialog = new bootstrap.Modal(modalDialogElm);
     modalDialog.show();
+
+    if (callback) {
+      callback();
+    }
 
   },
 
@@ -3004,6 +3014,20 @@ const GpxTrailEditor = {
     return new Promise(function (resolve, reject) { resolve(); });
   },
 
+  setupSettingDialog: function() {
+    const modalDialogElm = document.getElementById('modal-settings');
+    const primaryContainer = document.getElementById('primary-container');
+    modalDialogElm.querySelectorAll('input[type="radio"]').forEach(inputElm => {
+      inputElm.addEventListener('click', function (event) {
+        if (event.target.value === 'primary') {
+          primaryContainer.style.order = 0;
+        } else if (event.target.value === 'secondary') {
+          primaryContainer.style.order = 1;
+        }
+      });
+    });
+  },
+
   applyI18n: function() {
 
     // Top Nav
@@ -3107,6 +3131,7 @@ document.addEventListener('DOMContentLoaded', function () {
   GpxTrailEditor.setupSummary();
   GpxTrailEditor.setupOpButtonToolbar();
   GpxTrailEditor.setupOpButtonNavbar();
+  GpxTrailEditor.setupSettingDialog();
   GpxTrailEditor.applyI18n();
 
   // Initialize the tooltips

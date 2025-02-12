@@ -22,7 +22,7 @@ body {
       width: 32px;
     }
   }
-  #goto-github-repo {
+  #goto-github-repo, #settings {
     color: rgba(255,255,255,1);
     &:hover, &:active {
       color: rgba(255,255,255,0.8);

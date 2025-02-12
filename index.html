@@ -51,7 +51,8 @@
           <button id="btn-nav-create-new" class="btn btn-sm btn-light d-none"><span class="label">New</span></button>
           <button id="btn-nav-export" class="btn btn-sm btn-primary d-none"><i class="bi bi-download me-2"></i><span class="label">Export</span></button>
           <button id="btn-nav-start-over" class="btn btn-sm btn-danger d-none"><!-- i class="bi bi-trash me-2"></! --><i class="bi bi-arrow-clockwise me-2"></i><span class="label">Start Over</span></button>
-          <a id="goto-github-repo" class="btn btn-link" href="https://github.com/bunatree/gpx-trail-editor" title="GitHub レポジトリを開く"><i class="bi bi-github"></i></a>
+          <a id="settings" class="btn-btn-link ps-2 pe-1" href="javascript:void(0)" onclick="GpxTrailEditor.showSettingDialog()" title="設定"><i class="bi bi-gear-fill"></i></a>
+          <a id="goto-github-repo" class="btn btn-link ps-1 pe-2" href="https://github.com/bunatree/gpx-trail-editor" title="GitHub レポジトリを開く"><i class="bi bi-github"></i></a>
         </div>
 
       </div>
@@ -331,6 +332,42 @@
   <button type="button" id="scroll-to-top" class="btn btn-secondary btn-floating btn-lg opacity-75" onclick="GpxTrailEditor.scrollToTop()">
     <i class="bi bi-arrow-up"></i>
   </button>
+
+  <!-- Modal Setting Dialog -->
+  <div class="modal fade" id="modal-settings" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header text-bg-info">
+          <h5 class="modal-title">Settings</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <fieldset class="row mb-3">
+              <legend class="col-form-label col-sm-4 pt-0">Map Layout</legend>
+              <div class="col-sm-8">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="maplayout" id="map-layout-primary" value="primary" checked>
+                  <label class="form-check-label" for="map-layout-primary">
+                    Primary (Left)
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="maplayout" id="map-layout-secondary" value="secondary">
+                  <label class="form-check-label" for="map-layout-secondary">
+                    Secondary (Right)
+                  </label>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary btn-confirm btn-info" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal Dialog with an OK button -->
   <div class="modal fade" id="modal-ok" tabindex="-1" aria-hidden="true">
