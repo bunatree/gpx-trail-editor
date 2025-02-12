@@ -59,6 +59,10 @@ const i18nMsg = (function(lang) {
       "titleMoveToMarker": "Move to the row #${i}",
 
       // Summary
+      "titleGPXTime": "GPX Time",
+      "titleDistance": "Total Distance",
+      "titleAscent": "Total Ascent",
+      "titleDescent": "Total Descent",
       "titleRecalcButton": "Re-calculate the summary.",
 
       // Data Table
@@ -191,7 +195,11 @@ const i18nMsg = (function(lang) {
       "titleMoveToMarker": "行番号 ${i} へ移動",
 
       // Summary
-      "titleRecalcButton": "再計算を行います。",
+      "titleGPXTime": "GPX時間",
+      "titleDistance": "距離",
+      "titleAscent": "登り",
+      "titleDescent": "下り",
+      "titleRecalcButton": "再計算",
 
       // Data Table
       "menuEraseTitle": "左の欄の日時を消去します。",

@@ -92,6 +92,42 @@
       <div class="layout-wrapper">
 
         <div id="primary-container">
+
+          <div id="data-summary" class="d-flex justify-content-center align-items-center rounded d-none">
+            <div id="total-gpx-time" data-bs-toggle="tooltip">
+              <div class="desc text-center">
+                <i class="bi bi-stopwatch"></i>
+                <span class="value"></span>
+              </div>
+            </div>
+
+            <div id="total-distance" data-bs-toggle="tooltip">
+              <div class="desc text-center">
+                <i class="bi bi-person-walking"></i>
+                <span class="value"></span>
+                <span class="unit">m</span>
+              </div>
+            </div>
+            <div id="total-ascent" data-bs-toggle="tooltip">
+              <div class="desc text-center">
+                <i class="bi bi-arrow-up-right"></i>
+                <span class="value"></span>
+                <span class="unit">m</span>
+              </div>
+            </div>
+            <div id="total-descent" data-bs-toggle="tooltip">
+              <div class="desc text-center">
+                <i class="bi bi-arrow-down-right"></i>
+                <span class="value"></span>
+                <span class="unit">m</span>
+              </div>
+            </div>
+            <div id="recalc">
+              <button id="button-recalc" class="btn btn-sm btn-light" data-bs-toggle="tooltip">
+                <i class="bi bi-arrow-clockwise"></i>
+              </button>
+            </div>
+          </div>
           <div id="map-container">
             <div id="map" class="border rounded"></div>
           </div>
@@ -274,55 +310,6 @@
         </div>
 
       </div><!-- .layout-wrapper -->
-
-      <h2 class="d-none">GPX Details</h2>
-      <div id="data-summary" class="d-flex justify-content-center align-items-center mt-3 mb-3 p-3 rounded d-none">
-        <div id="total-gpx-time">
-          <h3 class="label fw-light text-center text-secondary">
-            <i class="bi bi-stopwatch"></i>
-            <span>GPS Time</span>
-          </h3>
-          <div class="desc text-center">
-            <span class="value h2"></span>
-          </div>
-        </div>
-
-        <div id="total-dist">
-          <h3 class="label fw-light text-center text-secondary">
-            <i class="bi bi-person-walking"></i>
-            <span>Distance</span>
-            </h3>
-          <div class="desc text-center">
-            <span class="value h2"></span>
-            <span class="unit">m</span>
-          </div>
-        </div>
-        <div id="total-ascent">
-          <h3 class="label fw-light text-center text-secondary">
-            <i class="bi bi-arrow-up-right"></i>
-            <span>Up</span>
-          </h3>
-          <div class="desc text-center">
-            <span class="value h2"></span>
-            <span class="unit">m</span>
-          </div>
-        </div>
-        <div id="total-descent">
-          <h3 class="label fw-light text-center text-secondary">
-            <i class="bi bi-arrow-down-right"></i>
-            <span>Down</span>
-          </h3>
-          <div class="desc text-center">
-            <span class="value h2"></span>
-            <span class="unit">m</span>
-          </div>
-        </div>
-        <div id="recalc">
-          <button id="button-recalc" class="btn btn-sm btn-light" title="再計算する" data-bs-toggle="tooltip">
-            <i class="bi bi-arrow-clockwise"></i>
-          </button>
-        </div>
-      </div>
 
     </div><!-- .container-fluid -->
 

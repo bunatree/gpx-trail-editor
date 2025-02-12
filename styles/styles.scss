@@ -58,11 +58,12 @@ body {
 }
 
 #data-summary {
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-  h3.label {
-    font-size: 1rem;
+  gap: 1.5rem;
+  // Adjust the margins so that the text appears at the same height\
+  // as the table header text on the right side
+  margin: 0.25rem 0 0.5rem 0;
+  .value {
+    font-weight: bold; // Use font-weight instead of fw-bold
   }
 }
 

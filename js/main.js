@@ -532,6 +532,10 @@ const GpxTrailEditor = {
     recalcButton.addEventListener('click', () => {
       GpxTrailEditor.parseSummary(GpxTrailEditor.points);
     });
+    GpxTrailEditor.setI18nTitle('#total-gpx-time', i18nMsg.titleGPXTime);
+    GpxTrailEditor.setI18nTitle('#total-distance', i18nMsg.titleDistance);
+    GpxTrailEditor.setI18nTitle('#total-ascent',   i18nMsg.titleAscent);
+    GpxTrailEditor.setI18nTitle('#total-descent',  i18nMsg.titleDescent);
     GpxTrailEditor.setI18nTitle('#button-recalc', i18nMsg.titleRecalcButton);
   },
 
@@ -545,7 +549,7 @@ const GpxTrailEditor = {
     // Total Distance
     const totalDistance = GpxTrailEditor.calcDistanceTotal(points);
     const roundedDistance = Number(totalDistance.toFixed(2));
-    const spanDistElm = document.querySelector('#total-dist .value');
+    const spanDistElm = document.querySelector('#total-distance .value');
     spanDistElm.innerHTML = roundedDistance;
 
     // Total Up/Down Evelations
