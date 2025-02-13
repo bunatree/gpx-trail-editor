@@ -66,28 +66,26 @@ body {
   }
 }
 
-
 #table-container {
   height: 100%;
-  overflow-x: auto; /* 横スクロール対応 */
+  overflow-y: auto;
 }
 
 #data-table {
   border-collapse: collapse;
-  table-layout: fixed; /* 列幅を固定 */
-  thead {
 
+  thead {
     position: sticky;
     top: 0;
-    background-color: white; /* 背景色を指定（透過を防ぐ） */
+    background-color: white; // 透過防止
     z-index: 10;
 
     th {
       .th-content {
-        position: sticky;
-        top: 0;
-        background: white;
-        z-index: 10;
+        // position: sticky;
+        // top: 0;
+        // background: white;
+        // z-index: 10;
         .dropdown-toggle:after {
           display: none;
         }
@@ -95,28 +93,28 @@ body {
     }
   }
 
-  tbody {
-    display: block;
-    overflow-y: auto;
-    width: 100%;
-  }
+  // tbody {
+  //   display: block;
+  //   overflow-y: auto;
+  //   width: 100%;
+  // }
 
-  thead, tbody tr {
-    display: table;
-    width: 100%;
-    table-layout: fixed;
-  }
+  // thead, tbody tr {
+  //   display: table;
+  //   width: 100%;
+  //   table-layout: fixed;
+  // }
 
   .idx, .chkbox {
     width: 2rem;
   }
 
   .datetime {
-    width: 14.5rem;
+    // width: 14.5rem;
   }
 
   .elevation {
-    width: 6rem;
+    max-width: 6rem;
   }
 
 }

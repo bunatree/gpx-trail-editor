@@ -2634,24 +2634,18 @@ const GpxTrailEditor = {
   },
 
   scrollToTableRow: function(rowIndex) {
+    const containerElm = document.getElementById('table-container');
     const tableElm = document.getElementById('data-table');
     const tbodyElm = tableElm.querySelector('tbody');
     const trElms = tbodyElm.getElementsByTagName('tr');
-
     if (rowIndex >= 0 && rowIndex < trElms.length) {
-        const targetRow = trElms[rowIndex];
-        const tableOffsetTop = tableElm.offsetTop;
-        const rowOffsetTop = targetRow.offsetTop;
-
-        // Calculate the scroll position to the target row
-        const topMargin = 16;
-        const scrollPosition = rowOffsetTop + tableOffsetTop - topMargin;
-
-        // Scroll to the target position
-        window.scrollTo({
-          top: scrollPosition,
-          behavior: 'smooth'
-        });
+      const targetRow = trElms[rowIndex];
+      const rowOffsetTop = targetRow.offsetTop;
+      const adjustedValue = 42;
+      containerElm.scrollTo({
+        top: rowOffsetTop - adjustedValue  ,
+        behavior: 'smooth'
+      });
     }
   },
 
