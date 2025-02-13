@@ -3017,15 +3017,37 @@ const GpxTrailEditor = {
   setupSettingDialog: function() {
     const modalDialogElm = document.getElementById('modal-settings');
     const primaryContainer = document.getElementById('primary-container');
-    modalDialogElm.querySelectorAll('input[type="radio"]').forEach(inputElm => {
-      inputElm.addEventListener('click', function (event) {
-        if (event.target.value === 'primary') {
-          primaryContainer.style.order = 0;
-        } else if (event.target.value === 'secondary') {
-          primaryContainer.style.order = 1;
-        }
+    const radioButtons = modalDialogElm.querySelectorAll('input[type="radio"]');
+    const resetButton = document.getElementById('reset-settings');
+
+    // Get the setting value from the localStorage (the default is "primary")
+    const savedLayout = localStorage.getItem('layoutPosition') || 'primary';
+
+    radioButtons.forEach(inputElm => {
+      if (inputElm.value === savedLayout) {
+        inputElm.checked = true;
+        primaryContainer.style.order = (savedLayout === 'primary') ? 0 : 1;
+      }
+
+      // When the radio button is clicked...
+      inputElm.addEventListener('click', function(event) {
+        const selectedValue = event.target.value;
+        primaryContainer.style.order = (selectedValue === 'primary') ? 0 : 1;
+        localStorage.setItem('layoutPosition', selectedValue); // Save the setting value.
       });
     });
+
+    // Rest to Default
+    resetButton.addEventListener('click', function() {
+      localStorage.removeItem('layoutPosition');
+      radioButtons.forEach(inputElm => {
+        if (inputElm.value === 'primary') {
+          inputElm.checked = true;
+        }
+      });
+      primaryContainer.style.order = 0; // The default is "primary"
+    });
+
   },
 
   applyI18n: function() {
