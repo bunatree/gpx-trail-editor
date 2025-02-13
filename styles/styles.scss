@@ -210,6 +210,32 @@ footer {
   display: none;
 }
 
+#alert-container {
+  position: fixed;
+  bottom: -100px; /* 初期状態では画面外に */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1050; /* 他のコンテンツより前面に */
+  width: auto;
+  max-width: 80%;
+  text-align: center;
+  transition: bottom 0.3s ease-in-out; /* ひょこっと出るアニメーション */
+
+  #alert-box {
+    // display: inline-block;
+    // padding: 10px 20px;
+    // background-color: rgba(0, 123, 255, 0.9); /* 背景色（Bootstrapのalert-infoに近い） */
+    // color: white;
+    // border-radius: 5px;
+    // box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  #alert-box .btn-close {
+    margin-left: 10px;
+  }
+}
+
+
 /* 画面幅 800px 未満のレイアウト */
 @media (max-width: 799px) {
 

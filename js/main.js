@@ -1645,20 +1645,26 @@ const GpxTrailEditor = {
     GpxTrailEditor.updateMarkersAndPolylines();
   },
 
-  showAlert: function(type,message) {
-    const alertContainer = document.getElementById('alert-container');
-    alertContainer.innerHTML = ''; // Clear the inner content.
-    const alertBox = document.createElement('div');
-    alertBox.id = 'alert-box';
-    alertBox.classList.add('alert','alert-'+type,'alert-dismissible','fade','show');
-    const dismissButton = document.createElement('button');
-    dismissButton.classList.add('btn-close');
-    dismissButton.setAttribute('type','button');
-    dismissButton.dataset.bsDismiss = 'alert';
-    dismissButton.areaLabel = 'Close'
-    alertBox.innerHTML = message;
-    alertBox.appendChild(dismissButton);
-    alertContainer.appendChild(alertBox);
+  showAlert: function(type,message,duration = 4000) {
+    const alertContainer = document.getElementById("alert-container");
+
+    alertContainer.innerHTML = `
+      <div id="alert-box" class="alert alert-${type} alert-dismissible fade show shadow-sm">
+        ${message}
+        <button class="btn-close" type="button" data-bs-dismiss="alert"></button>
+      </div>
+    `;
+
+    alertContainer.style.bottom = "20px";
+
+    // The alert dialog keeps visible
+    // if the duration value is 0 or minus.
+    if (duration) {
+      setTimeout(() => {
+        alertContainer.style.bottom = "-100px";
+      }, duration);
+    }
+
   },
 
   clearAlert: function() {
