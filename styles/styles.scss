@@ -58,26 +58,30 @@ body {
 }
 
 #data-summary {
-  gap: 1.5rem;
   // Adjust the margins so that the text appears at the same height\
   // as the table header text on the right side
-  margin: 0.25rem 0 0.5rem 0;
+  margin-top: 0.25rem;
   .value {
     font-weight: bold; // Use font-weight instead of fw-bold
   }
 }
 
 
-
 #table-container {
+  height: 100%;
   overflow-x: auto; /* 横スクロール対応 */
 }
 
 #data-table {
-
   border-collapse: collapse;
-
+  table-layout: fixed; /* 列幅を固定 */
   thead {
+
+    position: sticky;
+    top: 0;
+    background-color: white; /* 背景色を指定（透過を防ぐ） */
+    z-index: 10;
+
     th {
       .th-content {
         position: sticky;
@@ -91,15 +95,28 @@ body {
     }
   }
 
-  // tr.clicked-marker {
-  //   background-color: $bgTablePrimaryRow;
-  // }
-  // tr.dragged-marker {
-  //   background-color: $bgTablePrimaryRow;
-  // }
+  tbody {
+    display: block;
+    overflow-y: auto;
+    width: 100%;
+  }
+
+  thead, tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .idx, .chkbox {
+    width: 2rem;
+  }
+
+  .datetime {
+    width: 14.5rem;
+  }
 
   .elevation {
-    max-width: 6rem;
+    width: 6rem;
   }
 
 }
