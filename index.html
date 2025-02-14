@@ -36,12 +36,12 @@
 <body>
 
   <header>
-    <nav class="navbar bg-dark border-bottom border-body" data-bs-theme="dark">
+    <nav class="navbar bg-dark" data-bs-theme="dark">
       <div class="container-fluid">
 
-        <div class="navbar-brand fw-bold" href="#">
+        <div class="navbar-brand fw-bold d-flex align-items-center">
           <img src="images/icon192.png"class="app-icon me-2" alt="App Icon" class="me-2">
-          GPX Trail Editor
+          <span class="title-text">GPX Trail Editor</span>
         </div>
 
         <div class="d-flex align-items-center gap-1" id="nav-buttons">
@@ -49,8 +49,8 @@
             <input id="log-name-input" type="text" class="form-control form-control-sm" />
           </div>
           <button id="btn-nav-create-new" class="btn btn-sm btn-light d-none"><span class="label">New</span></button>
-          <button id="btn-nav-export" class="btn btn-sm btn-primary d-none"><i class="bi bi-download me-2"></i><span class="label">Export</span></button>
-          <button id="btn-nav-start-over" class="btn btn-sm btn-danger d-none"><!-- i class="bi bi-trash me-2"></! --><i class="bi bi-arrow-clockwise me-2"></i><span class="label">Start Over</span></button>
+          <button id="btn-nav-export" class="btn btn-sm btn-primary d-none"><i class="bi bi-download"></i><span class="label ms-2">Export</span></button>
+          <button id="btn-nav-start-over" class="btn btn-sm btn-danger d-none"><i class="bi bi-arrow-clockwise"></i><span class="label ms-2">Start Over</span></button>
           <a id="settings" class="btn-btn-link ps-2 pe-1" href="javascript:void(0)" onclick="GpxTrailEditor.showSettingDialog()" title="設定"><i class="bi bi-gear-fill"></i></a>
           <a id="goto-github-repo" class="btn btn-link ps-1 pe-2" href="https://github.com/bunatree/gpx-trail-editor" title="GitHub レポジトリを開く"><i class="bi bi-github"></i></a>
         </div>
@@ -61,7 +61,7 @@
 
   <main>
 
-    <div class="container-fluid">
+    <div class="container-fluid h-100">
 
       <!-- <div id="log-name-form" class="input-group mt-3 mb-3 d-none">
         <label class="input-group-text" for="log-name-input">タイトル</label>
@@ -96,11 +96,11 @@
       </div>
 
       <!-- Contains the map and the table. -->
-      <div class="layout-wrapper">
+      <div class="layout-wrapper row">
 
-        <div id="primary-container" class="d-flex flex-column gap-2">
+        <div id="primary-container" class="d-flex flex-column mt-0 col-12 col-lg-6">
 
-          <div id="data-summary" class="d-flex gap-4 justify-content-center align-items-center rounded d-none">
+          <div id="data-summary" class="d-flex mt-1 gap-4 justify-content-center align-items-center rounded d-none">
             <div id="total-gpx-time" data-bs-toggle="tooltip">
               <div class="desc text-center">
                 <i class="bi bi-stopwatch"></i>
@@ -135,12 +135,12 @@
               </button>
             </div>
           </div>
-          <div id="map-container">
+          <div id="map-container" class="mt-2">
             <div id="map" class="border rounded"></div>
           </div>
         </div>
 
-        <div id="secondary-container">
+        <div id="secondary-container" class="mt-0 col-12 col-lg-6">
 
           <div id="drop-zone-container">
             <div id="drop-zone-form" class="d-flex flex-column justify-content-center" data-was-file-dropped="false">
@@ -155,7 +155,7 @@
           </div>
   
           <div id="table-container" class="d-none">
-            <table id="data-table" class="table table-sm table-borderless table-hover w-100 mb-0 d-none">
+            <table id="data-table" class="table table-sm table-borderless table-hover text-nowrap w-100 mb-0 d-none">
               <thead>
                 <tr>
                   <th class="idx align-middle">
@@ -326,7 +326,6 @@
     <h2 class="h5">GPX Trail Editor</h2>
     <div class="mb-2">Copyright (c) 2024 Bunatree Melonpan</div>
     <div class="mb-2"><a href="https://github.com/bunatree/gpx-trail-editor">GitHub</a> <a href="https://github.com/bunatree/gpx-trail-editor?tab=MIT-1-ov-file#readme">MIT License</a></div>
-    <!-- <div class="mb-2">Powered by Leaflet, Bootstrap, and more.</div> -->
   </footer>
 
   <button type="button" id="scroll-to-top" class="btn btn-secondary btn-floating btn-lg opacity-75" onclick="GpxTrailEditor.scrollToTop()">

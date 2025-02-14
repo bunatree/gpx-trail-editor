@@ -1,6 +1,5 @@
 $mSize: calc(var(--bs-gutter-x) * .5); // margin 0.75rem
-$pSize: calc(var(--bs-gutter-x) * .5); // padding 0.75rem
-$gSize: calc(var(--bs-gutter-x) * .5); // gap 0.75rem
+// $gSize: calc(var(--bs-gutter-x) * .5); // gap 0.75rem
 // $bgTablePrimaryRow: #cfe2ff; // Borrowed from Bootstrap5. (table-primary)
 $fontFamily: 'M PLUS 1p', sans-serif;
 
@@ -11,23 +10,31 @@ $baseMarkerBG: blue;
 
 body {
   font-family: $fontFamily;
-  margin: 0;
-  padding: 0;
+  height: 100vh;
+  // margin: 0;
+  // padding: 0;
 }
 
-.navbar {
-  .navbar-brand {
-    img {
-      height: 32px;
-      width: 32px;
+header {
+  nav.navbar {
+    .navbar-brand {
+      img {
+        height: 32px;
+        width: 32px;
+      }
+    }
+    #goto-github-repo, #settings {
+      color: rgba(255,255,255,1);
+      &:hover, &:active {
+        color: rgba(255,255,255,0.8);
+      }
     }
   }
-  #goto-github-repo, #settings {
-    color: rgba(255,255,255,1);
-    &:hover, &:active {
-      color: rgba(255,255,255,0.8);
-    }
-  }
+}
+
+main {
+  // nav height = 58px
+  height: calc(100vh - 58px);
 }
 
 #op-btn-toolbar {
@@ -37,14 +44,8 @@ body {
 }
 
 .layout-wrapper {
-  display: flex;
-  flex-direction: row;
-  height: calc(100vh - 60px - 1.5rem); // navbarの高さと上下マージンを引く
-  margin-top: $mSize;
-  // margin-bottom: $mSize;
-  gap: $gSize;
+  height: calc(100% - 0.5rem);
   &> * {
-    flex: 1 1 50%;
     height: 100%;
   }
 
@@ -58,9 +59,6 @@ body {
 }
 
 #data-summary {
-  // Adjust the margins so that the text appears at the same height\
-  // as the table header text on the right side
-  margin-top: 0.25rem;
   .value {
     font-weight: bold; // Use font-weight instead of fw-bold
   }
@@ -77,15 +75,11 @@ body {
   thead {
     position: sticky;
     top: 0;
-    background-color: white; // 透過防止
+    background-color: white;
     z-index: 10;
 
     th {
       .th-content {
-        // position: sticky;
-        // top: 0;
-        // background: white;
-        // z-index: 10;
         .dropdown-toggle:after {
           display: none;
         }
@@ -93,24 +87,8 @@ body {
     }
   }
 
-  // tbody {
-  //   display: block;
-  //   overflow-y: auto;
-  //   width: 100%;
-  // }
-
-  // thead, tbody tr {
-  //   display: table;
-  //   width: 100%;
-  //   table-layout: fixed;
-  // }
-
   .idx, .chkbox {
     width: 2rem;
-  }
-
-  .datetime {
-    // width: 14.5rem;
   }
 
   .elevation {
@@ -120,9 +98,7 @@ body {
 }
 
 #map {
-
   height: 100%;
-
   .leaflet-top.leaflet-left {
     .leaflet-control-zoom {
       display: none;
@@ -212,44 +188,41 @@ footer {
 
 #alert-container {
   position: fixed;
-  bottom: -100px; /* 初期状態では画面外に */
+  bottom: -100px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 1050; /* 他のコンテンツより前面に */
+  z-index: 1050;
   width: auto;
   max-width: 80%;
   text-align: center;
-  transition: bottom 0.3s ease-in-out; /* ひょこっと出るアニメーション */
-
-  #alert-box {
-    // display: inline-block;
-    // padding: 10px 20px;
-    // background-color: rgba(0, 123, 255, 0.9); /* 背景色（Bootstrapのalert-infoに近い） */
-    // color: white;
-    // border-radius: 5px;
-    // box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  }
-
+  transition: bottom 0.3s ease-in-out;
   #alert-box .btn-close {
     margin-left: 10px;
   }
 }
 
-
-/* 画面幅 800px 未満のレイアウト */
-@media (max-width: 799px) {
-
+@media (max-width: 991px) {
   .layout-wrapper {
-    flex-direction: column; /* 縦並び */
-    height: auto; /* 高さの制約を解除 */
+    gap: 0.5rem;
+    &> * {
+      height: calc(50vh - 29px - 0.5rem);
+    }
   }
+}
 
-  #map-container {
-    height: 50vh; /* 画面の半分を地図に */
-  }
-
-  #table-container {
-    height: 50vh; /* 画面の半分を一覧表に */
-    overflow: auto;
+@media (max-width: 767px) {
+  .navbar {
+    .navbar-brand {
+      .title-text {
+        display: none;
+      }
+    }
+    #nav-buttons {
+      button {
+        .label {
+          display: none;
+        }
+      }
+    }
   }
 }
