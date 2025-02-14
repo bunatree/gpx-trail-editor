@@ -359,6 +359,29 @@
                 </div>
               </div>
             </fieldset>
+            <fieldset class="row mb-3">
+              <legend class="col-form-label col-sm-4 pt-0">Polyline Width</legend>
+              <div class="col-sm-2 d-flex align-items-center gap-2">
+                <input type="range" class="form-range" min="1" max="3" id="main-line" oninput="this.nextElementSibling.value = this.value">
+                <output>2</output>
+              </div>
+              <div class="col-sm-6">
+                <label class="form-range-label" for="main-line">
+                  Main Lines
+                </label>
+              </div>
+            </fieldset>
+            <fieldset class="row mb-3">
+              <div class="col-sm-2 offset-sm-4 d-flex align-items-center gap-2">
+                <input type="range" class="form-range" min="0" max="2" id="border-line" oninput="this.nextElementSibling.value = this.value">
+                <output>1</output>
+              </div>
+              <div class="col-sm-5">
+                <label class="form-range-label" for="border-line">
+                  Border Line
+                </label>
+              </div>
+            </fieldset>
           </form>
         </div>
         <div class="modal-footer">

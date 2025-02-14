@@ -969,7 +969,7 @@ const GpxTrailEditor = {
 
   },
 
-  updateMarkersAndPolylines: function() {
+  updateMarkersAndPolylines: function(shouldDrawBorder = true) {
 
     // Temporarily save a layer of markers
     const markerLayers = GpxTrailEditor.layerGroup.getLayers().filter(layer => layer instanceof L.Marker);
@@ -989,16 +989,18 @@ const GpxTrailEditor = {
     GpxTrailEditor.layerGroup.clearLayers();
 
     // If all latLngs are valid, proceed to add the polylines
-    const border = L.polyline(latLngs, GpxTrailEditor.borderPolylineOptions).addTo(GpxTrailEditor.layerGroup);
+    if (shouldDrawBorder) {
+      const border = L.polyline(latLngs, GpxTrailEditor.borderPolylineOptions).addTo(GpxTrailEditor.layerGroup);
+      GpxTrailEditor.borderPolyline = border;
+    }
+
     const polyline = L.polyline(latLngs, GpxTrailEditor.normalPolylineOptions).addTo(GpxTrailEditor.layerGroup);
 
     // Re-add the saved marker layers to the layerGroup
     markerLayers.forEach(layer => GpxTrailEditor.layerGroup.addLayer(layer));
 
     // Store the polylines in the GpxTrailEditor object for future reference
-    GpxTrailEditor.borderPolyline = border;
     GpxTrailEditor.polyline = polyline;
-  
   },
 
   setupMapButtons: function() {
