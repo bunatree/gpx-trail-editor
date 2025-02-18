@@ -343,8 +343,8 @@
         <div class="modal-body">
           <form>
             <fieldset class="row mb-3">
-              <legend class="col-form-label col-sm-4 pt-0">Map Layout</legend>
-              <div class="col-sm-8">
+              <legend class="col-form-label col-sm-3 pt-0">Map Layout</legend>
+              <div class="col-sm-9">
                 <div class="form-check">
                   <input class="form-check-input" type="radio" name="maplayout" id="map-layout-primary" value="primary" checked>
                   <label class="form-check-label" for="map-layout-primary">
@@ -359,29 +359,28 @@
                 </div>
               </div>
             </fieldset>
-            <fieldset class="row mb-3">
-              <legend class="col-form-label col-sm-4 pt-0">Polyline Width</legend>
-              <div class="col-sm-2 d-flex align-items-center gap-2">
-                <input type="range" class="form-range" min="1" max="3" id="main-line" oninput="this.nextElementSibling.value = this.value">
-                <output>2</output>
+
+            <div class="row mb-3">
+              <div class="col-form-label col-sm-3 pt-0">Border</div>
+              <div class="col-sm-9">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="border-markers" checked>
+                  <label class="form-check-label" for="border-markers">
+                    Draw Border on Markers
+                  </label>
+                </div>
               </div>
-              <div class="col-sm-6">
-                <label class="form-range-label" for="main-line">
-                  Main Lines
-                </label>
+            </div>
+            <div class="row mb-3">
+              <div class="col-sm-9 offset-sm-3">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="border-polylines" checked>
+                  <label class="form-check-label" for="border-polylines">
+                    Draw Border on Polylines
+                  </label>
+                </div>
               </div>
-            </fieldset>
-            <fieldset class="row mb-3">
-              <div class="col-sm-2 offset-sm-4 d-flex align-items-center gap-2">
-                <input type="range" class="form-range" min="0" max="2" id="border-line" oninput="this.nextElementSibling.value = this.value">
-                <output>1</output>
-              </div>
-              <div class="col-sm-5">
-                <label class="form-range-label" for="border-line">
-                  Border Line
-                </label>
-              </div>
-            </fieldset>
+            </div>
           </form>
         </div>
         <div class="modal-footer">

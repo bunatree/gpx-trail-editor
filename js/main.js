@@ -3017,37 +3017,78 @@ const GpxTrailEditor = {
   },
 
   setupSettingDialog: function() {
+
     const modalDialogElm = document.getElementById('modal-settings');
     const primaryContainer = document.getElementById('primary-container');
     const radioButtons = modalDialogElm.querySelectorAll('input[type="radio"]');
     const resetButton = document.getElementById('reset-settings');
 
-    // Get the setting value from the localStorage (the default is "primary")
-    const savedLayout = localStorage.getItem('layoutPosition') || 'primary';
+    if (!GpxTrailEditor.settings) {
+      GpxTrailEditor.settings = {};
+    }
 
+     // Border checkboxes
+     const borderMarkersCheckbox = document.getElementById('border-markers');
+     const borderPolylinesCheckbox = document.getElementById('border-polylines');
+ 
+     // Get the setting values from localStorage
+     const savedLayout = localStorage.getItem('layoutPosition') || 'primary';
+     const savedBorderMarkers = localStorage.getItem('borderMarkers');
+     const borderMarkersChecked = savedBorderMarkers === null ? true : savedBorderMarkers === 'true';
+     const savedBorderPolylines = localStorage.getItem('borderPolylines');
+     const borderPolylinesChecked = savedBorderPolylines === null ? true : savedBorderPolylines === 'true';
+
+    // Apply saved layout setting
+    let selectedValue = savedLayout;
     radioButtons.forEach(inputElm => {
       if (inputElm.value === savedLayout) {
         inputElm.checked = true;
         primaryContainer.style.order = (savedLayout === 'primary') ? 0 : 1;
       }
-
       // When the radio button is clicked...
       inputElm.addEventListener('click', function(event) {
         const selectedValue = event.target.value;
         primaryContainer.style.order = (selectedValue === 'primary') ? 0 : 1;
         localStorage.setItem('layoutPosition', selectedValue); // Save the setting value.
+        GpxTrailEditor.settings.layoutPosition = selectedValue;
       });
     });
+    
+    // Apply saved border settings
+    borderMarkersCheckbox.checked = borderMarkersChecked;
+    borderPolylinesCheckbox.checked = borderPolylinesChecked;
+    
+    // When border checkboxes are changed, save to localStorage
+    borderMarkersCheckbox.addEventListener('change', function() {
+      localStorage.setItem('borderMarkers', borderMarkersCheckbox.checked);
+      GpxTrailEditor.settings.borderMarkers = borderMarkersCheckbox.checked;
+    });
+    borderPolylinesCheckbox.addEventListener('change', function() {
+      localStorage.setItem('borderPolylines', borderPolylinesCheckbox.checked);
+      GpxTrailEditor.settings.borderPolylines = borderPolylinesCheckbox.checked;
+    });
+
+    // Save the setting values in the GpxTrailEditor name space
+    GpxTrailEditor.settings.layoutPosition = selectedValue;
+    GpxTrailEditor.settings.borderPolylines = borderPolylinesChecked;
+    GpxTrailEditor.settings.borderMarkers = borderMarkersChecked;
 
     // Rest to Default
     resetButton.addEventListener('click', function() {
       localStorage.removeItem('layoutPosition');
+      localStorage.removeItem('borderMarkers');
+      localStorage.removeItem('borderPolylines');
       radioButtons.forEach(inputElm => {
         if (inputElm.value === 'primary') {
           inputElm.checked = true;
         }
       });
       primaryContainer.style.order = 0; // The default is "primary"
+      borderMarkersCheckbox.checked = true;
+      borderPolylinesCheckbox.checked = true;
+      GpxTrailEditor.settings.layoutPosition = 'primary';
+      GpxTrailEditor.settings.borderPolylines = true;
+      GpxTrailEditor.settings.borderMarkers = true;
     });
 
   },
