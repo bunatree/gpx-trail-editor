@@ -123,9 +123,9 @@ const GpxTrailEditor = {
     const modalBodyElm = modalDialogElm.querySelector('.modal-body');
     const confirmButtonElm = modalDialogElm.querySelector('.btn-confirm');
 
-    modalTitleElm.textContent = titleText;
-    modalBodyElm.innerHTML = bodyContent;
-    confirmButtonElm.textContent = buttonLabel;
+    modalTitleElm.textContent = titleText || 'Dialog Title';
+    modalBodyElm.innerHTML = bodyContent || 'Dialog body content goes here...';
+    confirmButtonElm.textContent = buttonLabel || 'OK';
 
     confirmButtonElm.classList.remove('btn-primary','btn-info','btn-warning','btn-danger');
     confirmButtonElm.classList.add('btn-' + type);
@@ -1661,7 +1661,7 @@ const GpxTrailEditor = {
     // if the duration value is 0 or minus.
     if (duration) {
       setTimeout(() => {
-        alertContainer.style.bottom = "-100px";
+        alertContainer.style.bottom = '-200px';
       }, duration);
     }
 
@@ -3255,7 +3255,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // i18nMsg = GpxTrailEditor.setI18nData(i18nMsgData,lang);
   GpxTrailEditor.initMap();
-  GpxTrailEditor.setupDropZone();
   GpxTrailEditor.setupDropZone();
   GpxTrailEditor.setupLogNameForm();
   GpxTrailEditor.setupTable();
