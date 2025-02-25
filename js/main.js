@@ -188,7 +188,7 @@ const GpxTrailEditor = {
     const modaiDialog = new bootstrap.Modal(modalDialogElm);
     modaiDialog.show();
 
-    // モーダルが表示された後にツールチップを初期化
+    // Initialize tooltip after modal is displayed
     modalDialogElm.addEventListener('shown.bs.modal', () => {
       setTimeout(() => {
         const tooltipTriggerList = [].slice.call(modalDialogElm.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -1646,6 +1646,7 @@ const GpxTrailEditor = {
   },
 
   showAlert: function(type,message,duration = 4000) {
+
     const alertContainer = document.getElementById("alert-container");
 
     alertContainer.innerHTML = `
@@ -1657,11 +1658,10 @@ const GpxTrailEditor = {
 
     alertContainer.style.bottom = "20px";
 
-    // The alert dialog keeps visible
-    // if the duration value is 0 or minus.
+    // The alert dialog keeps visible if the duration value is 0 or false.
     if (duration) {
       setTimeout(() => {
-        alertContainer.style.bottom = '-200px';
+        alertContainer.style.bottom = '-1000px';
       }, duration);
     }
 
@@ -2487,7 +2487,8 @@ const GpxTrailEditor = {
         errorMsg += (invalidDateTime.datetimeValue.length) ? `<div class="error-message">${i18nMsg.errorInvalidDateTime.replace('${i}',invalidRowHtml(invalidDateTime.datetimeValue))}</div>` : '';
         errorMsg += (invalidDateTime.datetimeOrder.length > 0) ? `<div class="error-message">${i18nMsg.errorInvalidDateOrder.replace('${i}',invalidRowHtml(invalidDateTime.datetimeOrder))}</div>` : '';
 
-        GpxTrailEditor.showAlert('warning',errorMsg);
+        // The 3rd parameter 0 prevents the alert dialog from being closed automatically
+        GpxTrailEditor.showAlert('warning',errorMsg,0);
 
         if (!invalidPointLatLng.result && !invalidDateTime.result) {
           GpxTrailEditor.showOkDialog(i18nMsg.modalExportErrorTitle,i18nMsg.errorCanNotExportDateTimeLatLng,'OK','warning')
