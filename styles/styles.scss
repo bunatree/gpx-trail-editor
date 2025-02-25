@@ -6,13 +6,10 @@ $fontFamily: 'M PLUS 1p', sans-serif;
 $normalMarkerBG: rgba(255, 0, 128, 1);
 $firstMarkerBG: rgba(255, 0, 128, 1);
 $lastMarkerBG: rgba(255, 0, 128, 1);
-$baseMarkerBG: blue;
 
 body {
   font-family: $fontFamily;
   height: 100vh;
-  // margin: 0;
-  // padding: 0;
 }
 
 header {
@@ -33,7 +30,6 @@ header {
 }
 
 main {
-  // nav height = 58px
   height: calc(100vh - 58px);
 }
 
@@ -92,7 +88,7 @@ main {
   }
 
   .elevation {
-    max-width: 6rem;
+    max-width: 7rem;
   }
 
 }
