@@ -277,6 +277,9 @@ const GpxTrailEditor = {
 
     GpxTrailEditor.showLoadingMessage();
 
+    // Wait for the loading message to show up
+    await new Promise(resolve => requestAnimationFrame(resolve));
+
     const file = files[0];
 
     if (file && file.name.endsWith('.gpx')) {
@@ -302,8 +305,8 @@ const GpxTrailEditor = {
     const dropZoneForm = document.getElementById('drop-zone-form');
     const dropNoteElm = dropZoneForm.querySelector('.drop-note');
     const dropSubNoteElm = dropZoneForm.querySelector('.drop-subnote');
-    dropNoteElm.innerHTML = i18nMsg.dropNoteLoading;
-    dropSubNoteElm.innerHTML = i18nMsg.dropSubNoteLoading;
+    dropNoteElm.textContent = i18nMsg.dropNoteLoading;
+    dropSubNoteElm.textContent = i18nMsg.dropSubNoteLoading;
   },
 
   resetDropZone: function() {
@@ -314,8 +317,8 @@ const GpxTrailEditor = {
     dropZonePrompt.classList.remove('bg-primary','text-light');
     const dropNoteElm = dropZoneForm.querySelector('.drop-note');
     const dropSubNoteElm = dropZoneForm.querySelector('.drop-subnote');
-    dropNoteElm.innerHTML = i18nMsg.dropNoteDefault;
-    dropSubNoteElm.innerHTML = i18nMsg.dropSubNoteDefault;
+    dropNoteElm.textContent = i18nMsg.dropNoteDefault;
+    dropSubNoteElm.textContent = i18nMsg.dropSubNoteDefault;
   },
 
   // Analyze the uploaded GPX file, display the data in a table,
@@ -3118,22 +3121,25 @@ const GpxTrailEditor = {
     chkboxMarkerBorder.addEventListener('change', function() {
       localStorage.setItem('markerBorder', chkboxMarkerBorder.checked);
       GpxTrailEditor.settings.markerBorder = chkboxMarkerBorder.checked;
+      GpxTrailEditor.updateMarkersAndPolylines(chkboxMarkerBold.checked);
     });
   
-    chkboxMarkerBold.addEventListener('change', function() {// ####
+    chkboxMarkerBold.addEventListener('change', function() {
       localStorage.setItem('markerBold', chkboxMarkerBold.checked);
       GpxTrailEditor.settings.markerBold = chkboxMarkerBold.checked;
-      GpxTrailEditor.updateMarkersAndPolylines(); // ###
+      GpxTrailEditor.updateMarkersAndPolylines(chkboxMarkerBold.checked);
     });
   
     chkboxPolylineBorder.addEventListener('change', function() {
       localStorage.setItem('polylineBorder', chkboxPolylineBorder.checked);
       GpxTrailEditor.settings.polylineBorder = chkboxPolylineBorder.checked;
+      GpxTrailEditor.updateMarkersAndPolylines(chkboxMarkerBold.checked);
     });
   
     chkboxPolylineBold.addEventListener('change', function() {
       localStorage.setItem('polylineBold', chkboxPolylineBold.checked);
       GpxTrailEditor.settings.polylineBold = chkboxPolylineBold.checked;
+      GpxTrailEditor.updateMarkersAndPolylines(chkboxPolylineBold.checked);
     });
   
     selectMarkerColor.addEventListener('change', function(event) {
@@ -3152,8 +3158,8 @@ const GpxTrailEditor = {
       if (colorMap[newColor]) {
         localStorage.setItem('polylineColor', newColor);
         GpxTrailEditor.settings.polylineColor = newColor;
-        GpxTrailEditor.normalPolylineOptions.color = colorMap[newColor]; // ???####
-        GpxTrailEditor.updateMarkersAndPolylines(); // ###
+        GpxTrailEditor.normalPolylineOptions.color = colorMap[newColor];
+        GpxTrailEditor.updateMarkersAndPolylines();
       }
     });
 
