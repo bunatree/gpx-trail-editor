@@ -3,9 +3,9 @@ $mSize: calc(var(--bs-gutter-x) * .5); // margin 0.75rem
 // $bgTablePrimaryRow: #cfe2ff; // Borrowed from Bootstrap5. (table-primary)
 $fontFamily: 'M PLUS 1p', sans-serif;
 
-$normalMarkerBG: rgba(255, 0, 128, 1);
-$firstMarkerBG: rgba(255, 0, 128, 1);
-$lastMarkerBG: rgba(255, 0, 128, 1);
+$normalMarkerBG: #d63384;
+$firstMarkerBG: #d63384;
+$lastMarkerBG: #d63384;
 
 body {
   font-family: $fontFamily;

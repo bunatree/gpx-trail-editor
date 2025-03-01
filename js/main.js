@@ -48,7 +48,7 @@ const GpxTrailEditor = {
   },
 
   normalPolylineOptions: {
-    color: 'rgba(192, 0, 128, 1)',
+    color: '#6f42c1', // Bootstrap5 purple
     weight: 4,
   },
 
@@ -3055,7 +3055,6 @@ const GpxTrailEditor = {
     const colorMap = {
       "red": "#dc3545",
       "pink": "#d63384", // pink-500
-      "darkpink": "#ab296a", // pink-600
       "orange": "#fd7e14",
       "yellow": "#ffc107",
       "green": "#198754",
@@ -3091,7 +3090,7 @@ const GpxTrailEditor = {
     const savedMarkerColor = localStorage.getItem('markerColor') || 'pink';
     const savedPolylineBorder = localStorage.getItem('polylineBorder');
     const savedPolylineBold = localStorage.getItem('polylineBold');
-    const savedPolylineColor = localStorage.getItem('polylineColor') || 'darkpink';
+    const savedPolylineColor = localStorage.getItem('polylineColor') || 'purple';
 
     // Apply saved layout setting
     radioButtons.forEach(inputElm => {
@@ -3108,10 +3107,10 @@ const GpxTrailEditor = {
     });
     
     // Apply saved border settings
-    chkboxMarkerBorder.checked = savedMarkerBorder === 'true';
-    chkboxMarkerBold.checked = savedMarkerBold === 'true';
-    chkboxPolylineBorder.checked = savedPolylineBorder === 'true';
-    chkboxPolylineBold.checked = savedPolylineBold === 'true';
+    chkboxMarkerBorder.checked = savedMarkerBorder !== 'false';
+    chkboxMarkerBold.checked = savedMarkerBold !== 'false';
+    chkboxPolylineBorder.checked = savedPolylineBorder !== 'false';
+    chkboxPolylineBold.checked = savedPolylineBold !== 'false';
     selectMarkerColor.value = savedMarkerColor;
     selectPolylineColor.value = savedPolylineColor;
 
@@ -3182,7 +3181,7 @@ const GpxTrailEditor = {
 
       // Color selectors
       selectMarkerColor.value = 'pink';
-      selectPolylineColor.value = 'darkpink';
+      selectPolylineColor.value = 'purple';
 
       // Reset "settings" in GpxTrailEditor
       GpxTrailEditor.settings.layoutPosition = 'primary';
@@ -3191,7 +3190,7 @@ const GpxTrailEditor = {
       GpxTrailEditor.settings.markerColor = 'pink';
       GpxTrailEditor.settings.polylineBorder = true;
       GpxTrailEditor.settings.polylineBold = true;
-      GpxTrailEditor.settings.polylineColor = 'darkpink';
+      GpxTrailEditor.settings.polylineColor = 'purple';
       
     });
 
