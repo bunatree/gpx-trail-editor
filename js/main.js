@@ -110,9 +110,44 @@ const GpxTrailEditor = {
   },
 
   showSettingDialog: function() {
-    const modalDialogElm = document.getElementById('modal-settings');
-    const modalDialog = new bootstrap.Modal(modalDialogElm);
+
+    const settingDialog = document.getElementById('modal-settings');
+    const modalDialog = new bootstrap.Modal(settingDialog);
+
+    const titleElm = settingDialog.querySelector('.modal-title');
+    titleElm.innerHTML = i18nMsg.settingDialogTitle;
+    const markerLabel = settingDialog.querySelector('.row-map-layout legend');
+    markerLabel.innerHTML = i18nMsg.settingMapLayoutLabel;
+    const primaryLabel = settingDialog.querySelector('.row-map-layout .label-primary');
+    primaryLabel.innerHTML = i18nMsg.settingMapLayoutPrimary;
+    const secondaryLabel = settingDialog.querySelector('.row-map-layout .label-secondary');
+    secondaryLabel.innerHTML = i18nMsg.settingMapLayoutSecondary;
+
+    const labelMarkerColor = settingDialog.querySelector('.row-marker-color .col-form-label');
+    labelMarkerColor.innerHTML = i18nMsg.settingMarkersLabel;
+    const labelMarkerBold = settingDialog.querySelector('.row-marker-options .label-bold');
+    labelMarkerBold.textContent = i18nMsg.settingMarkersBold;
+    const labelMarkerBorder = settingDialog.querySelector('.row-marker-options .label-border');
+    labelMarkerBorder.textContent = i18nMsg.settingMarkersBorder;
+
+    const labelPolylineColor = settingDialog.querySelector('.row-polyline-color .col-form-label');
+    labelPolylineColor.innerHTML = i18nMsg.settingPolylinesLabel;
+    const labelPolylineBold = settingDialog.querySelector('.row-polyline-options .label-bold');
+    labelPolylineBold.textContent = i18nMsg.settingPolylinesBold;
+    const labelPolylineBorder = settingDialog.querySelector('.row-polyline-options .label-border');
+    labelPolylineBorder.textContent = i18nMsg.settingPolylinesBorder;
+
+    settingDialog.querySelectorAll('select option').forEach(opt => {
+      opt.classList.forEach(cls => {
+        const key = `settingColor${cls.charAt(0).toUpperCase() + cls.slice(1)}`;
+        if (i18nMsg[key]) {
+          opt.textContent = i18nMsg[key];
+        }
+      });
+    });
+
     modalDialog.show();
+
   },
 
   showOkDialog: function(titleText,bodyContent,buttonLabel,type,callback) {
@@ -3019,8 +3054,8 @@ const GpxTrailEditor = {
 
     const colorMap = {
       "red": "#dc3545",
-      "pink": "#d63384",
-      "darkpink": "#801f4f",
+      "pink": "#d63384", // pink-500
+      "darkpink": "#ab296a", // pink-600
       "orange": "#fd7e14",
       "yellow": "#ffc107",
       "green": "#198754",
@@ -3029,7 +3064,7 @@ const GpxTrailEditor = {
       "indigo": "#6610f2",
       "purple": "#6f42c1",
       "teal": "#20c997",
-      "gray": "#adb5bd"
+      "gray": "#6c757d" // gray-600
     };  
 
     const modalDialogElm = document.getElementById('modal-settings');
@@ -3086,9 +3121,10 @@ const GpxTrailEditor = {
       GpxTrailEditor.settings.markerBorder = chkboxMarkerBorder.checked;
     });
   
-    chkboxMarkerBold.addEventListener('change', function() {
+    chkboxMarkerBold.addEventListener('change', function() {// ####
       localStorage.setItem('markerBold', chkboxMarkerBold.checked);
       GpxTrailEditor.settings.markerBold = chkboxMarkerBold.checked;
+      GpxTrailEditor.updateMarkersAndPolylines(); // ###
     });
   
     chkboxPolylineBorder.addEventListener('change', function() {
@@ -3103,13 +3139,13 @@ const GpxTrailEditor = {
   
     selectMarkerColor.addEventListener('change', function(event) {
       const newColor = event.target.value;
-
       if (colorMap[newColor]) {
         localStorage.setItem('markerColor', newColor);
         GpxTrailEditor.settings.markerColor = newColor;
-        // GpxTrailEditor.normalPolylineOptions.color = colorMap[newColor]; // ???####
+        document.querySelectorAll('#map .leaflet-marker-icon').forEach(marker => {
+          marker.style.backgroundColor = colorMap[newColor];
+        });
       }
-
     });
   
     selectPolylineColor.addEventListener('change', function(event) {
@@ -3117,7 +3153,8 @@ const GpxTrailEditor = {
       if (colorMap[newColor]) {
         localStorage.setItem('polylineColor', newColor);
         GpxTrailEditor.settings.polylineColor = newColor;
-        GpxTrailEditor.normalPolylineOptions.color = colorMap[newColor];
+        GpxTrailEditor.normalPolylineOptions.color = colorMap[newColor]; // ???####
+        GpxTrailEditor.updateMarkersAndPolylines(); // ###
       }
     });
 

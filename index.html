@@ -342,51 +342,47 @@
         </div>
         <div class="modal-body">
           <form>
-            <fieldset class="row mb-3">
+            <fieldset class="row row-map-layout mb-3">
               <legend class="col-form-label col-sm-3 pt-0">Map Layout</legend>
               <div class="col-sm-9">
                 <div class="form-check">
                   <input class="form-check-input" type="radio" name="maplayout" id="map-layout-primary" value="primary" checked>
-                  <label class="form-check-label" for="map-layout-primary">
+                  <label class="form-check-label label-primary" for="map-layout-primary">
                     Primary (Left)
                   </label>
                 </div>
                 <div class="form-check">
                   <input class="form-check-input" type="radio" name="maplayout" id="map-layout-secondary" value="secondary">
-                  <label class="form-check-label" for="map-layout-secondary">
+                  <label class="form-check-label label-secondary" for="map-layout-secondary">
                     Secondary (Right)
                   </label>
                 </div>
               </div>
             </fieldset>
 
-            <div class="alert alert-info">
-              The border, bold, and color settings will not take effect until you refresh the page.
-            </div>
-
-            <div class="row mb-3">
+            <div class="row row-marker-color mb-3">
               <div class="col-form-label col-sm-3">Markers</div>
-              <div class="col-sm-6">
+              <div class="col-sm-9">
                 <select class="form-select" id="select-marker-color">
-                  <option value="red">Red</option>
-                  <option value="pink" selected>Pink</option>
-                  <option value="orange">Orange</option>
-                  <option value="yellow">Yellow</option>
-                  <option value="green">Green</option>
-                  <option value="teal">Teal</option>
-                  <option value="blue">Blue</option>
-                  <option value="cyan">Cyan</option>
-                  <option value="indigo">Indigo</option>
-                  <option value="purple">Purple</option>
-                  <option value="gray">Gray</option>
+                  <option class="red" value="red">Red</option>
+                  <option class="pink" value="pink" selected>Pink</option>
+                  <option class="orange" value="orange">Orange</option>
+                  <option class="yellow" value="yellow">Yellow</option>
+                  <option class="green" value="green">Green</option>
+                  <option class="teal" value="teal">Teal</option>
+                  <option class="blue" value="blue">Blue</option>
+                  <option class="cyan" value="cyan">Cyan</option>
+                  <option class="indigo" value="indigo">Indigo</option>
+                  <option class="purple" value="purple">Purple</option>
+                  <option class="gray" value="gray">Gray</option>
                 </select>
               </div>
             </div>
-            <div class="row mb-3">
+            <div class="row row-marker-options mb-3">
               <div class="col-sm-3 offset-sm-3">
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" id="chkbox-marker-bold" checked>
-                  <label class="form-check-label" for="chkbox-marker-bold">
+                  <label class="form-check-label label-bold" for="chkbox-marker-bold">
                     Bold
                   </label>
                 </div>
@@ -394,37 +390,37 @@
               <div class="col-sm-3">
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" id="chkbox-marker-border" checked>
-                  <label class="form-check-label" for="chkbox-marker-border">
+                  <label class="form-check-label label-border" for="chkbox-marker-border">
                     Border
                   </label>
                 </div>
               </div>
             </div>
 
-            <div class="row mb-3">
+            <div class="row row-polyline-color mb-3">
               <div class="col-form-label col-sm-3">Polylines</div>
-              <div class="col-sm-6">
+              <div class="col-sm-9">
                 <select class="form-select" id="select-polyline-color">
-                  <option value="red">Red</option>
-                  <option value="pink">Pink</option>
-                  <option value="darkpink" selected>Dark Pink</option>
-                  <option value="orange">Orange</option>
-                  <option value="yellow">Yellow</option>
-                  <option value="green">Green</option>
-                  <option value="teal">Teal</option>
-                  <option value="blue">Blue</option>
-                  <option value="cyan">Cyan</option>
-                  <option value="indigo">Indigo</option>
-                  <option value="purple">Purple</option>
-                  <option value="gray">Gray</option>
+                  <option class="red" value="red">Red</option>
+                  <option class="pink" value="pink">Pink</option>
+                  <option class="darkpink" value="darkpink" selected>Dark Pink</option>
+                  <option class="orange" value="orange">Orange</option>
+                  <option class="yellow" value="yellow">Yellow</option>
+                  <option class="green" value="green">Green</option>
+                  <option class="teal" value="teal">Teal</option>
+                  <option class="blue" value="blue">Blue</option>
+                  <option class="cyan" value="cyan">Cyan</option>
+                  <option class="indigo" value="indigo">Indigo</option>
+                  <option class="purple" value="purple">Purple</option>
+                  <option class="gray" value="gray">Gray</option>
                 </select>
               </div>
             </div>
-            <div class="row mb-3">
+            <div class="row row-polyline-options mb-3">
               <div class="col-sm-3 offset-sm-3">
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" id="chkbox-polyline-bold" checked>
-                  <label class="form-check-label" for="chkbox-polyline-bold">
+                  <label class="form-check-label label-bold" for="chkbox-polyline-bold">
                     Bold
                   </label>
                 </div>
@@ -432,7 +428,7 @@
               <div class="col-sm-3">
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" id="chkbox-polyline-border" checked>
-                  <label class="form-check-label" for="chkbox-polyline-border">
+                  <label class="form-check-label label-border" for="chkbox-polyline-border">
                     Border
                   </label>
                 </div>
@@ -441,7 +437,7 @@
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" id="reset-settings">Reset to Default</button>
+          <button type="button" class="btn btn-secondary" id="reset-settings">Reset to Defaults</button>
           <button type="button" class="btn btn-primary btn-confirm btn-info" data-bs-dismiss="modal">OK</button>
         </div>
       </div>
