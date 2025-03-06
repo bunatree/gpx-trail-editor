@@ -123,18 +123,14 @@ const GpxTrailEditor = {
     const secondaryLabel = settingDialog.querySelector('.row-map-layout .label-secondary');
     secondaryLabel.innerHTML = i18nMsg.settingMapLayoutSecondary;
 
-    const labelMarkerColor = settingDialog.querySelector('.row-marker-color .col-form-label');
+    const labelMarkerColor = settingDialog.querySelector('.row-marker .col-form-label');
     labelMarkerColor.innerHTML = i18nMsg.settingMarkersLabel;
-    const labelMarkerBold = settingDialog.querySelector('.row-marker-options .label-bold');
-    labelMarkerBold.textContent = i18nMsg.settingMarkersBold;
-    const labelMarkerBorder = settingDialog.querySelector('.row-marker-options .label-border');
+    const labelMarkerBorder = settingDialog.querySelector('.row-marker .label-border');
     labelMarkerBorder.textContent = i18nMsg.settingMarkersBorder;
 
-    const labelPolylineColor = settingDialog.querySelector('.row-polyline-color .col-form-label');
+    const labelPolylineColor = settingDialog.querySelector('.row-polyline .col-form-label');
     labelPolylineColor.innerHTML = i18nMsg.settingPolylinesLabel;
-    const labelPolylineBold = settingDialog.querySelector('.row-polyline-options .label-bold');
-    labelPolylineBold.textContent = i18nMsg.settingPolylinesBold;
-    const labelPolylineBorder = settingDialog.querySelector('.row-polyline-options .label-border');
+    const labelPolylineBorder = settingDialog.querySelector('.row-polyline .label-border');
     labelPolylineBorder.textContent = i18nMsg.settingPolylinesBorder;
 
     settingDialog.querySelectorAll('select option').forEach(opt => {
@@ -3086,19 +3082,15 @@ const GpxTrailEditor = {
 
     // Form elements
     const chkboxMarkerBorder = document.getElementById('chkbox-marker-border');
-    const chkboxMarkerBold = document.getElementById('chkbox-marker-bold');
     const chkboxPolylineBorder = document.getElementById('chkbox-polyline-border');
-    const chkboxPolylineBold = document.getElementById('chkbox-polyline-bold');
     const selectMarkerColor = document.getElementById('select-marker-color');
     const selectPolylineColor = document.getElementById('select-polyline-color');
       
     // Get the setting values from localStorage
     const savedLayout = localStorage.getItem('layoutPosition') || 'primary';
     const savedMarkerBorder = localStorage.getItem('markerBorder');
-    const savedMarkerBold = localStorage.getItem('markerBold');
     const savedMarkerColor = localStorage.getItem('markerColor') || 'pink';
     const savedPolylineBorder = localStorage.getItem('polylineBorder');
-    const savedPolylineBold = localStorage.getItem('polylineBold');
     const savedPolylineColor = localStorage.getItem('polylineColor') || 'purple';
 
     // Apply saved layout setting
@@ -3117,9 +3109,7 @@ const GpxTrailEditor = {
     
     // Apply saved border settings
     chkboxMarkerBorder.checked = savedMarkerBorder !== 'false';
-    chkboxMarkerBold.checked = savedMarkerBold !== 'false';
     chkboxPolylineBorder.checked = savedPolylineBorder !== 'false';
-    chkboxPolylineBold.checked = savedPolylineBold !== 'false';
     selectMarkerColor.value = savedMarkerColor;
     selectPolylineColor.value = savedPolylineColor;
 
@@ -3127,25 +3117,13 @@ const GpxTrailEditor = {
     chkboxMarkerBorder.addEventListener('change', function() {
       localStorage.setItem('markerBorder', chkboxMarkerBorder.checked);
       GpxTrailEditor.settings.markerBorder = chkboxMarkerBorder.checked;
-      GpxTrailEditor.updateMarkersAndPolylines(chkboxMarkerBold.checked);
-    });
-  
-    chkboxMarkerBold.addEventListener('change', function() {
-      localStorage.setItem('markerBold', chkboxMarkerBold.checked);
-      GpxTrailEditor.settings.markerBold = chkboxMarkerBold.checked;
-      GpxTrailEditor.updateMarkersAndPolylines(chkboxMarkerBold.checked);
+      GpxTrailEditor.updateMarkersAndPolylines(chkboxMarkerBorder.checked);
     });
   
     chkboxPolylineBorder.addEventListener('change', function() {
       localStorage.setItem('polylineBorder', chkboxPolylineBorder.checked);
       GpxTrailEditor.settings.polylineBorder = chkboxPolylineBorder.checked;
-      GpxTrailEditor.updateMarkersAndPolylines(chkboxMarkerBold.checked);
-    });
-  
-    chkboxPolylineBold.addEventListener('change', function() {
-      localStorage.setItem('polylineBold', chkboxPolylineBold.checked);
-      GpxTrailEditor.settings.polylineBold = chkboxPolylineBold.checked;
-      GpxTrailEditor.updateMarkersAndPolylines(chkboxPolylineBold.checked);
+      GpxTrailEditor.updateMarkersAndPolylines(chkboxPolylineBorder.checked);
     });
   
     selectMarkerColor.addEventListener('change', function(event) {
@@ -3173,10 +3151,8 @@ const GpxTrailEditor = {
     resetButton.addEventListener('click', function() {
       localStorage.removeItem('layoutPosition');
       localStorage.removeItem('markerBorder');
-      localStorage.removeItem('markerBold');
       localStorage.removeItem('markerColor');
       localStorage.removeItem('polylineBorder');
-      localStorage.removeItem('polylineBold');
       localStorage.removeItem('polylineColor');
       radioButtons.forEach(inputElm => {
         if (inputElm.value === 'primary') {
@@ -3187,9 +3163,7 @@ const GpxTrailEditor = {
 
       // Checkboxes
       chkboxMarkerBorder.checked = true;
-      chkboxMarkerBold.checked = true;
       chkboxPolylineBorder.checked = true;
-      chkboxPolylineBold.checked = true;
 
       // Color selectors
       selectMarkerColor.value = 'pink';
@@ -3198,10 +3172,8 @@ const GpxTrailEditor = {
       // Reset "settings" in GpxTrailEditor
       GpxTrailEditor.settings.layoutPosition = 'primary';
       GpxTrailEditor.settings.markerBorder = true;
-      GpxTrailEditor.settings.markerBold = true;
       GpxTrailEditor.settings.markerColor = 'pink';
       GpxTrailEditor.settings.polylineBorder = true;
-      GpxTrailEditor.settings.polylineBold = true;
       GpxTrailEditor.settings.polylineColor = 'purple';
       
     });
