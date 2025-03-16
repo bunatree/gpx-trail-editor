@@ -1282,6 +1282,12 @@ const GpxTrailEditor = {
 
     }
 
+    // Re-bind the events for all the markers
+    for (let i = 0; i < GpxTrailEditor.markers.length; i++) {
+      const marker = GpxTrailEditor.markers[i];
+      GpxTrailEditor.bindMarkerEvents(marker, i, [marker.getLatLng().lat, marker.getLatLng().lng], GpxTrailEditor.points[i]?.datetime);
+    }
+
     // Increase the starting piont index
     GpxTrailEditor.insertionStartIndex ++;
 
