@@ -14,48 +14,19 @@ const GpxTrailEditor = {
   borderPolyline: [], // an array for the markers on the map
   eleTiles: {}, // Elevation tile data
 
-  POLYLINE_COLOR: 'rgba(192, 0, 128, 1)',
-  POLYLINE_WEIGHT: 5,
+  MARKER_RADIUS: 6,
+  POLYLINE_COLOR: '#6f42c1', // Bootstrap5 purple
+  POLYLINE_WEIGHT: 4,
 
-  normalMarkerOptions: {
-    icon: L.divIcon({
-      className: 'normal-div-icon',
-      html: '',
-      iconSize: [6*2,6*2],
-      iconAnchor: [6,6],
-    }),
-    draggable: false, // Do not allow to drag the markers by default.
-  },
+  // normalPolylineOptions: {
+  //   color: '#6f42c1', // Bootstrap5 purple
+  //   weight: 4,
+  // },
 
-  firstMarkerOptions: {
-    icon: L.divIcon({
-      className: 'first-div-icon',
-      html: '<span class="label">S</span>',
-      iconSize: [8*2,8*2], // 2px larger than the normal marker
-      iconAnchor: [8,8], // 2px larger than the normal marker
-    }),
-    draggable: false, // Do not allow to drag the markers by default.
-  },
-  
-  lastMarkerOptions: {
-    icon: L.divIcon({
-      className: 'last-div-icon',
-      html: '<span class="label">G</span>',
-      iconSize: [8*2,8*2], // 2px larger than the normal marker
-      iconAnchor: [8,8], // 2px larger than the normal marker
-    }),
-    draggable: false, // Do not allow to drag the markers by default.
-  },
-
-  normalPolylineOptions: {
-    color: '#6f42c1', // Bootstrap5 purple
-    weight: 4,
-  },
-
-  borderPolylineOptions: {
-    color: 'white',
-    weight: 8,
-  },
+  // borderPolylineOptions: {
+  //   color: 'white',
+  //   weight: 8,
+  // },
 
   SPEED_RATE_UP_STEEP:        0.5, 	//急な上りの速度比(平地を1として)
   SPEED_RATE_UP_GENTLE:       0.8, 	//なだらかな上りの速度比
@@ -3293,8 +3264,46 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
+GpxTrailEditor.normalMarkerOptions = {
+  icon: L.divIcon({
+    className: 'normal-div-icon',
+    html: '',
+    iconSize: [GpxTrailEditor.MARKER_RADIUS*2,GpxTrailEditor.MARKER_RADIUS*2], // 12,12
+    iconAnchor: [GpxTrailEditor.MARKER_RADIUS, GpxTrailEditor.MARKER_RADIUS], // 6,6
+  }),
+  draggable: false, // Do not allow to drag the markers by default.
+};
+
+GpxTrailEditor.firstMarkerOptions = {
+  icon: L.divIcon({
+    className: 'first-div-icon',
+    html: '<span class="label">S</span>',
+    iconSize: [(GpxTrailEditor.MARKER_RADIUS+2)*2,(GpxTrailEditor.MARKER_RADIUS+2)*2], // 2px larger than the normal marker
+    iconAnchor: [(GpxTrailEditor.MARKER_RADIUS+2),(GpxTrailEditor.MARKER_RADIUS+2)], // 2px larger than the normal marker
+  }),
+  draggable: false, // Do not allow to drag the markers by default.
+};
+
+GpxTrailEditor.lastMarkerOptions = {
+  icon: L.divIcon({
+    className: 'last-div-icon',
+    html: '<span class="label">G</span>',
+    iconSize: [(GpxTrailEditor.MARKER_RADIUS+2)*2,(GpxTrailEditor.MARKER_RADIUS+2)*2], // 2px larger than the normal marker
+    iconAnchor: [(GpxTrailEditor.MARKER_RADIUS+2),(GpxTrailEditor.MARKER_RADIUS+2)], // 2px larger than the normal marker
+  }),
+  draggable: false, // Do not allow to drag the markers by default.
+};
+
+GpxTrailEditor.normalPolylineOptions = {
+  color: GpxTrailEditor.POLYLINE_COLOR,
+  weight: GpxTrailEditor.POLYLINE_WEIGHT
+};
+
+GpxTrailEditor.borderPolylineOptions = {
+  color: 'white',
+  weight: GpxTrailEditor.POLYLINE_WEIGHT + 4 // 4px wider than polyline
+};
+
 window.onscroll = function() {
   GpxTrailEditor.toggleScrollToTopButton();
 };
-
-
