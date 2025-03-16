@@ -3,10 +3,6 @@ $mSize: calc(var(--bs-gutter-x) * .5); // margin 0.75rem
 // $bgTablePrimaryRow: #cfe2ff; // Borrowed from Bootstrap5. (table-primary)
 $fontFamily: 'M PLUS 1p', sans-serif;
 
-$normalMarkerBG: #d63384;
-$firstMarkerBG: #d63384;
-$lastMarkerBG: #d63384;
-
 body {
   font-family: $fontFamily;
   height: 100vh;
@@ -121,27 +117,16 @@ main {
       font-weight: bold;
     }
 
-    &.first-div-icon {
-      border: 2px solid #fff;
-      background-color: $firstMarkerBG;
-      border-radius: 50%;
+    &.first-div-icon, &.last-div-icon {
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
-    &.last-div-icon {
-      border: 2px solid #fff;
-      background-color: $lastMarkerBG;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
+    &.first-div-icon,
+    &.last-div-icon,
     &.normal-div-icon {
       border: 2px solid #fff;
-      background-color: $normalMarkerBG;
       border-radius: 50%;
     }
 

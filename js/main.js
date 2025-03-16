@@ -29,7 +29,10 @@ const GpxTrailEditor = {
   },
 
   // Object that stores the changes on the setting dialog
-  settings: {},
+  settings: {
+    markerColor: localStorage.getItem('markerColor') || 'pink',
+    polylineColor: localStorage.getItem('polylineColor') || 'purple'
+  },
 
   MARKER_RADIUS: 6,
   POLYLINE_COLOR: '#6f42c1', // Bootstrap5 purple
@@ -778,8 +781,20 @@ const GpxTrailEditor = {
 
     }
 
+    // Color all the markers here.
+    // Note: The markers are not colored by SCSS / CSS.
+    GpxTrailEditor.colorAllMarkers();
+
     return markers;  // Return the array of marker references
 
+  },
+
+  colorAllMarkers: function() {
+    const colorName = GpxTrailEditor.settings.markerColor || 'pink';
+    const colorValue = GpxTrailEditor.colorMap[colorName] || GpxTrailEditor.colorMap['pink'];
+    document.querySelectorAll('#map .leaflet-marker-icon').forEach(marker => {
+      marker.style.backgroundColor = colorValue;
+    });
   },
 
   bindMarkerEvents: function(marker,i,latLng,dateTime) {
@@ -1021,6 +1036,11 @@ const GpxTrailEditor = {
 
     // Store the polylines in the GpxTrailEditor object for future reference
     GpxTrailEditor.polyline = polyline;
+
+    // Color all the markers here.
+    // Note: The markers are not colored by SCSS / CSS.
+    GpxTrailEditor.colorAllMarkers();
+
   },
 
   setupMapButtons: function() {
@@ -3050,10 +3070,6 @@ const GpxTrailEditor = {
     const radioButtons = modalDialogElm.querySelectorAll('input[type="radio"]');
     const resetButton = document.getElementById('reset-settings');
 
-    // if (!GpxTrailEditor.settings) {
-    //   GpxTrailEditor.settings = {};
-    // }
-
     // Form elements
     const chkboxMarkerBorder = document.getElementById('chkbox-marker-border');
     const chkboxPolylineBorder = document.getElementById('chkbox-polyline-border');
@@ -3136,6 +3152,7 @@ const GpxTrailEditor = {
   
     selectPolylineColor.addEventListener('change', function(event) {
       const newColor = event.target.value;
+      console.log(newColor)
       if (GpxTrailEditor.colorMap[newColor]) {
         localStorage.setItem('polylineColor', newColor);
         GpxTrailEditor.settings.polylineColor = newColor;
@@ -3172,6 +3189,12 @@ const GpxTrailEditor = {
       GpxTrailEditor.settings.markerColor = 'pink';
       GpxTrailEditor.settings.polylineBorder = true;
       GpxTrailEditor.settings.polylineColor = 'purple';
+
+      // Reset polyline color option
+      GpxTrailEditor.normalPolylineOptions.color = GpxTrailEditor.colorMap['purple'];
+
+      // Re-draw markers and polylines with the default settings
+      GpxTrailEditor.updateMarkersAndPolylines();
       
     });
 
@@ -3321,13 +3344,13 @@ GpxTrailEditor.lastMarkerOptions = {
 };
 
 GpxTrailEditor.normalPolylineOptions = {
-  color: GpxTrailEditor.POLYLINE_COLOR,
-  weight: GpxTrailEditor.POLYLINE_WEIGHT
+  color: GpxTrailEditor.colorMap[localStorage.getItem('polylineColor')] || GpxTrailEditor.colorMap['purple'],
+  weight: Number(localStorage.getItem('polylineWeight')) || 4
 };
 
 GpxTrailEditor.borderPolylineOptions = {
   color: 'white',
-  weight: GpxTrailEditor.POLYLINE_WEIGHT + 4 // 4px wider than polyline
+  weight: (Number(localStorage.getItem('polylineWeight')) || 4) + 4 // 4px wider than polyline
 };
 
 window.onscroll = function() {

@@ -1,1 +1,194 @@
-body{font-family:"M PLUS 1p",sans-serif;height:100vh}header nav.navbar .navbar-brand img{height:32px;width:32px}header nav.navbar #goto-github-repo,header nav.navbar #settings{color:#fff}header nav.navbar #goto-github-repo:hover,header nav.navbar #goto-github-repo:active,header nav.navbar #settings:hover,header nav.navbar #settings:active{color:rgba(255,255,255,0.8)}main{height:calc(100vh - 58px)}#op-btn-toolbar #btn-shift,#op-btn-toolbar #btn-fill{display:none}.layout-wrapper{height:calc(100% - 0.5rem)}.layout-wrapper>*{height:100%}.layout-wrapper #map-container,.layout-wrapper #drop-zone-container,.layout-wrapper #table-container{height:100%}#drop-zone-form{height:100%}#data-summary .value{font-weight:bold}#table-container{height:100%;overflow-y:auto}#data-table{border-collapse:collapse}#data-table thead{position:sticky;top:0;background-color:white;z-index:10}#data-table thead th .th-content .dropdown-toggle:after{display:none}#data-table .idx,#data-table .chkbox{width:2rem}#data-table .elevation{max-width:7rem}#map{height:100%}#map .leaflet-top.leaflet-left .leaflet-control-zoom{display:none}#map .leaflet-top.leaflet-left .custom-control{display:flex;flex-direction:column;gap:8px}#map .leaflet-top.leaflet-left .custom-control button.btn-white{background-color:#fff}#map .leaflet-top.leaflet-left .custom-control button.btn-white:hover,#map .leaflet-top.leaflet-left .custom-control button.btn-white:active{background-color:#d3d4d5}#map .leaflet-marker-icon .label{color:#fff;font-size:12px;font-weight:bold}#map .leaflet-marker-icon.first-div-icon{border:2px solid #fff;background-color:#ff0080;border-radius:50%;display:flex;justify-content:center;align-items:center}#map .leaflet-marker-icon.last-div-icon{border:2px solid #fff;background-color:#ff0080;border-radius:50%;display:flex;justify-content:center;align-items:center}#map .leaflet-marker-icon.normal-div-icon{border:2px solid #fff;background-color:#ff0080;border-radius:50%}#map .leaflet-popup-content button.remove-this-point{--bs-btn-padding-y:.1rem;--bs-btn-padding-x:.25rem;--bs-btn-font-size:100%}.tooltip-inner{text-align:unset}footer a:link,footer a:visited{color:#fff}footer a:hover,footer a:active{color:#ddd}footer .avatar{max-width:2rem;height:auto;display:inline-block}#scroll-to-top{position:fixed;bottom:20px;right:20px;display:none}#alert-container{position:fixed;bottom:-100px;left:50%;transform:translateX(-50%);z-index:1050;width:auto;max-width:80%;text-align:center;transition:bottom 0.3s ease-in-out}#alert-container #alert-box .btn-close{margin-left:10px}@media (max-width: 991px){.layout-wrapper{gap:0.5rem}.layout-wrapper>*{height:calc(50vh - 29px - 0.5rem)}}@media (max-width: 767px){.navbar .navbar-brand .title-text{display:none}.navbar #nav-buttons button .label{display:none}}
+/* line 6, styles.scss */
+body {
+  font-family: "M PLUS 1p", sans-serif;
+  height: 100vh;
+}
+
+/* line 14, styles.scss */
+header nav.navbar .navbar-brand img {
+  height: 32px;
+  width: 32px;
+}
+/* line 19, styles.scss */
+header nav.navbar #goto-github-repo, header nav.navbar #settings {
+  color: white;
+}
+/* line 21, styles.scss */
+header nav.navbar #goto-github-repo:hover, header nav.navbar #goto-github-repo:active, header nav.navbar #settings:hover, header nav.navbar #settings:active {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* line 28, styles.scss */
+main {
+  height: calc(100vh - 58px);
+}
+
+/* line 33, styles.scss */
+#op-btn-toolbar #btn-shift, #op-btn-toolbar #btn-fill {
+  display: none;
+}
+
+/* line 38, styles.scss */
+.layout-wrapper {
+  height: calc(100% - 0.5rem);
+}
+/* line 40, styles.scss */
+.layout-wrapper > * {
+  height: 100%;
+}
+/* line 44, styles.scss */
+.layout-wrapper #map-container, .layout-wrapper #drop-zone-container, .layout-wrapper #table-container {
+  height: 100%;
+}
+
+/* line 49, styles.scss */
+#drop-zone-form {
+  height: 100%;
+}
+
+/* line 54, styles.scss */
+#data-summary .value {
+  font-weight: bold;
+}
+
+/* line 59, styles.scss */
+#table-container {
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* line 64, styles.scss */
+#data-table {
+  border-collapse: collapse;
+}
+/* line 67, styles.scss */
+#data-table thead {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 10;
+}
+/* line 75, styles.scss */
+#data-table thead th .th-content .dropdown-toggle:after {
+  display: none;
+}
+/* line 82, styles.scss */
+#data-table .idx, #data-table .chkbox {
+  width: 2rem;
+}
+/* line 86, styles.scss */
+#data-table .elevation {
+  max-width: 7rem;
+}
+
+/* line 92, styles.scss */
+#map {
+  height: 100%;
+}
+/* line 95, styles.scss */
+#map .leaflet-top.leaflet-left .leaflet-control-zoom {
+  display: none;
+}
+/* line 98, styles.scss */
+#map .leaflet-top.leaflet-left .custom-control {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* line 102, styles.scss */
+#map .leaflet-top.leaflet-left .custom-control button.btn-white {
+  background-color: #fff;
+}
+/* line 104, styles.scss */
+#map .leaflet-top.leaflet-left .custom-control button.btn-white:hover, #map .leaflet-top.leaflet-left .custom-control button.btn-white:active {
+  background-color: #d3d4d5;
+}
+/* line 114, styles.scss */
+#map .leaflet-marker-icon .label {
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+}
+/* line 120, styles.scss */
+#map .leaflet-marker-icon.first-div-icon, #map .leaflet-marker-icon.last-div-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+/* line 126, styles.scss */
+#map .leaflet-marker-icon.first-div-icon, #map .leaflet-marker-icon.last-div-icon, #map .leaflet-marker-icon.normal-div-icon {
+  border: 2px solid #fff;
+  border-radius: 50%;
+}
+/* line 136, styles.scss */
+#map .leaflet-popup-content button.remove-this-point {
+  --bs-btn-padding-y: .1rem;
+  --bs-btn-padding-x: .25rem;
+  --bs-btn-font-size: 100%;
+}
+
+/* line 145, styles.scss */
+.tooltip-inner {
+  text-align: unset;
+}
+
+/* line 150, styles.scss */
+footer a:link, footer a:visited {
+  color: #fff;
+}
+/* line 153, styles.scss */
+footer a:hover, footer a:active {
+  color: #ddd;
+}
+/* line 156, styles.scss */
+footer .avatar {
+  max-width: 2rem;
+  height: auto;
+  display: inline-block;
+}
+
+/* line 163, styles.scss */
+#scroll-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: none;
+}
+
+/* line 170, styles.scss */
+#alert-container {
+  position: fixed;
+  bottom: -1000px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1050;
+  width: auto;
+  max-width: 80%;
+  text-align: center;
+  transition: bottom 0.3s ease-in-out;
+}
+/* line 180, styles.scss */
+#alert-container #alert-box .btn-close {
+  margin-left: 10px;
+}
+
+@media (max-width: 991px) {
+  /* line 186, styles.scss */
+  .layout-wrapper {
+    gap: 0.5rem;
+  }
+  /* line 188, styles.scss */
+  .layout-wrapper > * {
+    height: calc(50vh - 29px - 0.5rem);
+  }
+}
+@media (max-width: 767px) {
+  /* line 197, styles.scss */
+  .navbar .navbar-brand .title-text {
+    display: none;
+  }
+  /* line 203, styles.scss */
+  .navbar #nav-buttons button .label {
+    display: none;
+  }
+}
