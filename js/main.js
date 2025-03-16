@@ -14,6 +14,23 @@ const GpxTrailEditor = {
   borderPolyline: [], // an array for the markers on the map
   eleTiles: {}, // Elevation tile data
 
+  colorMap: {
+    "red": "#dc3545",
+    "pink": "#d63384", // pink-500
+    "orange": "#fd7e14",
+    "yellow": "#ffc107",
+    "green": "#198754",
+    "blue": "#0d6efd",
+    "cyan": "#0dcaf0",
+    "indigo": "#6610f2",
+    "purple": "#6f42c1",
+    "teal": "#20c997",
+    "gray": "#6c757d" // gray-600
+  },
+
+  // Object that stores the changes on the setting dialog
+  settings: {},
+
   MARKER_RADIUS: 6,
   POLYLINE_COLOR: '#6f42c1', // Bootstrap5 purple
   POLYLINE_WEIGHT: 4,
@@ -3028,28 +3045,14 @@ const GpxTrailEditor = {
 
   setupSettingDialog: function() {
 
-    const colorMap = {
-      "red": "#dc3545",
-      "pink": "#d63384", // pink-500
-      "orange": "#fd7e14",
-      "yellow": "#ffc107",
-      "green": "#198754",
-      "blue": "#0d6efd",
-      "cyan": "#0dcaf0",
-      "indigo": "#6610f2",
-      "purple": "#6f42c1",
-      "teal": "#20c997",
-      "gray": "#6c757d" // gray-600
-    };  
-
     const modalDialogElm = document.getElementById('modal-settings');
     const primaryContainer = document.getElementById('primary-container');
     const radioButtons = modalDialogElm.querySelectorAll('input[type="radio"]');
     const resetButton = document.getElementById('reset-settings');
 
-    if (!GpxTrailEditor.settings) {
-      GpxTrailEditor.settings = {};
-    }
+    // if (!GpxTrailEditor.settings) {
+    //   GpxTrailEditor.settings = {};
+    // }
 
     // Form elements
     const chkboxMarkerBorder = document.getElementById('chkbox-marker-border');
@@ -3077,7 +3080,30 @@ const GpxTrailEditor = {
         GpxTrailEditor.settings.layoutPosition = selectedValue;
       });
     });
-    
+
+    // Remove all the options in case
+    selectMarkerColor.innerHTML = '';
+    selectPolylineColor.innerHTML = '';
+
+    // Add color options from colorMap
+    Object.entries(GpxTrailEditor.colorMap).forEach(([color, hex]) => {
+      const markerOption = document.createElement('option');
+      markerOption.value = color;
+      markerOption.textContent = color.charAt(0).toUpperCase() + color.slice(1); // "red" → "Red"
+      if (color === (localStorage.getItem('markerColor') || 'pink')) {
+        markerOption.selected = true;
+      }
+      selectMarkerColor.appendChild(markerOption);
+
+      const polylineOption = document.createElement('option');
+      polylineOption.value = color;
+      polylineOption.textContent = color.charAt(0).toUpperCase() + color.slice(1);
+      if (color === (localStorage.getItem('polylineColor') || 'purple')) {
+        polylineOption.selected = true;
+      }
+      selectPolylineColor.appendChild(polylineOption);
+    });
+
     // Apply saved border settings
     chkboxMarkerBorder.checked = savedMarkerBorder !== 'false';
     chkboxPolylineBorder.checked = savedPolylineBorder !== 'false';
@@ -3099,21 +3125,21 @@ const GpxTrailEditor = {
   
     selectMarkerColor.addEventListener('change', function(event) {
       const newColor = event.target.value;
-      if (colorMap[newColor]) {
+      if (GpxTrailEditor.colorMap[newColor]) {
         localStorage.setItem('markerColor', newColor);
         GpxTrailEditor.settings.markerColor = newColor;
         document.querySelectorAll('#map .leaflet-marker-icon').forEach(marker => {
-          marker.style.backgroundColor = colorMap[newColor];
+          marker.style.backgroundColor = GpxTrailEditor.colorMap[newColor];
         });
       }
     });
   
     selectPolylineColor.addEventListener('change', function(event) {
       const newColor = event.target.value;
-      if (colorMap[newColor]) {
+      if (GpxTrailEditor.colorMap[newColor]) {
         localStorage.setItem('polylineColor', newColor);
         GpxTrailEditor.settings.polylineColor = newColor;
-        GpxTrailEditor.normalPolylineOptions.color = colorMap[newColor];
+        GpxTrailEditor.normalPolylineOptions.color = GpxTrailEditor.colorMap[newColor];
         GpxTrailEditor.updateMarkersAndPolylines();
       }
     });
