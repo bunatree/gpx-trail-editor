@@ -1222,15 +1222,27 @@ const GpxTrailEditor = {
       // Update previous last marker to "normal" icon
       if (GpxTrailEditor.markers.length > 0) {
         const lastMarker = GpxTrailEditor.markers[GpxTrailEditor.markers.length - 1];
-        lastMarker.setIcon(GpxTrailEditor.normalMarkerOptions.icon);
-        lastMarker.getElement().classList.remove('last-div-icon');
-        lastMarker.getElement().classList.add('normal-div-icon');
+        // lastMarker.setIcon(GpxTrailEditor.normalMarkerOptions.icon);
+        // lastMarker.getElement().classList.remove('last-div-icon');
+        // lastMarker.getElement().classList.add('normal-div-icon');
+
+        if (GpxTrailEditor.markers.length === 1) {
+          // If it was the only marker, it should become the first marker
+          lastMarker.setIcon(GpxTrailEditor.firstMarkerOptions.icon);
+          lastMarker.getElement().classList.remove('normal-div-icon', 'last-div-icon');
+          lastMarker.getElement().classList.add('first-div-icon');
+        } else {
+          // Otherwise, it should just be a normal marker
+          lastMarker.setIcon(GpxTrailEditor.normalMarkerOptions.icon);
+          lastMarker.getElement().classList.remove('last-div-icon');
+          lastMarker.getElement().classList.add('normal-div-icon');
+        }
+
       }
 
       // Add the new marker as the last marker
       const newMarker = L.marker([lat,lng], GpxTrailEditor.lastMarkerOptions);
       GpxTrailEditor.layerGroup.addLayer(newMarker);
-
       GpxTrailEditor.markers.push(newMarker);
 
       // Connect the new marker with a polyline to the previous one
@@ -2867,10 +2879,21 @@ const GpxTrailEditor = {
   },
 
   setStartLastMarkers: function() {
-    const firstMarker = GpxTrailEditor.markers[0];
-    firstMarker.setIcon(GpxTrailEditor.firstMarkerOptions.icon);
-    const lastMarker = GpxTrailEditor.markers[GpxTrailEditor.markers.length - 1];
-    lastMarker.setIcon(GpxTrailEditor.lastMarkerOptions.icon);
+    if (GpxTrailEditor.markers.length === 1) {
+      const singleMarker = GpxTrailEditor.markers[0];
+      singleMarker.setIcon(GpxTrailEditor.firstMarkerOptions.icon);
+      singleMarker.getElement().classList.remove('last-div-icon');
+      singleMarker.getElement().classList.add('first-div-icon');
+    } else {
+      const firstMarker = GpxTrailEditor.markers[0];
+      firstMarker.setIcon(GpxTrailEditor.firstMarkerOptions.icon);
+      firstMarker.getElement().classList.remove('last-div-icon');
+      firstMarker.getElement().classList.add('first-div-icon');
+      const lastMarker = GpxTrailEditor.markers[GpxTrailEditor.markers.length - 1];
+      lastMarker.setIcon(GpxTrailEditor.lastMarkerOptions.icon);
+      lastMarker.getElement().classList.remove('first-div-icon');
+      lastMarker.getElement().classList.add('last-div-icon');
+    }
   },
 
   reportLatLngError: function() {
