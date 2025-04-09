@@ -14,6 +14,10 @@ const GpxTrailEditor = {
   borderPolyline: [], // an array for the markers on the map
   eleTiles: {}, // Elevation tile data
 
+  // Object that stores the changes on the setting dialog
+  // Put the content later
+  settings: {},
+
   colorMap: {
     "red": "#dc3545",
     "pink": "#d63384", // pink-500
@@ -26,12 +30,6 @@ const GpxTrailEditor = {
     "purple": "#6f42c1",
     "teal": "#20c997",
     "gray": "#6c757d" // gray-600
-  },
-
-  // Object that stores the changes on the setting dialog
-  settings: {
-    markerColor: localStorage.getItem('markerColor') || 'pink',
-    polylineColor: localStorage.getItem('polylineColor') || 'purple'
   },
 
   MARKER_RADIUS: 6,
@@ -736,7 +734,7 @@ const GpxTrailEditor = {
   
   },
 
-  drawPolylines: function(latLngs,shouldDrawBorder = GpxTrailEditor.settings.borderPolylines) {
+  drawPolylines: function(latLngs,shouldDrawBorder = GpxTrailEditor.settings.polylineBorder) {
 
     let border, polyline;
     if (shouldDrawBorder) {
@@ -3063,6 +3061,21 @@ const GpxTrailEditor = {
     return new Promise(function (resolve, reject) { resolve(); });
   },
 
+  getBoolSettingFromLocalStorage: function (key, defaultValue = true) {
+    const val = localStorage.getItem(key);
+    return val === null ? defaultValue : val === 'true';
+  },
+
+  initSettings: function () {
+    this.settings = {
+      markerColor: localStorage.getItem('markerColor') || 'pink',
+      markerBorder: this.getBoolSettingFromLocalStorage('markerBorder', true),
+      polylineColor: localStorage.getItem('polylineColor') || 'purple',
+      polylineBorder: this.getBoolSettingFromLocalStorage('polylineBorder', true),
+      layoutPosition: localStorage.getItem('layoutPosition') || 'primary'
+    };
+  },
+
   setupSettingDialog: function() {
 
     const modalDialogElm = document.getElementById('modal-settings');
@@ -3076,18 +3089,11 @@ const GpxTrailEditor = {
     const selectMarkerColor = document.getElementById('select-marker-color');
     const selectPolylineColor = document.getElementById('select-polyline-color');
       
-    // Get the setting values from localStorage
-    const savedLayout = localStorage.getItem('layoutPosition') || 'primary';
-    const savedMarkerBorder = localStorage.getItem('markerBorder');
-    const savedMarkerColor = localStorage.getItem('markerColor') || 'pink';
-    const savedPolylineBorder = localStorage.getItem('polylineBorder');
-    const savedPolylineColor = localStorage.getItem('polylineColor') || 'purple';
-
     // Apply saved layout setting
     radioButtons.forEach(inputElm => {
-      if (inputElm.value === savedLayout) {
+      if (inputElm.value === this.settings.layoutPosition) {
         inputElm.checked = true;
-        primaryContainer.style.order = (savedLayout === 'primary') ? 0 : 1;
+        primaryContainer.style.order = (this.settings.layoutPosition === 'primary') ? 0 : 1;
       }
       inputElm.addEventListener('click', function(event) {
         const selectedValue = event.target.value;
@@ -3121,10 +3127,10 @@ const GpxTrailEditor = {
     });
 
     // Apply saved border settings
-    chkboxMarkerBorder.checked = savedMarkerBorder !== 'false';
-    chkboxPolylineBorder.checked = savedPolylineBorder !== 'false';
-    selectMarkerColor.value = savedMarkerColor;
-    selectPolylineColor.value = savedPolylineColor;
+    chkboxMarkerBorder.checked = this.settings.markerBorder;
+    chkboxPolylineBorder.checked = this.settings.polylineBorder;
+    selectMarkerColor.value = this.settings.markerColor;
+    selectPolylineColor.value = this.settings.polylineColor;
 
     // Save to localStorage when a user changes the form element value
     chkboxMarkerBorder.addEventListener('change', function() {
@@ -3152,7 +3158,6 @@ const GpxTrailEditor = {
   
     selectPolylineColor.addEventListener('change', function(event) {
       const newColor = event.target.value;
-      console.log(newColor)
       if (GpxTrailEditor.colorMap[newColor]) {
         localStorage.setItem('polylineColor', newColor);
         GpxTrailEditor.settings.polylineColor = newColor;
@@ -3284,8 +3289,7 @@ const GpxTrailEditor = {
     if (element && titleDesc) {
       element.title = titleDesc;
     }
-  },
-
+  }
 
 };
 
@@ -3302,6 +3306,7 @@ document.addEventListener('DOMContentLoaded', function () {
   GpxTrailEditor.setupSummary();
   GpxTrailEditor.setupOpButtonToolbar();
   GpxTrailEditor.setupOpButtonNavbar();
+  GpxTrailEditor.initSettings();
   GpxTrailEditor.setupSettingDialog();
   GpxTrailEditor.applyI18n();
 
