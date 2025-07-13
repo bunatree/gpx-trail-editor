@@ -122,6 +122,9 @@ const GpxTrailEditor = {
     const labelPolylineBorder = settingDialog.querySelector('.row-polyline .label-border');
     labelPolylineBorder.textContent = i18nMsg.settingPolylinesBorder;
 
+    const labelResetButton = settingDialog.querySelector('#reset-settings');
+    labelResetButton.textContent = i18nMsg.settingBtnReset;
+
     settingDialog.querySelectorAll('select option').forEach(opt => {
       opt.classList.forEach(cls => {
         const key = `settingColor${cls.charAt(0).toUpperCase() + cls.slice(1)}`;
@@ -1536,6 +1539,7 @@ const GpxTrailEditor = {
   onSmoothTrackClicked: function() {
 
     const bodyContent = `
+      <div class="alert alert-info">${i18nMsg.modalSmoothTrackInfo}</div>
       <label for="smoothnessRange" class="form-label">${i18nMsg.modalSmoothTrackCorrection} (1 - 5)</label>
       <input type="range" class="form-range" min="1" max="5" step="1" id="smoothnessRange" value="2">
       <div id="smoothnessValue" class="text-center mt-2">2</div>
@@ -1624,6 +1628,7 @@ const GpxTrailEditor = {
 
   onAddRandomNoiseClicked: function() {
     const bodyContent = `
+      <div class="alert alert-info">${i18nMsg.modalAddRandomNoiseInfo}</div>
       <label for="noise-level" class="form-label">${i18nMsg.modalAddRandomNoiseCorrection} (1 - 6)</label>
       <input type="range" class="form-range" min="1" max="6" step="1" id="noise-level" value="3">
       <div id="noise-level-value" class="text-center mt-2">3</div>

@@ -97,7 +97,7 @@ const i18nMsg = (function(lang) {
       "menuSmoothTrackTitle": "Smooth Track",
       "menuSmoothTrackLabel": "Adjusts the coordinates of each point to reduce zigzags in the track.",
       "menuAddRandomNoiseTitle": "Add Random Noise",
-      "menuAddRandomNoiseLabel": "Adds random noise at each point to increase the zigzag of the track",
+      "menuAddRandomNoiseLabel": "Adds random noise at each point to increase the zigzag of the track.",
 
       // Modal Dialog
       "modalStartOverTitle": "Confirm",
@@ -267,11 +267,13 @@ const i18nMsg = (function(lang) {
       "modalStartOverConfirmLabel": "OK",
       "modalStartOverCancelLabel": "キャンセル",
       "modalExportErrorTitle": "エクスポート エラー",
-      "modalSmoothTrackTitle": "ギザギザの平滑化",
+      "modalSmoothTrackTitle": "ジグザグの平滑化",
+      "modalSmoothTrackInfo": "緯度と経度の両方を平滑化（スムージング）します。",
       "modalSmoothTrackConfirmLabel": "OK",
       "modalSmoothTrackCancelLabel": "キャンセル",
       "modalSmoothTrackCorrection": "補正レベル",
       "modalAddRandomNoiseTitle": "ランダムノイズの追加",
+      "modalAddRandomNoiseInfo": "緯度と経度の両方にランダムなノイズを加えます。",
       "modalAddRandomNoiseConfirmLabel": "OK",
       "modalAddRandomNoiseCancelLabel": "キャンセル",
       "modalAddRandomNoiseCorrection": "ノイズ レベル",
