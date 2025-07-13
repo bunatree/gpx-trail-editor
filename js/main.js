@@ -1730,6 +1730,17 @@ const GpxTrailEditor = {
   },
 
   onAddRandomNoiseClicked: function() {
+
+    // Take a backup of points
+    GpxTrailEditor.originalPointsBackup = JSON.parse(JSON.stringify(GpxTrailEditor.points));
+
+    // Initialize or create a preview layer group
+    if (!GpxTrailEditor.previewLayerGroup) {
+      GpxTrailEditor.previewLayerGroup = L.layerGroup().addTo(GpxTrailEditor.map);
+    } else {
+      GpxTrailEditor.previewLayerGroup.clearLayers(); // clear previous preview
+    }
+
     const bodyContent = `
       <div class="alert alert-info">${i18nMsg.modalAddRandomNoiseInfo}</div>
       <label for="noise-level" class="form-label">${i18nMsg.modalAddRandomNoiseCorrection} (1 - 6)</label>
@@ -1743,73 +1754,193 @@ const GpxTrailEditor = {
       i18nMsg.modalAddRandomNoiseConfirmLabel,
       i18nMsg.modalAddRandomNoiseCancelLabel,
       'primary',
-      async () => {
+      async () => { // When OK is clicked
         const noiseLevel = parseInt(document.getElementById('noise-level').value, 10);
-        await GpxTrailEditor.addRandomNoise(noiseLevel);
+        await GpxTrailEditor.addRandomNoiseApply(noiseLevel);
+        GpxTrailEditor.previewLayerGroup.clearLayers();
+        GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
+        GpxTrailEditor.previewLayerGroup = null;
+      },
+      () => { // When Cancel is clicked
+        GpxTrailEditor.previewLayerGroup.clearLayers();
+        GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
+        GpxTrailEditor.previewLayerGroup = null;
       }
     );
-  
+
     const modalDialogElm = document.getElementById('modal-cancel-confirm');
-    modalDialogElm.querySelector('#noise-level').addEventListener('input', (event) => {
+    modalDialogElm.querySelector('#noise-level').addEventListener('input', async (event) => {
       const valueDisplay = modalDialogElm.querySelector('#noise-level-value');
       valueDisplay.textContent = event.target.value;
+      await GpxTrailEditor.addRandomNoisePreview(parseInt(event.target.value, 10));
+    });
+
+    modalDialogElm.addEventListener('shown.bs.modal', async () => {
+      const initialNoiseLevel = parseInt(document.getElementById('noise-level').value, 10);
+      await GpxTrailEditor.addRandomNoisePreview(initialNoiseLevel);
     });
   },
 
-  addRandomNoise: async function(noiseLevel) {
-    // ノイズレベルに基づき小数点以下の桁数を指定
+  addRandomNoisePreview: async function(noiseLevel) {
     const scales = {
-        1: Math.pow(10, -8),  // 小数点第8位
-        2: Math.pow(10, -7),  // 小数点第7位
-        3: Math.pow(10, -6),  // 小数点第6位
-        4: Math.pow(10, -5),  // 小数点第5位
-        5: Math.pow(10, -4),  // 小数点第4位
-        6: Math.pow(10, -3)   // 小数点第3位
+      1: Math.pow(10, -8),
+      2: Math.pow(10, -7),
+      3: Math.pow(10, -6),
+      4: Math.pow(10, -5),
+      5: Math.pow(10, -4),
+      6: Math.pow(10, -3)
     };
     const scale = scales[noiseLevel] || Math.pow(10, -6);
 
-    // ノイズレベル6で倍率を0.5に設定
     const multiplyingFactors = {
       1: 1,
       2: 1,
       3: 1,
       4: 1,
       5: 1,
-      6: 0.5 // 0.5倍に調整
+      6: 0.5
+    };
+    const mf = multiplyingFactors[noiseLevel] || 1;
+  
+    const previewPoints = JSON.parse(JSON.stringify(GpxTrailEditor.originalPointsBackup));
+
+    for (let i = 0; i < previewPoints.length; i++) {
+      const point = previewPoints[i];
+  
+      const noiseLat = (Math.random() - 0.5) * 2 * scale * mf;
+      const noiseLng = (Math.random() - 0.5) * 2 * scale * mf;
+  
+      point.latitude += noiseLat;
+      point.longitude += noiseLng;
+    }
+  
+    GpxTrailEditor.previewLayerGroup.clearLayers();
+    const latLngs = previewPoints.map(p => [p.latitude, p.longitude]);
+      const previewPolyline = L.polyline(latLngs, {
+      color: GpxTrailEditor.PREVIEW_POLYLINE_COLOR,
+      weight: 3,
+      opacity: 0.7
+    }).addTo(GpxTrailEditor.previewLayerGroup);
+
+    previewPoints.forEach((p, index) => {
+      let markerOptions = {
+        radius: 3,
+        color: GpxTrailEditor.PREVIEW_MARKER_COLOR,
+        fillColor: GpxTrailEditor.PREVIEW_MARKER_COLOR,
+        fillOpacity: 0.8,
+        weight: 1
+      };
+      if (index === 0 || index === previewPoints.length - 1) {
+        markerOptions.radius = 5;
+      }
+      L.circleMarker([p.latitude, p.longitude], markerOptions).addTo(GpxTrailEditor.previewLayerGroup);
+    });
+  },
+
+  addRandomNoiseApply: async function(noiseLevel) {
+    const scales = {
+      1: Math.pow(10, -8),
+      2: Math.pow(10, -7),
+      3: Math.pow(10, -6),
+      4: Math.pow(10, -5),
+      5: Math.pow(10, -4),
+      6: Math.pow(10, -3)
+    };
+    const scale = scales[noiseLevel] || Math.pow(10, -6);
+
+    const multiplyingFactors = {
+      1: 1,
+      2: 1,
+      3: 1,
+      4: 1,
+      5: 1,
+      6: 0.5
     };
     const mf = multiplyingFactors[noiseLevel] || 1;
   
     for (let i = 0; i < GpxTrailEditor.points.length; i++) {
       const point = GpxTrailEditor.points[i];
   
-      // ランダムなノイズを計算
       const noiseLat = (Math.random() - 0.5) * 2 * scale * mf;
       const noiseLng = (Math.random() - 0.5) * 2 * scale * mf;
   
-      // ノイズを適用
       point.latitude += noiseLat;
       point.longitude += noiseLng;
   
-      // 国土地理院APIを使って新しい標高を取得
       let newElevation;
       try {
-          newElevation = await GpxTrailEditor.latLngToEle(point.latitude, point.longitude);
+        newElevation = await GpxTrailEditor.latLngToEle(point.latitude, point.longitude);
       } catch (error) {
-          console.error('Failed to fetch elevation:', error);
-          newElevation = null;
+        console.error('Failed to fetch elevation:', error);
+        newElevation = null;
       }
       point.elevation = newElevation;
       GpxTrailEditor.updateTableRow(i, { "lat": point.latitude, "lng": point.longitude }, newElevation);
   
-      // マーカーの位置とテーブル表示を更新
       if (GpxTrailEditor.markers[i]) {
-          GpxTrailEditor.markers[i].setLatLng([point.latitude, point.longitude]);
+        GpxTrailEditor.markers[i].setLatLng([point.latitude, point.longitude]);
       }
     }
   
-    // ポリラインの再描画
+    // Re-draw
     GpxTrailEditor.updateMarkersAndPolylines();
+    GpxTrailEditor.parseSummary(GpxTrailEditor.points);
   },
+
+  // addRandomNoise: async function(noiseLevel) {
+  //   // ノイズレベルに基づき小数点以下の桁数を指定
+  //   const scales = {
+  //       1: Math.pow(10, -8),  // 小数点第8位
+  //       2: Math.pow(10, -7),  // 小数点第7位
+  //       3: Math.pow(10, -6),  // 小数点第6位
+  //       4: Math.pow(10, -5),  // 小数点第5位
+  //       5: Math.pow(10, -4),  // 小数点第4位
+  //       6: Math.pow(10, -3)   // 小数点第3位
+  //   };
+  //   const scale = scales[noiseLevel] || Math.pow(10, -6);
+
+  //   // ノイズレベル6で倍率を0.5に設定
+  //   const multiplyingFactors = {
+  //     1: 1,
+  //     2: 1,
+  //     3: 1,
+  //     4: 1,
+  //     5: 1,
+  //     6: 0.5 // 0.5倍に調整
+  //   };
+  //   const mf = multiplyingFactors[noiseLevel] || 1;
+  
+  //   for (let i = 0; i < GpxTrailEditor.points.length; i++) {
+  //     const point = GpxTrailEditor.points[i];
+  
+  //     // ランダムなノイズを計算
+  //     const noiseLat = (Math.random() - 0.5) * 2 * scale * mf;
+  //     const noiseLng = (Math.random() - 0.5) * 2 * scale * mf;
+  
+  //     // ノイズを適用
+  //     point.latitude += noiseLat;
+  //     point.longitude += noiseLng;
+  
+  //     // 国土地理院APIを使って新しい標高を取得
+  //     let newElevation;
+  //     try {
+  //         newElevation = await GpxTrailEditor.latLngToEle(point.latitude, point.longitude);
+  //     } catch (error) {
+  //         console.error('Failed to fetch elevation:', error);
+  //         newElevation = null;
+  //     }
+  //     point.elevation = newElevation;
+  //     GpxTrailEditor.updateTableRow(i, { "lat": point.latitude, "lng": point.longitude }, newElevation);
+  
+  //     // マーカーの位置とテーブル表示を更新
+  //     if (GpxTrailEditor.markers[i]) {
+  //         GpxTrailEditor.markers[i].setLatLng([point.latitude, point.longitude]);
+  //     }
+  //   }
+  
+  //   // ポリラインの再描画
+  //   GpxTrailEditor.updateMarkersAndPolylines();
+  // },
 
   showAlert: function(type,message,duration = 4000) {
 
