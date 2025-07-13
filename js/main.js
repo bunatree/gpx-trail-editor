@@ -2,6 +2,7 @@ const GpxTrailEditor = {
 
   map: null,
   layerGroup: null,
+  previewLayerGroup: null, // for smoothing and zigzag preview
 
   isDragModeActive: false, // represents the "marker drag mode"
   isInsertionModeActive: false, // represents the "marker insertion mode"
@@ -9,6 +10,7 @@ const GpxTrailEditor = {
 
   logName: '', // the name of the trail log
   points: [], // an array for the points in the table
+  originalPointsBackup: [], // an array as a backup of points
   markers: [], // an array for the markers on the map
   polyline: [], // an array for the markers on the map
   borderPolyline: [], // an array for the markers on the map
@@ -32,19 +34,12 @@ const GpxTrailEditor = {
     "gray": "#6c757d" // gray-600
   },
 
+  PREVIEW_POLYLINE_COLOR: '#7393b3', // Blue Gray
+  PREVIEW_MARKER_COLOR: '#7393b3',   // Blue Gray
+
   MARKER_RADIUS: 6,
   POLYLINE_COLOR: '#6f42c1', // Bootstrap5 purple
   POLYLINE_WEIGHT: 4,
-
-  // normalPolylineOptions: {
-  //   color: '#6f42c1', // Bootstrap5 purple
-  //   weight: 4,
-  // },
-
-  // borderPolylineOptions: {
-  //   color: 'white',
-  //   weight: 8,
-  // },
 
   SPEED_RATE_UP_STEEP:        0.5, 	//急な上りの速度比(平地を1として)
   SPEED_RATE_UP_GENTLE:       0.8, 	//なだらかな上りの速度比
@@ -172,7 +167,7 @@ const GpxTrailEditor = {
     modalHeaderElm.classList.remove('text-bg-info','text-bg-success','text-bg-warning','text-bg-danger');
   },
 
-  showQuestionDialog: function(titleText,bodyContent,confirmLabel,cancelLabel,type,onConfirm) {
+  showQuestionDialog: function(titleText,bodyContent,confirmLabel,cancelLabel,type,onConfirm, onCancel) {
 
     const modalDialogElm = document.getElementById('modal-cancel-confirm');
     const modalHeaderElm = modalDialogElm.querySelector('.modal-header');
@@ -196,6 +191,10 @@ const GpxTrailEditor = {
     confirmButtonElm.replaceWith(confirmButtonElm.cloneNode(true));
     const newConfirmButtonElm = modalDialogElm.querySelector('.btn-confirm');
 
+    // Remove existing event listener from cancel button and add new one
+    cancelButtonElm.replaceWith(cancelButtonElm.cloneNode(true));
+    const newCancelButtonElm = modalDialogElm.querySelector('.btn-cancel');
+
     newConfirmButtonElm.classList.remove('btn-primary','btn-info','btn-warning','btn-danger');
     newConfirmButtonElm.classList.add('btn-' + type);
 
@@ -205,7 +204,32 @@ const GpxTrailEditor = {
         onConfirm();
       }
       const modalInstance = bootstrap.Modal.getInstance(modalDialogElm);
-      modalInstance.hide(); 
+      modalInstance.hide();
+    });
+
+    // When the Cancel button is clicked or modal is dismissed (via X button or clicking outside)
+    newCancelButtonElm.addEventListener('click', () => {
+      if (onCancel) {
+        onCancel();
+      }
+      const modalInstance = bootstrap.Modal.getInstance(modalDialogElm);
+      modalInstance.hide();
+    });
+
+    // Add listener for modal hide event (e.g., when clicking outside or 'x' button)
+    // This catches cases where onCancel might not be explicitly called by button clicks
+    modalDialogElm.addEventListener('hide.bs.modal', function onModalHide() {
+        if (onCancel && !modalDialogElm.dataset.confirmed) {
+          onCancel();
+        }
+        modalDialogElm.dataset.confirmed = false; // reset the flag
+        // Run the event listner only once
+        modalDialogElm.removeEventListener('hide.bs.modal', onModalHide);
+    });
+
+    // Set the flag that represents the Confirm button is clicked
+    newConfirmButtonElm.addEventListener('click', () => {
+      modalDialogElm.dataset.confirmed = true; // flag
     });
 
     const modaiDialog = new bootstrap.Modal(modalDialogElm);
@@ -220,7 +244,6 @@ const GpxTrailEditor = {
         });
       }, 0);
     });
-
   },
 
   initMap: function() {
@@ -1538,6 +1561,16 @@ const GpxTrailEditor = {
 
   onSmoothTrackClicked: function() {
 
+    // 既存のデータをバックアップ
+    GpxTrailEditor.originalPointsBackup = JSON.parse(JSON.stringify(GpxTrailEditor.points));
+
+    // プレビューレイヤーグループを初期化または作成
+    if (!GpxTrailEditor.previewLayerGroup) {
+      GpxTrailEditor.previewLayerGroup = L.layerGroup().addTo(GpxTrailEditor.map);
+    } else {
+      GpxTrailEditor.previewLayerGroup.clearLayers(); // 前回のプレビューをクリア
+    }
+
     const bodyContent = `
       <div class="alert alert-info">${i18nMsg.modalSmoothTrackInfo}</div>
       <label for="smoothnessRange" class="form-label">${i18nMsg.modalSmoothTrackCorrection} (1 - 5)</label>
@@ -1551,59 +1584,129 @@ const GpxTrailEditor = {
       i18nMsg.modalSmoothTrackConfirmLabel,
       i18nMsg.modalSmoothTrackCancelLabel,
       'primary',
-      async () => {
-        // スライダーの値を0.1〜0.5の範囲に変換
+      async () => { // 「OK」クリック時の処理
         const smoothnessLevel = parseInt(document.getElementById('smoothnessRange').value) * 0.1;
-        await GpxTrailEditor.smoothTrack(smoothnessLevel);
+        // 実際のデータにスムージングを適用 (Elevation API呼び出しを含む)
+        await GpxTrailEditor.smoothTrackApply(smoothnessLevel); // ★新関数
+        GpxTrailEditor.previewLayerGroup.clearLayers(); // プレビューをクリア
+        GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup); // プレビューレイヤーを削除
+        GpxTrailEditor.previewLayerGroup = null; // リセット
+      },
+      () => { // 「キャンセル」クリック時の処理 (showQuestionDialogにキャンセル時のコールバックを追加する必要がある)
+        // 何も変更しないので、プレビューをクリアするだけ
+        GpxTrailEditor.previewLayerGroup.clearLayers();
+        GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
+        GpxTrailEditor.previewLayerGroup = null; // リセット
+        // ここではGpxTrailEditor.pointsはoriginalPointsBackupに戻す必要はない
+        // onConfirmのところでGpxTrailEditor.pointsを更新するから
       }
     );
 
     const modalDialogElm = document.getElementById('modal-cancel-confirm');
-    modalDialogElm.querySelector('#smoothnessRange').addEventListener('input', (event) => {
+    modalDialogElm.querySelector('#smoothnessRange').addEventListener('input', async (event) => {
       const smoothnessDisplay = modalDialogElm.querySelector('#smoothnessValue');
       const smoothnessLevel = parseInt(event.target.value);
       smoothnessDisplay.textContent = smoothnessLevel;
+      // プレビューを更新
+      await GpxTrailEditor.smoothTrackPreview(smoothnessLevel * 0.1); // ★新関数
+    });
+
+    // モーダル表示時に一度プレビューを初期描画
+    modalDialogElm.addEventListener('shown.bs.modal', async () => {
+        // 現在のスライダー値で初期プレビュー
+        const initialSmoothnessLevel = parseInt(document.getElementById('smoothnessRange').value) * 0.1;
+        await GpxTrailEditor.smoothTrackPreview(initialSmoothnessLevel);
     });
   },
 
-  smoothTrack: async function(smoothnessLevel) {
+  // Preview (Don't call the Elevation API)
+  smoothTrackPreview: async function(smoothnessLevel) {
+
+    // Take a backup
+    const previewPoints = JSON.parse(JSON.stringify(GpxTrailEditor.originalPointsBackup));
+    
+    // Preview the smoothing operation (Don't update the elevations)
+    for (let i = 1; i < previewPoints.length - 1; i++) {
+      const prev = previewPoints[i - 1];
+      const current = previewPoints[i];
+      const next = previewPoints[i + 1];
+
+      const angleABC = GpxTrailEditor.calculateAngle(prev, current, next);
+
+      if (angleABC < 180) {
+        const midLat = (prev.latitude + next.latitude) / 2;
+        const midLng = (prev.longitude + next.longitude) / 2;
+
+        current.latitude = current.latitude * (1 - smoothnessLevel) + midLat * smoothnessLevel;
+        current.longitude = current.longitude * (1 - smoothnessLevel) + midLng * smoothnessLevel;
+      }
+    }
+
+    // Clear the preview layer and re-draw
+    GpxTrailEditor.previewLayerGroup.clearLayers();
+    const latLngs = previewPoints.map(p => [p.latitude, p.longitude]);
+    const previewPolyline = L.polyline(latLngs, {
+      color: GpxTrailEditor.PREVIEW_POLYLINE_COLOR,
+      weight: 3,
+      opacity: 0.7
+    }).addTo(GpxTrailEditor.previewLayerGroup);
+
+    // Draw preview markers
+    previewPoints.forEach((p, index) => {
+      let markerOptions = {
+        radius: 3,
+        color: GpxTrailEditor.PREVIEW_MARKER_COLOR,
+        fillColor: GpxTrailEditor.PREVIEW_MARKER_COLOR,
+        fillOpacity: 0.8,
+        weight: 1
+      };
+      if (index === 0 || index === previewPoints.length - 1) {
+        markerOptions.radius = 5;
+      }
+      L.circleMarker([p.latitude, p.longitude], markerOptions).addTo(GpxTrailEditor.previewLayerGroup);
+    });
+  },
+
+  // Apply (Call the Elevation API)
+  smoothTrackApply: async function(smoothnessLevel) {
+
+    // Update the data in GpxTrailEditor.points
     for (let i = 1; i < GpxTrailEditor.points.length - 1; i++) {
       const prev = GpxTrailEditor.points[i - 1];
       const current = GpxTrailEditor.points[i];
       const next = GpxTrailEditor.points[i + 1];
 
-      // A-B-C間の角度を計算
       const angleABC = GpxTrailEditor.calculateAngle(prev, current, next);
 
-      // 角度が180度未満なら補正を行う
       if (angleABC < 180) {
         const midLat = (prev.latitude + next.latitude) / 2;
         const midLng = (prev.longitude + next.longitude) / 2;
 
-        // 指定された調整量に基づいて移動
         current.latitude = current.latitude * (1 - smoothnessLevel) + midLat * smoothnessLevel;
         current.longitude = current.longitude * (1 - smoothnessLevel) + midLng * smoothnessLevel;
       }
 
-      // 国土地理院APIから新しい標高を取得
+      // Obtain new elevation
       let newElevation;
       try {
-          newElevation = await GpxTrailEditor.latLngToEle(current.latitude, current.longitude);
+        newElevation = await GpxTrailEditor.latLngToEle(current.latitude, current.longitude);
       } catch (error) {
-          console.error('Failed to fetch elevation:', error);
-          newElevation = null;
+        console.error('Failed to fetch elevation:', error);
+        newElevation = null;
       }
-      
       GpxTrailEditor.points[i].elevation = newElevation;
 
-      // 更新後の座標と標高をテーブルに反映
+      // Update the table content
       GpxTrailEditor.updateTableRow(i, { "lat": current.latitude, "lng": current.longitude }, newElevation);
 
-      // 更新後の座標をマーカーに適用
+      // Update the markers
       GpxTrailEditor.markers[i].setLatLng([current.latitude, current.longitude]);
     }
 
+    // Re-draw the polylines
     GpxTrailEditor.updateMarkersAndPolylines();
+    // Re-calculate the summary
+    GpxTrailEditor.parseSummary(GpxTrailEditor.points);
   },
 
   calculateAngle: function(pointA, pointB, pointC) {
