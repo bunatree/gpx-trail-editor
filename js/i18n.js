@@ -112,7 +112,13 @@ const i18nMsg = (function(lang) {
       "modalAddRandomNoiseTitle": "Add Random Noise",
       "modalAddRandomNoiseConfirmLabel": "OK",
       "modalAddRandomNoiseCancelLabel": "Cancel",
-      "modalAddRandomNoiseCorrection": "Noise Level",
+      "modalAddRandomNoiseLevel": "Noise Level",
+      "modalThinOutPointsTitle": "Thin Out Points",
+      "modalThinOutPointsInfo": "Thins out points at specified intervals.",
+      "modalThinOutPointsHint": "Points will remain at the specified interval, and intermediate points will be deleted. For example, if you select '2', points will remain every two points, and the points in between will be deleted.",
+      "modalThinOutPointsLevel": "Interval to Keep Points",
+      "modalThinOutPointsLevelConfirmLabel": "OK",
+      "modalThinOutPointsLevelCancelLabel": "Cancel",
 
       // Setting Dialog
       "settingDialogTitle": "Settings",
@@ -276,7 +282,13 @@ const i18nMsg = (function(lang) {
       "modalAddRandomNoiseInfo": "緯度と経度の両方にランダムなノイズを加えます。",
       "modalAddRandomNoiseConfirmLabel": "OK",
       "modalAddRandomNoiseCancelLabel": "キャンセル",
-      "modalAddRandomNoiseCorrection": "ノイズ レベル",
+      "modalAddRandomNoiseLevel": "ノイズ レベル",
+      "modalThinOutPointsTitle": "ポイントの間引き",
+      "modalThinOutPointsInfo": "指定した間隔でポイントを間引きます。",
+      "modalThinOutPointsHint": "指定した間隔でポイントが残り、間にあるポイントは削除されます。例: '2'を選択すると、2個ごとにポイントが残り、間のポイントが削除されます。",
+      "modalThinOutPointsLevel": "ポイントを残す間隔",
+      "modalThinOutPointsLevelConfirmLabel": "OK",
+      "modalThinOutPointsLevelCancelLabel": "キャンセル",
 
       // Setting Dialog
       "settingDialogTitle": "設定",

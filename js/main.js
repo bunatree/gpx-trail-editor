@@ -363,6 +363,11 @@ const GpxTrailEditor = {
                 const points = GpxTrailEditor.convertTableToPoints();
                 GpxTrailEditor.points = points;
 
+        // ★★★ 追加する行 ★★★
+        // GPXデータが正常に解析され、GpxTrailEditor.pointsに設定された直後にバックアップを作成
+        GpxTrailEditor.originalPointsBackup = JSON.parse(JSON.stringify(GpxTrailEditor.points));
+        // ★★★ ここまで ★★★
+
                 GpxTrailEditor.parseSummary(points);
                 GpxTrailEditor.showSummary();
 
@@ -989,18 +994,17 @@ const GpxTrailEditor = {
 
   setPointInfo: function(index,curDateTime,curLatitude,curLongitude,curElevation,toNextDistance,toNextElevation,toNextSeconds,toNextSpeedInfo) {
     if (GpxTrailEditor.points[index]) {
-      GpxTrailEditor.points[index] = {
-        "index": index,
-        "datetime": curDateTime,
-        "latitude": curLatitude,
-        "longitude": curLongitude,
-        "elevation": curElevation,
-        "toNextDistance": toNextDistance,
-        "toNextElevation": toNextElevation,
-        "toNextSeconds": toNextSeconds,
-        "toNextSpeedRatio": toNextSpeedInfo.speedRatio,
-        "toNextSpeedInfo": toNextSpeedInfo
-      };
+      const targetPoint = GpxTrailEditor.points[index];
+      targetPoint.index = index;
+      targetPoint.datetime = curDateTime;
+      targetPoint.latitude = curLatitude;
+      targetPoint.longitude = curLongitude;
+      targetPoint.elevation = curElevation;
+      targetPoint.toNextDistance = toNextDistance;
+      targetPoint.toNextElevation = toNextElevation;
+      targetPoint.toNextSeconds = toNextSeconds;
+      targetPoint.toNextSpeedRatio = toNextSpeedInfo.speedRatio;
+      targetPoint.toNextSpeedInfo = toNextSpeedInfo;
     }
   },
 
@@ -1562,21 +1566,23 @@ const GpxTrailEditor = {
 
   onSmoothTrackClicked: function() {
 
-    // 既存のデータをバックアップ
-    GpxTrailEditor.originalPointsBackup = JSON.parse(JSON.stringify(GpxTrailEditor.points));
-
-    // プレビューレイヤーグループを初期化または作成
-    if (!GpxTrailEditor.previewLayerGroup) {
-      GpxTrailEditor.previewLayerGroup = L.layerGroup().addTo(GpxTrailEditor.map);
-    } else {
+    // プレビューレイヤーグループが存在し、かつマップに追加されている場合のみクリア
+    if (GpxTrailEditor.previewLayerGroup && GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
       GpxTrailEditor.previewLayerGroup.clearLayers(); // 前回のプレビューをクリア
+    } else if (!GpxTrailEditor.previewLayerGroup) {
+      // プレビューレイヤーグループがまだ存在しない場合のみ新しく作成してマップに追加
+      GpxTrailEditor.previewLayerGroup = L.layerGroup();
+    }
+    // LayerGroupが存在するがマップに追加されていない場合は、ここで追加
+    if (!GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
+        GpxTrailEditor.previewLayerGroup.addTo(GpxTrailEditor.map);
     }
 
     const bodyContent = `
-      <div class="alert alert-info">${i18nMsg.modalSmoothTrackInfo}</div>
-      <label for="smoothnessRange" class="form-label">${i18nMsg.modalSmoothTrackCorrection} (1 - 5)</label>
-      <input type="range" class="form-range" min="1" max="5" step="1" id="smoothnessRange" value="2">
-      <div id="smoothnessValue" class="text-center mt-2">2</div>
+      <div class="desc mb-3">${i18nMsg.modalSmoothTrackInfo}</div>
+      <label for="smoothnessRange" class="form-label">${i18nMsg.modalSmoothTrackCorrection} (0 - 5)</label>
+      <input type="range" class="form-range" min="0" max="5" step="1" id="smoothnessRange" value="0">
+      <div id="smoothnessValue" class="text-center mt-2">0</div>
     `;
 
     GpxTrailEditor.showQuestionDialog(
@@ -1587,19 +1593,19 @@ const GpxTrailEditor = {
       'primary',
       async () => { // 「OK」クリック時の処理
         const smoothnessLevel = parseInt(document.getElementById('smoothnessRange').value) * 0.1;
-        // 実際のデータにスムージングを適用 (Elevation API呼び出しを含む)
-        await GpxTrailEditor.smoothTrackApply(smoothnessLevel); // ★新関数
-        GpxTrailEditor.previewLayerGroup.clearLayers(); // プレビューをクリア
-        GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup); // プレビューレイヤーを削除
-        GpxTrailEditor.previewLayerGroup = null; // リセット
+        await GpxTrailEditor.smoothTrackApply(smoothnessLevel);
+        if (GpxTrailEditor.previewLayerGroup) { // nullチェックを追加
+          GpxTrailEditor.previewLayerGroup.clearLayers();
+          GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
+          GpxTrailEditor.previewLayerGroup = null;
+        }
       },
-      () => { // 「キャンセル」クリック時の処理 (showQuestionDialogにキャンセル時のコールバックを追加する必要がある)
-        // 何も変更しないので、プレビューをクリアするだけ
-        GpxTrailEditor.previewLayerGroup.clearLayers();
-        GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
-        GpxTrailEditor.previewLayerGroup = null; // リセット
-        // ここではGpxTrailEditor.pointsはoriginalPointsBackupに戻す必要はない
-        // onConfirmのところでGpxTrailEditor.pointsを更新するから
+      () => { // 「キャンセル」クリック時の処理
+        if (GpxTrailEditor.previewLayerGroup) { // nullチェックを追加
+          GpxTrailEditor.previewLayerGroup.clearLayers();
+          GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
+          GpxTrailEditor.previewLayerGroup = null;
+        }
       }
     );
 
@@ -1614,16 +1620,15 @@ const GpxTrailEditor = {
 
     // モーダル表示時に一度プレビューを初期描画
     modalDialogElm.addEventListener('shown.bs.modal', async () => {
-        // 現在のスライダー値で初期プレビュー
-        const initialSmoothnessLevel = parseInt(document.getElementById('smoothnessRange').value) * 0.1;
-        await GpxTrailEditor.smoothTrackPreview(initialSmoothnessLevel);
+      // 現在のスライダー値で初期プレビュー
+      const initialSmoothnessLevel = parseInt(document.getElementById('smoothnessRange').value) * 0.1;
+      await GpxTrailEditor.smoothTrackPreview(initialSmoothnessLevel);
     });
   },
 
   // Preview (Don't call the Elevation API)
   smoothTrackPreview: async function(smoothnessLevel) {
 
-    // Take a backup
     const previewPoints = JSON.parse(JSON.stringify(GpxTrailEditor.originalPointsBackup));
     
     // Preview the smoothing operation (Don't update the elevations)
@@ -1732,21 +1737,23 @@ const GpxTrailEditor = {
 
   onAddRandomNoiseClicked: function() {
 
-    // Take a backup of points
-    GpxTrailEditor.originalPointsBackup = JSON.parse(JSON.stringify(GpxTrailEditor.points));
-
-    // Initialize or create a preview layer group
-    if (!GpxTrailEditor.previewLayerGroup) {
-      GpxTrailEditor.previewLayerGroup = L.layerGroup().addTo(GpxTrailEditor.map);
-    } else {
-      GpxTrailEditor.previewLayerGroup.clearLayers(); // clear previous preview
+    // プレビューレイヤーグループが存在し、かつマップに追加されている場合のみクリア
+    if (GpxTrailEditor.previewLayerGroup && GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
+      GpxTrailEditor.previewLayerGroup.clearLayers(); // 前回のプレビューをクリア
+    } else if (!GpxTrailEditor.previewLayerGroup) {
+      // プレビューレイヤーグループがまだ存在しない場合のみ新しく作成してマップに追加
+      GpxTrailEditor.previewLayerGroup = L.layerGroup(); // まずLayerGroupを作成
+    }
+    // LayerGroupが存在するがマップに追加されていない場合は、ここで追加
+    if (!GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
+        GpxTrailEditor.previewLayerGroup.addTo(GpxTrailEditor.map);
     }
 
     const bodyContent = `
-      <div class="alert alert-info">${i18nMsg.modalAddRandomNoiseInfo}</div>
-      <label for="noise-level" class="form-label">${i18nMsg.modalAddRandomNoiseCorrection} (1 - 6)</label>
-      <input type="range" class="form-range" min="1" max="6" step="1" id="noise-level" value="3">
-      <div id="noise-level-value" class="text-center mt-2">3</div>
+      <div class="desc mb-3">${i18nMsg.modalAddRandomNoiseInfo}</div>
+      <label for="noise-level" class="form-label">${i18nMsg.modalAddRandomNoiseLevel} (0 - 5)</label>
+      <input type="range" class="form-range" min="0" max="5" step="1" id="noise-level" value="0">
+      <div id="noise-level-value" class="text-center mt-2">0</div>
     `;
   
     GpxTrailEditor.showQuestionDialog(
@@ -1756,16 +1763,22 @@ const GpxTrailEditor = {
       i18nMsg.modalAddRandomNoiseCancelLabel,
       'primary',
       async () => { // When OK is clicked
-        const noiseLevel = parseInt(document.getElementById('noise-level').value, 10);
+       const noiseLevel = parseInt(document.getElementById('noise-level').value, 10);
         await GpxTrailEditor.addRandomNoiseApply(noiseLevel);
-        GpxTrailEditor.previewLayerGroup.clearLayers();
-        GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
-        GpxTrailEditor.previewLayerGroup = null;
+        // プレビューが完了し、本番データに適用されたのでプレビューレイヤーをクリーンアップ
+        if (GpxTrailEditor.previewLayerGroup) { // nullチェックを追加
+            GpxTrailEditor.previewLayerGroup.clearLayers();
+            GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
+            GpxTrailEditor.previewLayerGroup = null;
+        }
       },
       () => { // When Cancel is clicked
-        GpxTrailEditor.previewLayerGroup.clearLayers();
-        GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
-        GpxTrailEditor.previewLayerGroup = null;
+     // キャンセルされたのでプレビューレイヤーをクリーンアップ
+        if (GpxTrailEditor.previewLayerGroup) { // nullチェックを追加
+            GpxTrailEditor.previewLayerGroup.clearLayers();
+            GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
+            GpxTrailEditor.previewLayerGroup = null;
+        }
         // Clear the noise offsets
         GpxTrailEditor.generatedNoiseOffsets = [];
       }
@@ -1851,6 +1864,7 @@ const GpxTrailEditor = {
     // Show an error when there is no noise offsets from the preview
     if (GpxTrailEditor.generatedNoiseOffsets.length === 0 || GpxTrailEditor.generatedNoiseOffsets.length !== GpxTrailEditor.points.length) {
       console.error('No noise offsets generated for apply, or length mismatch.');
+      GpxTrailEditor.generatedNoiseOffsets = [];
       return;
     }
   
@@ -1863,23 +1877,38 @@ const GpxTrailEditor = {
       point.latitude += noiseOffset.lat;
       point.longitude += noiseOffset.lng;
   
-      let newElevation;
-      try {
-        newElevation = await GpxTrailEditor.latLngToEle(point.latitude, point.longitude);
-      } catch (error) {
-        console.error('Failed to fetch elevation:', error);
-        newElevation = null;
-      }
-      point.elevation = newElevation;
-      GpxTrailEditor.updateTableRow(i, { "lat": point.latitude, "lng": point.longitude }, newElevation);
-  
       if (GpxTrailEditor.markers[i]) {
         GpxTrailEditor.markers[i].setLatLng([point.latitude, point.longitude]);
       }
+
+      // Note: Elevation and table row updates are postponed.
+
     }
   
     // Re-draw
     GpxTrailEditor.updateMarkersAndPolylines();
+
+    // Update elevations
+    const elevationPromises = GpxTrailEditor.points.map(point =>
+      GpxTrailEditor.latLngToEle(point.latitude, point.longitude)
+    );
+
+    let fetchedElevations;
+    try {
+      fetchedElevations = await Promise.all(elevationPromises);
+    } catch (error) {
+      console.error('Failed to fetch one or more elevations:', error);
+      fetchedElevations = GpxTrailEditor.points.map(() => null);
+    }
+
+    // Update elevations in GpxTrailEditor.points and update table rows
+    for (let i = 0; i < GpxTrailEditor.points.length; i++) {
+      const point = GpxTrailEditor.points[i];
+      point.elevation = fetchedElevations[i];
+      GpxTrailEditor.updateTableRow(i, { "lat": point.latitude, "lng": point.longitude }, point.elevation);
+    }
+
+    // Re-calculate the summary
     GpxTrailEditor.parseSummary(GpxTrailEditor.points);
 
     // Clear the noise offsets
@@ -2540,7 +2569,9 @@ const GpxTrailEditor = {
   },
 
   onThinOutPointsClicked: function() {
+
     const bodyContent = `
+    <div class="desc mb-3">${i18nMsg.modalThinOutPointsInfo}</div>
         <label for="thinOutRange" class="form-label">
           ポイントを残す間隔 (2 - 6)
           <i class="bi bi-question-circle-fill" data-bs-toggle="tooltip" data-bs-placement="right" 
