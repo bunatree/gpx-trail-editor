@@ -1584,6 +1584,7 @@ const GpxTrailEditor = {
     `;
 
     const modalDialogElm = document.getElementById('modal-cancel-confirm');
+    const smoothingFactor = 0.15;
 
     GpxTrailEditor.showQuestionDialog(
       i18nMsg.modalSmoothTrackTitle,
@@ -1592,7 +1593,7 @@ const GpxTrailEditor = {
       i18nMsg.modalSmoothTrackCancelLabel,
       'primary',
       async () => { // When the OK button is clicked
-         const smoothnessLevel = parseInt(modalDialogElm.querySelector('#smoothness-level').value) * 0.1;
+         const smoothnessLevel = parseInt(modalDialogElm.querySelector('#smoothness-level').value) * smoothingFactor;
         await GpxTrailEditor.smoothTrackApply(smoothnessLevel);
       },
       () => { // When the Cancel button is clicked
@@ -1606,12 +1607,12 @@ const GpxTrailEditor = {
       smoothnessSlider.addEventListener('input', async (event) => {
         const smoothnessLevel = parseInt(event.target.value);
         smoothnessValueDisplay.textContent = smoothnessLevel;
-        await GpxTrailEditor.smoothTrackPreview(smoothnessLevel * 0.1);
+        await GpxTrailEditor.smoothTrackPreview(smoothnessLevel * smoothingFactor);
       });
     }
 
     modalDialogElm.addEventListener('shown.bs.modal', async function onSmoothShown() {
-      const initialSmoothnessLevel = parseInt(smoothnessSlider.value) * 0.1;
+      const initialSmoothnessLevel = parseInt(smoothnessSlider.value) * smoothingFactor;
       await GpxTrailEditor.smoothTrackPreview(initialSmoothnessLevel);
       modalDialogElm.removeEventListener('shown.bs.modal', onSmoothShown);
     });
