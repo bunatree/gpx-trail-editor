@@ -173,7 +173,7 @@ const GpxTrailEditor = {
     const modalDialogElm = document.getElementById('modal-cancel-confirm');
     const modalHeaderElm = modalDialogElm.querySelector('.modal-header');
     const modalTitleElm = modalDialogElm.querySelector('.modal-title');
-    const modalBodyElm = modalDialogElm.querySelector('.modal-body');
+    const modalBodyElm = modalDialogElm.querySelector('.modal-body'); 
     const cancelButtonElm = modalDialogElm.querySelector('.btn-cancel');
     const confirmButtonElm = modalDialogElm.querySelector('.btn-confirm');
 
@@ -188,19 +188,22 @@ const GpxTrailEditor = {
       modalHeaderElm.classList.add(typeClassName);
     }
 
-    // Remove the existing event listener.
-    confirmButtonElm.replaceWith(confirmButtonElm.cloneNode(true));
-    const newConfirmButtonElm = modalDialogElm.querySelector('.btn-confirm');
+    // Remove the existing event listener for the Confirm button and set a new one.
+    const oldConfirmButtonElm = modalDialogElm.querySelector('.btn-confirm');
+    const newConfirmButtonElm = oldConfirmButtonElm.cloneNode(true);
+    oldConfirmButtonElm.parentNode.replaceChild(newConfirmButtonElm, oldConfirmButtonElm);
 
-    // Remove existing event listener from cancel button and add new one
-    cancelButtonElm.replaceWith(cancelButtonElm.cloneNode(true));
-    const newCancelButtonElm = modalDialogElm.querySelector('.btn-cancel');
+    // Remove the existing event listener for the Cancel button and set a new one.
+    const oldCancelButtonElm = modalDialogElm.querySelector('.btn-cancel');
+    const newCancelButtonElm = oldCancelButtonElm.cloneNode(true);
+    oldCancelButtonElm.parentNode.replaceChild(newCancelButtonElm, oldCancelButtonElm);
 
     newConfirmButtonElm.classList.remove('btn-primary','btn-info','btn-warning','btn-danger');
     newConfirmButtonElm.classList.add('btn-' + type);
 
     // When the OK button is clicked
     newConfirmButtonElm.addEventListener('click', () => {
+      modalDialogElm.dataset.confirmed = 'true';
       if (onConfirm) {
         onConfirm();
       }
@@ -210,6 +213,7 @@ const GpxTrailEditor = {
 
     // When the Cancel button is clicked or modal is dismissed (via X button or clicking outside)
     newCancelButtonElm.addEventListener('click', () => {
+      modalDialogElm.dataset.confirmed = 'false';
       if (onCancel) {
         onCancel();
       }
@@ -217,27 +221,36 @@ const GpxTrailEditor = {
       modalInstance.hide();
     });
 
-    // Add listener for modal hide event (e.g., when clicking outside or 'x' button)
-    // This catches cases where onCancel might not be explicitly called by button clicks
-    modalDialogElm.addEventListener('hide.bs.modal', function onModalHide() {
-        if (onCancel && !modalDialogElm.dataset.confirmed) {
-          onCancel();
+    // Add listener for modal hidden event (after CSS transitions finish)
+    // This catches cases where the modal is dismissed by clicking outside, ESC key, or X button.
+    modalDialogElm.addEventListener('hidden.bs.modal', function onModalHidden() {
+        // Execute onCancel only if dataset.confirmed is not 'true' (closed other than OK)
+        if (modalDialogElm.dataset.confirmed !== 'true') {
+          if (onCancel) {
+            onCancel();
+          }
         }
-        modalDialogElm.dataset.confirmed = false; // reset the flag
-        // Run the event listner only once
-        modalDialogElm.removeEventListener('hide.bs.modal', onModalHide);
-    });
+        // Clean up the preview layer group
+        if (GpxTrailEditor.previewLayerGroup) {
+            GpxTrailEditor.previewLayerGroup.clearLayers();
+            if (GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
+              GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
+            }
+            GpxTrailEditor.previewLayerGroup = null;
+        }
+        GpxTrailEditor.generatedNoiseOffsets = [];
 
-    // Set the flag that represents the Confirm button is clicked
-    newConfirmButtonElm.addEventListener('click', () => {
-      modalDialogElm.dataset.confirmed = true; // flag
+        // Delete event listeners after they have been executed only once
+        modalDialogElm.removeEventListener('hidden.bs.modal', onModalHidden);
+        // Clean up the flag
+        delete modalDialogElm.dataset.confirmed;
     });
 
     const modaiDialog = new bootstrap.Modal(modalDialogElm);
     modaiDialog.show();
 
     // Initialize tooltip after modal is displayed
-    modalDialogElm.addEventListener('shown.bs.modal', () => {
+    modalDialogElm.addEventListener('shown.bs.modal', (event) => {
       setTimeout(() => {
         const tooltipTriggerList = [].slice.call(modalDialogElm.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -245,6 +258,7 @@ const GpxTrailEditor = {
         });
       }, 0);
     });
+
   },
 
   initMap: function() {
@@ -337,52 +351,51 @@ const GpxTrailEditor = {
   // and draw markers and polylines on the map.
   parseAndDisplayGPX: function(file) {
     return new Promise((resolve, reject) => {
-        const reader = new FileReader();
+      const reader = new FileReader();
 
-        reader.onload = function (e) {
-            try {
-                const gpxData = e.target.result;
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(gpxData, 'text/xml');
+      reader.onload = function (e) {
+        try {
+          const gpxData = e.target.result;
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(gpxData, 'text/xml');
 
-                if (!GpxTrailEditor.isValidGPX(xmlDoc)) {
-                    console.error('Oops! Invalid GPX file.');
-                    reject('Invalid GPX file'); // エラーを返して処理を中断
-                    return;
-                }
+          if (!GpxTrailEditor.isValidGPX(xmlDoc)) {
+              console.error('Oops! Invalid GPX file.');
+              reject('Invalid GPX file'); // エラーを返して処理を中断
+              return;
+          }
 
-                GpxTrailEditor.logName = GpxTrailEditor.getTrackTitle(xmlDoc);
-                // GpxTrailEditor.showLogNameForm(GpxTrailEditor.logName);
-                GpxTrailEditor.showLogNameNav(GpxTrailEditor.logName)
+          GpxTrailEditor.logName = GpxTrailEditor.getTrackTitle(xmlDoc);
+          // GpxTrailEditor.showLogNameForm(GpxTrailEditor.logName);
+          GpxTrailEditor.showLogNameNav(GpxTrailEditor.logName)
 
-                GpxTrailEditor.parseDataTable(xmlDoc);
-                GpxTrailEditor.showDataTable();
+          GpxTrailEditor.parseDataTable(xmlDoc);
+          GpxTrailEditor.showDataTable();
 
-                // Create points data from the table display contents and
-                // assign it to points in the namespace GpxTrailEditor.
-                const points = GpxTrailEditor.convertTableToPoints();
-                GpxTrailEditor.points = points;
+          // Create points data from the table display contents and
+          // assign it to points in the namespace GpxTrailEditor.
+          const points = GpxTrailEditor.convertTableToPoints();
+          GpxTrailEditor.points = points;
 
-        // ★★★ 追加する行 ★★★
-        // GPXデータが正常に解析され、GpxTrailEditor.pointsに設定された直後にバックアップを作成
-        GpxTrailEditor.originalPointsBackup = JSON.parse(JSON.stringify(GpxTrailEditor.points));
-        // ★★★ ここまで ★★★
+          // Create backups immediately after GPX data has been successfully parsed
+          // and set in GpxTrailEditor.points
+          GpxTrailEditor.originalPointsBackup = JSON.parse(JSON.stringify(GpxTrailEditor.points));
 
-                GpxTrailEditor.parseSummary(points);
-                GpxTrailEditor.showSummary();
+          GpxTrailEditor.parseSummary(points);
+          GpxTrailEditor.showSummary();
 
-                // Drap markers and polylines on the map and
-                // put the data into GpxTrailEditor.markers etc.
-                GpxTrailEditor.parseMapGPX(xmlDoc);
+          // Drap markers and polylines on the map and
+          // put the data into GpxTrailEditor.markers etc.
+          GpxTrailEditor.parseMapGPX(xmlDoc);
 
-                resolve(); // すべての処理が完了したら resolve() を呼ぶ
-            } catch (error) {
-                console.error('Error parsing GPX:', error);
-                reject(error); // エラーをキャッチして reject() する
-            }
-        };
+          resolve();
+        } catch (error) {
+            console.error('Error parsing GPX:', error);
+            reject(error);
+        }
+      };
 
-        reader.readAsText(file);
+      reader.readAsText(file);
     });
   },
 
@@ -1230,9 +1243,9 @@ const GpxTrailEditor = {
     GpxTrailEditor.disableMarkerDrag();
   },
 
-  // 地図がクリックされたときの処理
+  // When the map is clicked
   onMapClick: async function(e) {
-    // マーカー追加モードでない場合は即時終了
+    // Exit immediately if not in the "add markers" mode
     if (!GpxTrailEditor.isInsertionModeActive) return;
     GpxTrailEditor.addNewMarkerPolyline(e);
   },
@@ -1251,9 +1264,6 @@ const GpxTrailEditor = {
       // Update previous last marker to "normal" icon
       if (GpxTrailEditor.markers.length > 0) {
         const lastMarker = GpxTrailEditor.markers[GpxTrailEditor.markers.length - 1];
-        // lastMarker.setIcon(GpxTrailEditor.normalMarkerOptions.icon);
-        // lastMarker.getElement().classList.remove('last-div-icon');
-        // lastMarker.getElement().classList.add('normal-div-icon');
 
         if (GpxTrailEditor.markers.length === 1) {
           // If it was the only marker, it should become the first marker
@@ -1566,24 +1576,27 @@ const GpxTrailEditor = {
 
   onSmoothTrackClicked: function() {
 
-    // プレビューレイヤーグループが存在し、かつマップに追加されている場合のみクリア
+    // Clear only if preview layer group exists and has been added to the map
     if (GpxTrailEditor.previewLayerGroup && GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
-      GpxTrailEditor.previewLayerGroup.clearLayers(); // 前回のプレビューをクリア
+      // Clear the previous preview
+      GpxTrailEditor.previewLayerGroup.clearLayers();
     } else if (!GpxTrailEditor.previewLayerGroup) {
-      // プレビューレイヤーグループがまだ存在しない場合のみ新しく作成してマップに追加
+      // Create a new layer and add to the map
       GpxTrailEditor.previewLayerGroup = L.layerGroup();
     }
-    // LayerGroupが存在するがマップに追加されていない場合は、ここで追加
+    // If a LayerGroup exists but it has not yet been added to the map, add it here
     if (!GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
         GpxTrailEditor.previewLayerGroup.addTo(GpxTrailEditor.map);
     }
 
     const bodyContent = `
       <div class="desc mb-3">${i18nMsg.modalSmoothTrackInfo}</div>
-      <label for="smoothnessRange" class="form-label">${i18nMsg.modalSmoothTrackCorrection} (0 - 5)</label>
-      <input type="range" class="form-range" min="0" max="5" step="1" id="smoothnessRange" value="0">
-      <div id="smoothnessValue" class="text-center mt-2">0</div>
+      <label for="smoothness-level" class="form-label">${i18nMsg.modalSmoothTrackCorrection} (0 - 5)</label>
+      <input type="range" class="form-range" min="0" max="5" step="1" id="smoothness-level" value="0">
+      <div id="smoothness-level-value" class="text-center mt-2">0</div>
     `;
+
+    const modalDialogElm = document.getElementById('modal-cancel-confirm');
 
     GpxTrailEditor.showQuestionDialog(
       i18nMsg.modalSmoothTrackTitle,
@@ -1591,45 +1604,37 @@ const GpxTrailEditor = {
       i18nMsg.modalSmoothTrackConfirmLabel,
       i18nMsg.modalSmoothTrackCancelLabel,
       'primary',
-      async () => { // 「OK」クリック時の処理
-        const smoothnessLevel = parseInt(document.getElementById('smoothnessRange').value) * 0.1;
+      async () => { // When the OK button is clicked
+         const smoothnessLevel = parseInt(modalDialogElm.querySelector('#smoothness-level').value) * 0.1;
         await GpxTrailEditor.smoothTrackApply(smoothnessLevel);
-        if (GpxTrailEditor.previewLayerGroup) { // nullチェックを追加
-          GpxTrailEditor.previewLayerGroup.clearLayers();
-          GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
-          GpxTrailEditor.previewLayerGroup = null;
-        }
       },
-      () => { // 「キャンセル」クリック時の処理
-        if (GpxTrailEditor.previewLayerGroup) { // nullチェックを追加
-          GpxTrailEditor.previewLayerGroup.clearLayers();
-          GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
-          GpxTrailEditor.previewLayerGroup = null;
-        }
+      () => { // When the Cancel button is clicked
       }
     );
 
-    const modalDialogElm = document.getElementById('modal-cancel-confirm');
-    modalDialogElm.querySelector('#smoothnessRange').addEventListener('input', async (event) => {
-      const smoothnessDisplay = modalDialogElm.querySelector('#smoothnessValue');
-      const smoothnessLevel = parseInt(event.target.value);
-      smoothnessDisplay.textContent = smoothnessLevel;
-      // プレビューを更新
-      await GpxTrailEditor.smoothTrackPreview(smoothnessLevel * 0.1); // ★新関数
-    });
+    const smoothnessSlider = modalDialogElm.querySelector('#smoothness-level');
+    const smoothnessValueDisplay = modalDialogElm.querySelector('#smoothness-level-value');
 
-    // モーダル表示時に一度プレビューを初期描画
-    modalDialogElm.addEventListener('shown.bs.modal', async () => {
-      // 現在のスライダー値で初期プレビュー
-      const initialSmoothnessLevel = parseInt(document.getElementById('smoothnessRange').value) * 0.1;
+    if (smoothnessSlider) {
+      smoothnessSlider.addEventListener('input', async (event) => {
+        const smoothnessLevel = parseInt(event.target.value);
+        smoothnessValueDisplay.textContent = smoothnessLevel;
+        await GpxTrailEditor.smoothTrackPreview(smoothnessLevel * 0.1);
+      });
+    }
+
+    modalDialogElm.addEventListener('shown.bs.modal', async function onSmoothShown() {
+      const initialSmoothnessLevel = parseInt(smoothnessSlider.value) * 0.1;
       await GpxTrailEditor.smoothTrackPreview(initialSmoothnessLevel);
+      modalDialogElm.removeEventListener('shown.bs.modal', onSmoothShown);
     });
   },
 
   // Preview (Don't call the Elevation API)
   smoothTrackPreview: async function(smoothnessLevel) {
 
-    const previewPoints = JSON.parse(JSON.stringify(GpxTrailEditor.originalPointsBackup));
+    // const previewPoints = JSON.parse(JSON.stringify(GpxTrailEditor.originalPointsBackup));
+    const previewPoints = JSON.parse(JSON.stringify(GpxTrailEditor.points));
     
     // Preview the smoothing operation (Don't update the elevations)
     for (let i = 1; i < previewPoints.length - 1; i++) {
@@ -1737,14 +1742,15 @@ const GpxTrailEditor = {
 
   onAddRandomNoiseClicked: function() {
 
-    // プレビューレイヤーグループが存在し、かつマップに追加されている場合のみクリア
+    // Clear only if preview layer group exists and has been added to the map
     if (GpxTrailEditor.previewLayerGroup && GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
-      GpxTrailEditor.previewLayerGroup.clearLayers(); // 前回のプレビューをクリア
+      // Clear the previous preview
+      GpxTrailEditor.previewLayerGroup.clearLayers();
     } else if (!GpxTrailEditor.previewLayerGroup) {
-      // プレビューレイヤーグループがまだ存在しない場合のみ新しく作成してマップに追加
-      GpxTrailEditor.previewLayerGroup = L.layerGroup(); // まずLayerGroupを作成
+      // Create a new layer and add to the map
+      GpxTrailEditor.previewLayerGroup = L.layerGroup();
     }
-    // LayerGroupが存在するがマップに追加されていない場合は、ここで追加
+    // If a LayerGroup exists but it has not yet been added to the map, add it here
     if (!GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
         GpxTrailEditor.previewLayerGroup.addTo(GpxTrailEditor.map);
     }
@@ -1755,6 +1761,8 @@ const GpxTrailEditor = {
       <input type="range" class="form-range" min="0" max="5" step="1" id="noise-level" value="0">
       <div id="noise-level-value" class="text-center mt-2">0</div>
     `;
+
+    const modalDialogElm = document.getElementById('modal-cancel-confirm');
   
     GpxTrailEditor.showQuestionDialog(
       i18nMsg.modalAddRandomNoiseTitle,
@@ -1763,50 +1771,41 @@ const GpxTrailEditor = {
       i18nMsg.modalAddRandomNoiseCancelLabel,
       'primary',
       async () => { // When OK is clicked
-       const noiseLevel = parseInt(document.getElementById('noise-level').value, 10);
+        const noiseLevel = parseInt(modalDialogElm.querySelector('#noise-level').value, 10);
         await GpxTrailEditor.addRandomNoiseApply(noiseLevel);
-        // プレビューが完了し、本番データに適用されたのでプレビューレイヤーをクリーンアップ
-        if (GpxTrailEditor.previewLayerGroup) { // nullチェックを追加
-            GpxTrailEditor.previewLayerGroup.clearLayers();
-            GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
-            GpxTrailEditor.previewLayerGroup = null;
-        }
       },
       () => { // When Cancel is clicked
-     // キャンセルされたのでプレビューレイヤーをクリーンアップ
-        if (GpxTrailEditor.previewLayerGroup) { // nullチェックを追加
-            GpxTrailEditor.previewLayerGroup.clearLayers();
-            GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
-            GpxTrailEditor.previewLayerGroup = null;
-        }
-        // Clear the noise offsets
-        GpxTrailEditor.generatedNoiseOffsets = [];
       }
     );
 
-    const modalDialogElm = document.getElementById('modal-cancel-confirm');
-    modalDialogElm.querySelector('#noise-level').addEventListener('input', async (event) => {
-      const valueDisplay = modalDialogElm.querySelector('#noise-level-value');
-      valueDisplay.textContent = event.target.value;
-      await GpxTrailEditor.addRandomNoisePreview(parseInt(event.target.value, 10));
-    });
+    const noiseSlider = modalDialogElm.querySelector('#noise-level');
+    const noiseValueDisplay = modalDialogElm.querySelector('#noise-level-value');
 
-    modalDialogElm.addEventListener('shown.bs.modal', async () => {
-      const initialNoiseLevel = parseInt(document.getElementById('noise-level').value, 10);
+    if (noiseSlider) {
+      noiseSlider.addEventListener('input', async (event) => {
+        const value = parseInt(event.target.value, 10);
+        noiseValueDisplay.textContent = value;
+        await GpxTrailEditor.addRandomNoisePreview(value);
+      });
+    }
+
+    modalDialogElm.addEventListener('shown.bs.modal', async function onNoiseShown() {
+      const initialNoiseLevel = parseInt(noiseSlider.value, 10);
       await GpxTrailEditor.addRandomNoisePreview(initialNoiseLevel);
+      modalDialogElm.removeEventListener('shown.bs.modal', onNoiseShown);
     });
   },
 
   addRandomNoisePreview: async function(noiseLevel) {
     const scales = {
-      1: Math.pow(10, -8),
-      2: Math.pow(10, -7),
-      3: Math.pow(10, -6),
-      4: Math.pow(10, -5),
-      5: Math.pow(10, -4),
-      6: Math.pow(10, -3)
+      0: Math.pow(10, -6),
+      1: Math.pow(10, -5),
+      2: Math.pow(10, -5) * 2,
+      3: Math.pow(10, -4),
+      4: Math.pow(10, -4) * 2,
+      5: Math.pow(10, -4) * 4,
     };
-    const scale = scales[noiseLevel] || Math.pow(10, -6);
+    const scale = scales[noiseLevel] || scales[0];
 
     const multiplyingFactors = {
       1: 1,
@@ -1818,8 +1817,8 @@ const GpxTrailEditor = {
     };
     const mf = multiplyingFactors[noiseLevel] || 1;
   
-    const previewPoints = JSON.parse(JSON.stringify(GpxTrailEditor.originalPointsBackup));
-    
+    const previewPoints = JSON.parse(JSON.stringify(GpxTrailEditor.points));
+
     // Reset the noise offsets
     GpxTrailEditor.generatedNoiseOffsets = [];
 
@@ -2573,19 +2572,19 @@ const GpxTrailEditor = {
     const bodyContent = `
     <div class="desc mb-3">${i18nMsg.modalThinOutPointsInfo}</div>
         <label for="thinOutRange" class="form-label">
-          ポイントを残す間隔 (2 - 6)
+          ${i18nMsg.modalThinOutPointsInfo} (2 - 6)
           <i class="bi bi-question-circle-fill" data-bs-toggle="tooltip" data-bs-placement="right" 
-         title="指定した間隔でポイントが残り、間にあるポイントは削除されます。例: '2'を選択すると、2個ごとにポイントが残り、間のポイントが削除されます。"></i>
+         title="${i18nMsg.modalThinOutPointsHint}"></i>
         </label>
         <input type="range" class="form-range" min="2" max="6" step="1" id="thinOutRange" value="2">
         <div id="thinOutValue" class="text-center mt-2">2</div>
     `;
 
     GpxTrailEditor.showQuestionDialog(
-        "ポイントの間引き",
+        i18nMsg.modalThinOutPointsTitle,
         bodyContent,
-        "OK",
-        "キャンセル",
+        i18nMsg.modalThinOutPointsLevelConfirmLabel,
+        i18nMsg.modalThinOutPointsLevelCancelLabel,
         'primary',
         async () => {
           const interval = parseInt(document.getElementById('thinOutRange').value, 10);
