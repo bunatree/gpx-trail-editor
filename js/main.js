@@ -1576,19 +1576,6 @@ const GpxTrailEditor = {
 
   onSmoothTrackClicked: function() {
 
-    // Clear only if preview layer group exists and has been added to the map
-    if (GpxTrailEditor.previewLayerGroup && GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
-      // Clear the previous preview
-      GpxTrailEditor.previewLayerGroup.clearLayers();
-    } else if (!GpxTrailEditor.previewLayerGroup) {
-      // Create a new layer and add to the map
-      GpxTrailEditor.previewLayerGroup = L.layerGroup();
-    }
-    // If a LayerGroup exists but it has not yet been added to the map, add it here
-    if (!GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
-        GpxTrailEditor.previewLayerGroup.addTo(GpxTrailEditor.map);
-    }
-
     const bodyContent = `
       <div class="desc mb-3">${i18nMsg.modalSmoothTrackInfo}</div>
       <label for="smoothness-level" class="form-label">${i18nMsg.modalSmoothTrackCorrection} (0 - 5)</label>
@@ -1632,6 +1619,27 @@ const GpxTrailEditor = {
 
   // Preview (Don't call the Elevation API)
   smoothTrackPreview: async function(smoothnessLevel) {
+
+    // Do not show the preview when smoothnessLevel = 0.
+    if (smoothnessLevel === 0) {
+      if (GpxTrailEditor.previewLayerGroup) {
+        GpxTrailEditor.previewLayerGroup.clearLayers();
+        if (GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
+          GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
+        }
+        GpxTrailEditor.previewLayerGroup = null;
+      }
+      return;
+    }
+
+    // Continue when smoothnessLevel != 0
+    // Create a preview layer and add to the map when reviewLayerGroup is null.
+    if (!GpxTrailEditor.previewLayerGroup) {
+      GpxTrailEditor.previewLayerGroup = L.layerGroup().addTo(GpxTrailEditor.map);
+    } else if (!GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
+      // Add the layer group to the map when it exists and not on the map.
+      GpxTrailEditor.previewLayerGroup.addTo(GpxTrailEditor.map);
+    }
 
     // const previewPoints = JSON.parse(JSON.stringify(GpxTrailEditor.originalPointsBackup));
     const previewPoints = JSON.parse(JSON.stringify(GpxTrailEditor.points));
@@ -1742,19 +1750,6 @@ const GpxTrailEditor = {
 
   onAddRandomNoiseClicked: function() {
 
-    // Clear only if preview layer group exists and has been added to the map
-    if (GpxTrailEditor.previewLayerGroup && GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
-      // Clear the previous preview
-      GpxTrailEditor.previewLayerGroup.clearLayers();
-    } else if (!GpxTrailEditor.previewLayerGroup) {
-      // Create a new layer and add to the map
-      GpxTrailEditor.previewLayerGroup = L.layerGroup();
-    }
-    // If a LayerGroup exists but it has not yet been added to the map, add it here
-    if (!GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
-        GpxTrailEditor.previewLayerGroup.addTo(GpxTrailEditor.map);
-    }
-
     const bodyContent = `
       <div class="desc mb-3">${i18nMsg.modalAddRandomNoiseInfo}</div>
       <label for="noise-level" class="form-label">${i18nMsg.modalAddRandomNoiseLevel} (0 - 5)</label>
@@ -1797,6 +1792,29 @@ const GpxTrailEditor = {
   },
 
   addRandomNoisePreview: async function(noiseLevel) {
+
+    // Do not show the preview when noiseLevel = 0
+    if (noiseLevel === 0) {
+      if (GpxTrailEditor.previewLayerGroup) {
+        GpxTrailEditor.previewLayerGroup.clearLayers();
+        if (GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
+            GpxTrailEditor.map.removeLayer(GpxTrailEditor.previewLayerGroup);
+        }
+        GpxTrailEditor.previewLayerGroup = null;
+      }
+      GpxTrailEditor.generatedNoiseOffsets = [];
+      return;
+    }
+
+    // Continue when noiseLevel != 0
+    // Create a preview layer and add to the map when reviewLayerGroup is null.
+    if (!GpxTrailEditor.previewLayerGroup) {
+      GpxTrailEditor.previewLayerGroup = L.layerGroup().addTo(GpxTrailEditor.map);
+    } else if (!GpxTrailEditor.map.hasLayer(GpxTrailEditor.previewLayerGroup)) {
+      // Add the layer group to the map when it exists and not on the map.
+      GpxTrailEditor.previewLayerGroup.addTo(GpxTrailEditor.map);
+    }
+
     const scales = {
       0: Math.pow(10, -6),
       1: Math.pow(10, -5),
