@@ -130,6 +130,12 @@ const GpxTrailEditor = {
       });
     });
 
+    // Add shadow class to modal-dialog
+    const dialogContent = settingDialog.querySelector('.modal-dialog');
+    if (dialogContent) {
+      dialogContent.classList.add('shadow');
+    }
+
     modalDialog.show();
 
   },
@@ -156,6 +162,13 @@ const GpxTrailEditor = {
     }
 
     const modalDialog = new bootstrap.Modal(modalDialogElm);
+
+    // Add shadow class to modal-dialog
+    const dialogContent = modalDialogElm.querySelector('.modal-dialog');
+    if (dialogContent) {
+      dialogContent.classList.add('shadow');
+    }
+
     modalDialog.show();
 
     if (callback) {
@@ -245,6 +258,12 @@ const GpxTrailEditor = {
         // Clean up the flag
         delete modalDialogElm.dataset.confirmed;
     });
+
+    // Add shadow class to modal-dialog
+    const modalDialogContent = modalDialogElm.querySelector('.modal-dialog');
+    if (modalDialogContent) {
+      modalDialogContent.classList.add('shadow');
+    }
 
     const modaiDialog = new bootstrap.Modal(modalDialogElm);
     modaiDialog.show();

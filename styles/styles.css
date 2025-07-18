@@ -172,22 +172,27 @@ footer .avatar {
   margin-left: 10px;
 }
 
+/* line 185, styles.scss */
+.modal-backdrop {
+  --bs-backdrop-opacity: 0.25;
+}
+
 @media (max-width: 991px) {
-  /* line 186, styles.scss */
+  /* line 190, styles.scss */
   .layout-wrapper {
     gap: 0.5rem;
   }
-  /* line 188, styles.scss */
+  /* line 192, styles.scss */
   .layout-wrapper > * {
     height: calc(50vh - 29px - 0.5rem);
   }
 }
 @media (max-width: 767px) {
-  /* line 197, styles.scss */
+  /* line 201, styles.scss */
   .navbar .navbar-brand .title-text {
     display: none;
   }
-  /* line 203, styles.scss */
+  /* line 207, styles.scss */
   .navbar #nav-buttons button .label {
     display: none;
   }

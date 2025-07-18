@@ -182,6 +182,10 @@ footer {
   }
 }
 
+.modal-backdrop {
+  --bs-backdrop-opacity: 0.25;
+}
+
 @media (max-width: 991px) {
   .layout-wrapper {
     gap: 0.5rem;
@@ -207,3 +211,4 @@ footer {
     }
   }
 }
+
