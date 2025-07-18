@@ -159,6 +159,8 @@ const i18nMsg = (function(lang) {
       "errorInvalidLatitude": "Invalid Latitude (Row: ${i})",
       "errorInvalidLongitude": "Invalid Longitude (Row: ${i})",
       "errorInvalidDateOrder": "Invalid Date Order (Row: ${i})",
+      "errorCanNotAddRandomNoise": "Can not add random noise.",
+      "errorCanNotSmoothTrack": "Can not reduce zigzag.",
 
       // Alerts
       "alertCheckRowFirst": "Check ON the checkboxes of the rows you want to update.",
@@ -329,6 +331,8 @@ const i18nMsg = (function(lang) {
       "errorInvalidLatitude": "緯度エラー (行番号: ${i})",
       "errorInvalidLongitude": "経度エラー (行番号: ${i})",
       "errorInvalidDateOrder": "日時順序エラー (行番号: ${i})",
+      "errorCanNotAddRandomNoise": "ジグザグ強調を実行できません。",
+      "errorCanNotSmoothTrack": "ジグザグ平滑化を実行できません。",
 
       // Alerts
       "alertCheckRowFirst": "更新したい行のチェックボックスを ON にしてください。",

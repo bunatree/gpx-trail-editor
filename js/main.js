@@ -1595,6 +1595,31 @@ const GpxTrailEditor = {
 
   onSmoothTrackClicked: function() {
 
+    // Check if there are invalid latitude and/or longitude values
+    const invalidLatLng = GpxTrailEditor.checkPointLatLngValid();
+    if (!invalidLatLng.result) { //
+      const invalidRowHtml = function(array) {
+        if (Array.isArray(array) && array.length > 0) {
+          return array.map(rowIndex => {
+            return '<a href="javascript:void(0);" onclick="GpxTrailEditor.scrollToTableRow(' + rowIndex + ')">' + (rowIndex + 1) + '</a>';
+          }).join(' ');
+        } 
+        return '';
+      };
+
+      let errorMsg = i18nMsg.errorCanNotSmoothTrack;
+      if (invalidLatLng.latitude.length > 0) {
+          errorMsg += `<div class="error-message">${i18nMsg.errorInvalidLatitude.replace('${i}', invalidRowHtml(invalidLatLng.latitude))}</div>`;
+      }
+      if (invalidLatLng.longitude.length > 0) {
+          errorMsg += `<div class="error-message">${i18nMsg.errorInvalidLongitude.replace('${i}', invalidRowHtml(invalidLatLng.longitude))}</div>`;
+      }
+
+      GpxTrailEditor.showAlert('warning', errorMsg, 0);
+      GpxTrailEditor.alertTableCell([], invalidLatLng.latitude, invalidLatLng.longitude, []);
+      return;
+    }
+
     const bodyContent = `
       <div class="desc mb-3">${i18nMsg.modalSmoothTrackInfo}</div>
       <label for="smoothness-level" class="form-label">${i18nMsg.modalSmoothTrackCorrection} (0 - 5)</label>
@@ -1769,6 +1794,31 @@ const GpxTrailEditor = {
   },
 
   onAddRandomNoiseClicked: function() {
+
+    // Check if there are invalid latitude and/or longitude values
+    const invalidLatLng = GpxTrailEditor.checkPointLatLngValid();
+    if (!invalidLatLng.result) {
+      const invalidRowHtml = function(array) {
+        if (Array.isArray(array) && array.length > 0) {
+          return array.map(rowIndex => {
+            return '<a href="javascript:void(0);" onclick="GpxTrailEditor.scrollToTableRow(' + rowIndex + ')">' + (rowIndex + 1) + '</a>';
+          }).join(' ');
+        } 
+        return '';
+      };
+
+      let errorMsg = i18nMsg.errorCanNotAddRandomNoise;
+      if (invalidLatLng.latitude.length > 0) {
+        errorMsg += `<div class="error-message">${i18nMsg.errorInvalidLatitude.replace('${i}', invalidRowHtml(invalidLatLng.latitude))}</div>`;
+      }
+      if (invalidLatLng.longitude.length > 0) {
+        errorMsg += `<div class="error-message">${i18nMsg.errorInvalidLongitude.replace('${i}', invalidRowHtml(invalidLatLng.longitude))}</div>`;
+      }
+
+      GpxTrailEditor.showAlert('warning', errorMsg, 0);
+      GpxTrailEditor.alertTableCell([], invalidLatLng.latitude, invalidLatLng.longitude, []);
+      return;
+    }
 
     const bodyContent = `
       <div class="desc mb-3">${i18nMsg.modalAddRandomNoiseInfo}</div>
