@@ -2286,7 +2286,7 @@ const GpxTrailEditor = {
     const dropZonePrompt = document.getElementById('drop-zone-prompt');
 
     dropZonePrompt.addEventListener('click', e => {
-      if (dropZonePrompt.dataset.wasFileDropped === 'false') {
+      if (dropZoneForm.dataset.wasFileDropped === 'false') {
         fileInput.click();
       }
     });
