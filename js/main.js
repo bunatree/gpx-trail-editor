@@ -282,7 +282,10 @@ const GpxTrailEditor = {
 
   initMap: function() {
     if (!this.map) {
-      this.map = L.map('map').setView([35.6895, 139.6917], 10);
+      this.map = L.map(
+        'map', {
+          renderer: L.canvas()
+        }).setView([35.6895, 139.6917], 10);
       L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
         attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank">国土地理院</a>',
         maxZoom: 18,
@@ -804,13 +807,14 @@ const GpxTrailEditor = {
     if (shouldDrawBorder) {
       border = L.polyline(latLngs, GpxTrailEditor.borderPolylineOptions).addTo(GpxTrailEditor.map);
       GpxTrailEditor.layerGroup.addLayer(border);
+      GpxTrailEditor.borderPolyline = border;
     }
 
     // Draw polylines with the style options above.
     polyline = L.polyline(latLngs, GpxTrailEditor.normalPolylineOptions).addTo(GpxTrailEditor.map);
-
     // Add polyline to the layerGroup
     GpxTrailEditor.layerGroup.addLayer(polyline);
+    GpxTrailEditor.polyline = polyline;
 
     return [polyline, border];
 
@@ -942,6 +946,19 @@ const GpxTrailEditor = {
 
     GpxTrailEditor.markers[i].setLatLng(newLatLng);
 
+    // Get the latest marker posisitons.
+    const allLatLngs = GpxTrailEditor.markers.map(m => m.getLatLng());
+
+    // Re-draw all the polylines based on the latest marker positions.
+    GpxTrailEditor.layerGroup.eachLayer(function (layer) {
+      if (layer instanceof L.Polyline) {
+        layer.setLatLngs(allLatLngs);
+        if (typeof layer.redraw === 'function') {
+          layer.redraw();
+        }
+      }
+    });
+
     let newElevation;
     try {
       newElevation = await GpxTrailEditor.latLngToEle(newLatLng.lat, newLatLng.lng);
@@ -952,7 +969,9 @@ const GpxTrailEditor = {
 
     GpxTrailEditor.updatePointInfo(i,newLatLng,newElevation);
     GpxTrailEditor.updateTableRow(i,newLatLng,newElevation);
-    GpxTrailEditor.updateMarkersAndPolylines();
+
+    // Not in use. (Left this call as a backup)
+    // GpxTrailEditor.updateMarkersAndPolylines();
 
   },
 
@@ -3674,7 +3693,8 @@ GpxTrailEditor.lastMarkerOptions = {
 
 GpxTrailEditor.normalPolylineOptions = {
   color: GpxTrailEditor.colorMap[localStorage.getItem('polylineColor')] || GpxTrailEditor.colorMap['purple'],
-  weight: Number(localStorage.getItem('polylineWeight')) || 4
+  weight: Number(localStorage.getItem('polylineWeight')) || 4,
+  smoothFactor: 1.5 // Thins out unnecessary points when rendering, depending on the zoom level. (Default = 1)
 };
 
 GpxTrailEditor.borderPolylineOptions = {
