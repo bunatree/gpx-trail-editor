@@ -1155,9 +1155,21 @@ const GpxTrailEditor = {
       insertButton.dataset.bsToggle = 'tooltip';
       insertButton.dataset.bsPlacement = 'right';
       insertButton.addEventListener('click', function (event) {
-        // ボタンがクリックされた場合は、最後のポイントのindexを開始基準にする
-        GpxTrailEditor.insertionStartIndex = GpxTrailEditor.points.length - 1;
-        GpxTrailEditor.toggleInsertMarkerBetween(event);
+        event.stopPropagation();
+        if (!GpxTrailEditor.isInsertionModeActive) {
+          // Off -> Append (Extension) mode
+          GpxTrailEditor.insertionStartIndex = GpxTrailEditor.points.length - 1;
+          GpxTrailEditor.enableInsertMarkerBetween(event);
+          GpxTrailEditor.showAlert('info', i18nMsg.alertEnabledAppendMode);
+        } else if (GpxTrailEditor.insertionStartIndex === GpxTrailEditor.markers.length - 1) {
+          // Append -> Prepend mode
+          GpxTrailEditor.insertionStartIndex = -1;
+          GpxTrailEditor.showAlert('info', i18nMsg.alertEnabledPrependMode);
+        } else {
+          // Prepend (or Insert between) -> Off
+          GpxTrailEditor.disableInsertMarkerBetween(event);
+          GpxTrailEditor.showAlert('info', i18nMsg.alertDisabledInsertionMode);
+        }
         GpxTrailEditor.disableMarkerDrag(event);
       });
       
@@ -1235,7 +1247,7 @@ const GpxTrailEditor = {
     event.stopPropagation(); // Prevent clicking through the button.
     if (!GpxTrailEditor.isInsertionModeActive) {
       GpxTrailEditor.enableInsertMarkerBetween(event);
-      GpxTrailEditor.showAlert('info',i18nMsg.alertEnabledExtensionMode);
+      GpxTrailEditor.showAlert('info',i18nMsg.alertEnabledAppendMode);
     } else {
       GpxTrailEditor.disableInsertMarkerBetween(event);
       GpxTrailEditor.showAlert('info',i18nMsg.alertDisabledInsertionMode);
@@ -1272,7 +1284,7 @@ const GpxTrailEditor = {
     if (index === markersLength - 1) {
       // Add a new marker after the goal marker to extend the trail route.
       GpxTrailEditor.enableAddMarkerAfter(); // Enable the extension mode and turn the button blue
-      GpxTrailEditor.showAlert('info',i18nMsg.alertEnabledExtensionMode);
+      GpxTrailEditor.showAlert('info',i18nMsg.alertEnabledAppendMode);
     } else {
       // Insert a new marker between existing markers.
       GpxTrailEditor.enableInsertMarkerBetween(); // Enable the extension mode and turn the button blue
@@ -1296,8 +1308,50 @@ const GpxTrailEditor = {
 
     const elevation = await GpxTrailEditor.latLngToEle(lat, lng);
 
-    // Handle case when inserting at the end
-    if (GpxTrailEditor.insertionStartIndex === GpxTrailEditor.markers.length - 1) {
+    // Handle case when inserting at the beginning (Prepend)
+    if (GpxTrailEditor.insertionStartIndex === -1) {
+
+      // Update the previous first marker to "normal" icon (or "last" if it was the only one)
+      if (GpxTrailEditor.markers.length > 0) {
+        const firstMarker = GpxTrailEditor.markers[0];
+
+        if (GpxTrailEditor.markers.length === 1) {
+          // If it was the only marker, it becomes the last marker
+          firstMarker.setIcon(GpxTrailEditor.lastMarkerOptions.icon);
+          firstMarker.getElement().classList.remove('first-div-icon', 'normal-div-icon');
+          firstMarker.getElement().classList.add('last-div-icon');
+        } else {
+          // Otherwise, it should just be a normal marker
+          firstMarker.setIcon(GpxTrailEditor.normalMarkerOptions.icon);
+          firstMarker.getElement().classList.remove('first-div-icon');
+          firstMarker.getElement().classList.add('normal-div-icon');
+        }
+      }
+
+      // Add the new marker as the first marker
+      const newMarker = L.marker([lat, lng], GpxTrailEditor.firstMarkerOptions);
+      GpxTrailEditor.layerGroup.addLayer(newMarker);
+      GpxTrailEditor.markers.unshift(newMarker);
+
+      // Connect the new marker with a polyline to the old first one
+      if (GpxTrailEditor.markers.length > 1) {
+        const oldFirstMarker = GpxTrailEditor.markers[1];
+        const latLngs = [latlng, oldFirstMarker.getLatLng()];
+        const [polyline, border] = GpxTrailEditor.drawPolylines(latLngs);
+      }
+
+      // Update Markers and Polylines
+      GpxTrailEditor.updateMarkersAndPolylines();
+
+      // Insert a new table row at the beginning (index 0)
+      GpxTrailEditor.addTableRow(0, null, lat, lng, elevation);
+
+      // Update points from the updated table
+      GpxTrailEditor.points = GpxTrailEditor.convertTableToPoints();
+
+      GpxTrailEditor.resetPopupBalloonAll();
+
+    } else if (GpxTrailEditor.insertionStartIndex === GpxTrailEditor.markers.length - 1) {
       
       // Update previous last marker to "normal" icon
       if (GpxTrailEditor.markers.length > 0) {
@@ -1364,8 +1418,8 @@ const GpxTrailEditor = {
       // Redraw markers and polylines
       GpxTrailEditor.updateMarkersAndPolylines();
 
-      // Insert a new table row at the insertionStartIndex
-      const newRowIdx = GpxTrailEditor.insertionStartIndex;
+      // Insert a new table row after the current insertionStartIndex
+      const newRowIdx = GpxTrailEditor.insertionStartIndex + 1;
       GpxTrailEditor.addTableRow(newRowIdx, null, lat, lng, elevation);
       
       // Update points from the updated table
@@ -1381,8 +1435,10 @@ const GpxTrailEditor = {
       GpxTrailEditor.bindMarkerEvents(marker, i, [marker.getLatLng().lat, marker.getLatLng().lng], GpxTrailEditor.points[i]?.datetime);
     }
 
-    // Increase the starting piont index
-    GpxTrailEditor.insertionStartIndex ++;
+    // Increase the starting point index (except for prepend mode)
+    if (GpxTrailEditor.insertionStartIndex !== -1) {
+      GpxTrailEditor.insertionStartIndex ++;
+    }
 
   },
 
@@ -3274,12 +3330,12 @@ const GpxTrailEditor = {
   
     const tableBody = document.querySelector('#data-table tbody');
   
-    // Insert a new row after an existing row with the index
+    // Insert a new row at the specified index
     if (index < tableBody.rows.length) {
       const targetRow = tableBody.rows[index];
-      targetRow.insertAdjacentElement('afterend', newRow);
+      targetRow.insertAdjacentElement('beforebegin', newRow);
     } else {
-      // Add a new row after the last row
+      // Add a new row at the end
       tableBody.appendChild(newRow);
     }
 
