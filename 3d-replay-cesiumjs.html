@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Replay by CesiumJS- GPX Trail Editor</title>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.116/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.116/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    html, body, #cesiumContainer {
+      width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;
+      background-color: #000;
+    }
+    #ui-panel {
+      position: absolute; top: 10px; left: 10px; z-index: 100;
+      background: rgba(42, 42, 42, 0.8); color: white; padding: 15px;
+      border-radius: 8px; font-family: sans-serif; pointer-events: auto;
+    }
+    .control-group { margin-bottom: 10px; }
+    button { cursor: pointer; padding: 5px 10px; }
+  </style>
+</head>
+<body>
+  <div id="ui-panel">
+    <div class="control-group">
+      <h3 style="margin-top:0">3D Replay (Experimental)</h3>
+      <button id="btn-play">Play</button>
+      <button id="btn-pause">Pause</button>
+      <button id="btn-stop">Stop</button>
+    </div>
+    <div class="control-group">
+      Speed: <input type="range" id="range-speed" min="1" max="500" value="100"> <span id="speed-value">100x</span>
+    </div>
+  </div>
+  <div id="cesiumContainer"></div>
+  <script src="js/3d-replay-cesiumjs.js"></script>
+</body>
+</html>

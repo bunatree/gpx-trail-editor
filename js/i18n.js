@@ -163,6 +163,9 @@ const i18nMsg = (function(lang) {
       "errorCanNotSmoothTrack": "Can not reduce zigzag.",
 
       // Alerts
+      "btn3DReplayLabel": "3D Replay",
+      "title3DReplayButton": "Open 3D Replay (Experimental)",
+      "alertNoDataToReplay": "No data to replay. Please drop a GPX file first.",
       "alertCheckRowFirst": "Check ON the checkboxes of the rows you want to update.",
       "alertEnabledDragMode": "Turnd on the moving point mode. You can drag to move the points on the map.",
       "alertDisabledDragMode": "Turned off the moving point mode.",
@@ -336,6 +339,9 @@ const i18nMsg = (function(lang) {
       "errorCanNotSmoothTrack": "ジグザグ平滑化を実行できません。",
 
       // Alerts
+      "btn3DReplayLabel": "3D再生",
+      "title3DReplayButton": "3Dリプレイを表示（実験的機能）",
+      "alertNoDataToReplay": "再生するデータがありません。GPXファイルを読み込んでください。",
       "alertCheckRowFirst": "更新したい行のチェックボックスを ON にしてください。",
       "alertEnabledDragMode": "ポイント移動モード ON: ポイントをドラッグして移動できます。",
       "alertDisabledDragMode": "ポイント移動モード OFF",

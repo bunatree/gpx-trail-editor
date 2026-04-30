@@ -1455,6 +1455,7 @@ const GpxTrailEditor = {
 
   showNavbarButtons: function() {
     document.getElementById('btn-nav-export').classList.remove('d-none');
+    // document.getElementById('btn-nav-3d-replay-cesiumjs').classList.remove('d-none');
     document.getElementById('btn-nav-start-over').classList.remove('d-none');
   },
 
@@ -2938,6 +2939,28 @@ const GpxTrailEditor = {
     }
   },
 
+  on3DReplayBtnClicked: function() {
+    if (GpxTrailEditor.points.length > 0) {
+      // 子ウィンドウからのメッセージを待機するリスナーを一度だけ登録
+      const messageHandler = function(event) {
+        if (event.data.type === '3D_REPLAY_READY') {
+          // 子ウィンドウの準備ができたらデータを送信
+          event.source.postMessage({
+            type: '3D_REPLAY_DATA',
+            points: GpxTrailEditor.points
+          }, '*');
+          // 送信後はリスナーを解除
+          window.removeEventListener('message', messageHandler);
+        }
+      };
+      window.addEventListener('message', messageHandler);
+
+      window.open('3d-replay-cesiumjs.html', 'gpx-3d-replay');
+    } else {
+      GpxTrailEditor.showAlert('danger', i18nMsg.alertNoDataToReplay);
+    }
+  },
+
   checkPointDatetimeValid: function() {
 
     const invalidIndices = new Set();
@@ -3402,10 +3425,12 @@ const GpxTrailEditor = {
 
     const buttonNew = document.getElementById('btn-nav-create-new');
     const buttonExport = document.getElementById('btn-nav-export');
+    const buttonReplay3dCesiumJs = document.getElementById('btn-nav-3d-replay-cesiumjs');
     const buttonStartOver = document.getElementById('btn-nav-start-over');
 
     buttonNew.addEventListener('click', GpxTrailEditor.onCreateNewBtnClicked);
     buttonExport.addEventListener('click', GpxTrailEditor.onGpxExportBtnClicked);
+    buttonReplay3dCesiumJs.addEventListener('click', GpxTrailEditor.on3DReplayBtnClicked);
     buttonStartOver.addEventListener('click', GpxTrailEditor.onStartOverClicked);
 
   },
@@ -3609,6 +3634,8 @@ const GpxTrailEditor = {
     // Top Nav
     GpxTrailEditor.setI18nInnerText('#btn-nav-create-new .label', i18nMsg.btnNewLabel);
     GpxTrailEditor.setI18nInnerText('#btn-nav-export .label', i18nMsg.btnExportLabel);
+    GpxTrailEditor.setI18nInnerText('#btn-nav-3d-replay-cesiumjs .label', i18nMsg.btn3DReplayLabel);
+    GpxTrailEditor.setI18nTitle('btn-nav-3d-replay-cesiumjs', i18nMsg.title3DReplayButton);
     GpxTrailEditor.setI18nInnerText('#btn-nav-start-over .label', i18nMsg.btnStartOverLabel);
     GpxTrailEditor.setI18nTitle('goto-github-repo', i18nMsg.linkGitHubTitle);
 
