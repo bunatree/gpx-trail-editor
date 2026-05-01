@@ -1,5 +1,5 @@
 (function() {
-  console.log("3D Replay (MapLibre): Fixed Manual mode sticky bug.");
+  console.log("3D Replay (MapLibre): Starting with i18n debugging.");
 
   let zeroTileBuffer = null;
   async function getZeroTileBuffer() {
@@ -44,7 +44,52 @@
     }
   });
 
+  // グローバル関数として定義して、どこからでも呼べるようにする
+  function applyI18n() {
+    if (typeof i18nMsg === 'undefined') {
+      console.warn("i18nMsg is not defined yet.");
+      return;
+    }
+    console.log("Applying i18n translation...");
+    
+    // 各要素の翻訳
+    const playBtn = document.getElementById('btn-play');
+    if (playBtn) playBtn.querySelector('.label').innerText = i18nMsg.btnPlay;
+    
+    const pauseBtn = document.getElementById('btn-pause');
+    if (pauseBtn) pauseBtn.title = i18nMsg.btnPause;
+    
+    const stopBtn = document.getElementById('btn-stop');
+    if (stopBtn) stopBtn.title = i18nMsg.btnStop;
+    
+    const speedLabel = document.querySelector('label[for="range-speed"] .label');
+    if (speedLabel) speedLabel.innerText = i18nMsg.labelSpeed;
+    
+    const cameraLabel = document.querySelector('label[for="select-camera-mode"]');
+    if (cameraLabel) cameraLabel.innerText = i18nMsg.labelCameraMode;
+    
+    const sensitivityLabel = document.querySelector('label[for="range-sensitivity"] .label');
+    if (sensitivityLabel) sensitivityLabel.innerText = i18nMsg.labelSensitivity;
+
+    const cameraModeSelect = document.getElementById('select-camera-mode');
+    if (cameraModeSelect) {
+      const opts = cameraModeSelect.options;
+      opts[0].text = i18nMsg.optCameraFixed;
+      opts[1].text = i18nMsg.optCameraFollow;
+      opts[2].text = i18nMsg.optCameraManual;
+    }
+
+    const sensitivityValue = document.getElementById('sensitivity-value');
+    if (sensitivityValue) {
+      const currentVal = document.getElementById('range-sensitivity').value;
+      sensitivityValue.innerText = i18nMsg.labelLevel + ' ' + currentVal;
+    }
+  }
+
   function initMapLibre(points) {
+    // データ受信後、即座に翻訳を実行
+    applyI18n();
+
     const map = new maplibregl.Map({
       container: 'map',
       maxTileCacheSize: 100,
@@ -80,7 +125,7 @@
 
       let startTime = null, isPlaying = false, multiplier = 500, animationId = null;
       let currentBearing = 0;
-      let ignoreEvents = false; // プログラムによるカメラ移動を無視するためのフラグ
+      let ignoreEvents = false;
       
       const uiPanel = document.getElementById('ui-panel');
       const btnOpen = document.getElementById('btn-open-panel');
@@ -103,7 +148,7 @@
       };
 
       const setManualCamera = () => {
-        if (ignoreEvents) return; // プログラム操作時は何もしない
+        if (ignoreEvents) return;
         if (cameraModeSelect.value !== 'manual') {
           cameraModeSelect.value = 'manual';
           updateSensitivityUI();
@@ -116,9 +161,9 @@
       map.on('wheel', (e) => { if (e.originalEvent.ctrlKey || e.originalEvent.metaKey || Math.abs(e.originalEvent.deltaY) > 1) setManualCamera(); });
 
       cameraModeSelect.onchange = () => {
-        ignoreEvents = true; // モード切替の瞬間はイベントを無視
+        ignoreEvents = true;
         updateSensitivityUI();
-        setTimeout(() => { ignoreEvents = false; }, 200); // 余裕を持ってフラグを戻す
+        setTimeout(() => { ignoreEvents = false; }, 200);
       };
       updateSensitivityUI();
 
@@ -128,20 +173,16 @@
         const durationMillis = (new Date(points[totalPoints - 1].datetime) - new Date(points[0].datetime));
         const elapsed = (timestamp - startTime) * multiplier;
         const progress = Math.min(elapsed / durationMillis, 1);
-
         const floatIndex = progress * (totalPoints - 1);
         const index = Math.floor(floatIndex);
         const nextIndex = Math.min(index + 1, totalPoints - 1);
         const ratio = floatIndex - index;
-
         const p1 = points[index], p2 = points[nextIndex];
         if (p1 && p2) {
           const lng = parseFloat(p1.longitude) + (parseFloat(p2.longitude) - parseFloat(p1.longitude)) * ratio;
           const lat = parseFloat(p1.latitude) + (parseFloat(p2.latitude) - parseFloat(p1.latitude)) * ratio;
-
           const source = map.getSource('current-point');
           if (source) source.setData({ type: 'Feature', geometry: { type: 'Point', coordinates: [lng, lat] } });
-
           const options = { center: [lng, lat], duration: 0, essential: true };
           if (cameraModeSelect.value === 'follow') {
             const dx = parseFloat(p2.longitude) - parseFloat(p1.longitude);
@@ -154,19 +195,12 @@
               currentBearing += diff * parseInt(sensitivityRange.value) * 0.001;
               options.bearing = currentBearing;
             }
-            ignoreEvents = true; // easeToによる発火を無視
-            map.easeTo(options);
-            setTimeout(() => { ignoreEvents = false; }, 50);
+            ignoreEvents = true; map.easeTo(options); setTimeout(() => { ignoreEvents = false; }, 50);
           } else if (cameraModeSelect.value === 'fixed') {
-            currentBearing = 0;
-            options.bearing = 0;
-            ignoreEvents = true;
-            map.easeTo(options);
-            setTimeout(() => { ignoreEvents = false; }, 50);
+            currentBearing = 0; options.bearing = 0;
+            ignoreEvents = true; map.easeTo(options); setTimeout(() => { ignoreEvents = false; }, 50);
           } else {
-            ignoreEvents = true;
-            map.jumpTo({ center: [lng, lat] });
-            setTimeout(() => { ignoreEvents = false; }, 50);
+            ignoreEvents = true; map.jumpTo({ center: [lng, lat] }); setTimeout(() => { ignoreEvents = false; }, 50);
           }
         }
         if (progress < 1 && isPlaying) animationId = requestAnimationFrame(animate);
@@ -177,16 +211,26 @@
       document.getElementById('btn-pause').onclick = () => { isPlaying = false; if (animationId) cancelAnimationFrame(animationId); };
       document.getElementById('btn-stop').onclick = () => {
         isPlaying = false; if (animationId) cancelAnimationFrame(animationId); startTime = null; currentBearing = 0;
-        cameraModeSelect.value = 'fixed';
-        updateSensitivityUI();
+        cameraModeSelect.value = 'fixed'; updateSensitivityUI();
         map.jumpTo({ center: coordinates[0], zoom: 15, pitch: 65, bearing: 0 });
       };
       document.getElementById('range-speed').oninput = (e) => { multiplier = parseFloat(e.target.value); document.getElementById('speed-value').innerText = e.target.value + 'x'; };
-      sensitivityRange.oninput = (e) => { sensitivityValue.innerText = 'Level ' + e.target.value; };
+      sensitivityRange.oninput = (e) => { sensitivityValue.innerText = i18nMsg.labelLevel + ' ' + e.target.value; };
+
+      // 地図コントロールのツールチップ設定
+      const zoomIn = document.querySelector('.maplibregl-ctrl-zoom-in');
+      if (zoomIn) zoomIn.title = i18nMsg.titleZoomInButton || "Zoom In";
+      const zoomOut = document.querySelector('.maplibregl-ctrl-zoom-out');
+      if (zoomOut) zoomOut.title = i18nMsg.titleZoomOutButton || "Zoom Out";
+      const compass = document.querySelector('.maplibregl-ctrl-compass');
+      if (compass) compass.title = i18nMsg.titleCompassButton || "Reset Bearing";
     });
   }
 
-  window.addEventListener('message', (e) => { if (e.data.type === '3D_REPLAY_DATA') initMapLibre(e.data.points); });
+  window.addEventListener('message', (event) => {
+    if (event.data.type === '3D_REPLAY_DATA') initMapLibre(event.data.points);
+  });
+
   if (window.opener) window.opener.postMessage({ type: '3D_REPLAY_READY' }, '*');
   else if (window.parent) window.parent.postMessage({ type: '3D_REPLAY_READY' }, '*');
 })();
