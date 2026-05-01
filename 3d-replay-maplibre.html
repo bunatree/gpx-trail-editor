@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Replay (MapLibre) - GPX Trail Editor</title>
+  <script src="https://unpkg.com/maplibre-gl@5.0.1/dist/maplibre-gl.js"></script>
+  <link href="https://unpkg.com/maplibre-gl@5.0.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <style>
+    body { margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    #ui-panel {
+      position: absolute; top: 10px; left: 10px; z-index: 100;
+      background: rgba(42, 42, 42, 0.8); color: white; padding: 15px;
+      border-radius: 8px; font-family: sans-serif; pointer-events: auto;
+    }
+    .control-group { margin-bottom: 10px; }
+    button { cursor: pointer; padding: 5px 10px; }
+  </style>
+</head>
+<body>
+  <div id="ui-panel">
+    <div class="control-group">
+      <h3 style="margin-top:0">3D Replay (MapLibre)</h3>
+      <button id="btn-play">Play</button>
+      <button id="btn-pause">Pause</button>
+      <button id="btn-stop">Stop</button>
+    </div>
+    <div class="control-group">
+      Speed: <input type="range" id="range-speed" min="1" max="500" value="100"> <span id="speed-value">100x</span>
+    </div>
+    <div class="control-group">
+      Camera: <select id="select-camera-mode">
+        <option value="fixed">固定視点 (南から)</option>
+        <option value="follow">進行方向追従</option>
+      </select>
+    </div>
+    <div class="control-group">
+      Sensitivity: <input type="range" id="range-sensitivity" min="1" max="10" value="5"> <span id="sensitivity-value">Level 5</span>
+    </div>
+  </div>
+  <div id="map"></div>
+  <script src="js/3d-replay-maplibre.js"></script>
+</body>
+</html>
