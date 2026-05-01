@@ -78,7 +78,7 @@
       map.addSource('current-point', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'Point', coordinates: coordinates[0] } } });
       map.addLayer({ id: 'current-point-layer', type: 'circle', source: 'current-point', paint: { 'circle-radius': 12, 'circle-color': '#ff0000', 'circle-stroke-width': 3, 'circle-stroke-color': '#ffffff', 'circle-pitch-alignment': 'map' } });
 
-      let startTime = null, isPlaying = false, multiplier = 100, animationId = null;
+      let startTime = null, isPlaying = false, multiplier = 500, animationId = null;
       let currentBearing = 0;
       let ignoreEvents = false; // プログラムによるカメラ移動を無視するためのフラグ
       
