@@ -4,42 +4,85 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>3D Replay (MapLibre) - GPX Trail Editor</title>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <script src="https://unpkg.com/maplibre-gl@5.0.1/dist/maplibre-gl.js"></script>
   <link href="https://unpkg.com/maplibre-gl@5.0.1/dist/maplibre-gl.css" rel="stylesheet" />
+
   <style>
-    body { margin: 0; padding: 0; }
+    body { margin: 0; padding: 0; overflow: hidden; background-color: #000; }
     #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    
     #ui-panel {
-      position: absolute; top: 10px; left: 10px; z-index: 100;
-      background: rgba(42, 42, 42, 0.8); color: white; padding: 15px;
-      border-radius: 8px; font-family: sans-serif; pointer-events: auto;
+      position: absolute; top: 20px; left: 20px; z-index: 100; width: 320px;
+      background: rgba(33, 37, 41, 0.85); backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
     }
-    .control-group { margin-bottom: 10px; }
-    button { cursor: pointer; padding: 5px 10px; }
+    
+    .panel-header { border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 10px; margin-bottom: 15px; }
+    .form-label { color: #adb5bd; font-size: 0.85rem; margin-bottom: 0.2rem; }
+    .value-badge { font-size: 0.8rem; float: right; color: #0dcaf0; }
+    .maplibregl-ctrl-top-right { top: 20px; right: 20px; }
+
+    input[disabled].form-range::-webkit-slider-thumb { background-color: #6c757d; }
+    input[disabled].form-range::-moz-range-thumb { background-color: #6c757d; }
   </style>
 </head>
 <body>
-  <div id="ui-panel">
-    <div class="control-group">
-      <h3 style="margin-top:0">3D Replay (MapLibre)</h3>
-      <button id="btn-play">Play</button>
-      <button id="btn-pause">Pause</button>
-      <button id="btn-stop">Stop</button>
-    </div>
-    <div class="control-group">
-      Speed: <input type="range" id="range-speed" min="1" max="500" value="100"> <span id="speed-value">100x</span>
-    </div>
-    <div class="control-group">
-      Camera: <select id="select-camera-mode">
-        <option value="fixed">固定視点 (南から)</option>
-        <option value="follow">進行方向追従</option>
-      </select>
-    </div>
-    <div class="control-group">
-      Sensitivity: <input type="range" id="range-sensitivity" min="1" max="10" value="5"> <span id="sensitivity-value">Level 5</span>
+
+  <div id="map"></div>
+
+  <!-- Panel Open Button (Floating) -->
+  <button id="btn-open-panel" class="btn btn-dark shadow-lg d-none" style="position:absolute; top:20px; left:20px; z-index:101; background: rgba(33,37,41,0.9);">
+    <i class="bi bi-list fs-4"></i>
+  </button>
+
+  <!-- UI Panel -->
+  <div id="ui-panel" class="card text-white shadow-lg">
+    <div class="card-body p-3">
+      
+      <div class="panel-header d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-box-fill text-info me-2 fs-4"></i>
+          <h5 class="card-title mb-0 fw-bold">3D Replay</h5>
+        </div>
+        <button id="btn-close-panel" class="btn btn-link text-white p-0 opacity-75 hover-opacity-100">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="d-flex gap-2 mb-3">
+        <button id="btn-play" class="btn btn-primary flex-grow-1"><i class="bi bi-play-fill me-1"></i>Play</button>
+        <button id="btn-pause" class="btn btn-outline-light"><i class="bi bi-pause-fill"></i></button>
+        <button id="btn-stop" class="btn btn-outline-danger"><i class="bi bi-stop-fill"></i></button>
+      </div>
+
+      <div class="mb-3">
+        <label for="range-speed" class="form-label w-100">Speed <span id="speed-value" class="value-badge">100x</span></label>
+        <input type="range" class="form-range" id="range-speed" min="1" max="500" value="100">
+      </div>
+
+      <hr class="my-3 opacity-25">
+
+      <div class="mb-3">
+        <label for="select-camera-mode" class="form-label">Camera Mode</label>
+        <select id="select-camera-mode" class="form-select form-select-sm bg-dark text-white border-secondary">
+          <option value="fixed">Fixed View (From South)</option>
+          <option value="follow">Auto-Follow Path</option>
+          <option value="manual">Manual (Free View)</option>
+        </select>
+      </div>
+
+      <div class="mb-2">
+        <label for="range-sensitivity" id="label-sensitivity" class="form-label w-100">Sensitivity <span id="sensitivity-value" class="value-badge">Level 5</span></label>
+        <input type="range" class="form-range" id="range-sensitivity" min="1" max="10" value="5">
+      </div>
+
     </div>
   </div>
-  <div id="map"></div>
+
   <script src="js/3d-replay-maplibre.js"></script>
 </body>
 </html>
